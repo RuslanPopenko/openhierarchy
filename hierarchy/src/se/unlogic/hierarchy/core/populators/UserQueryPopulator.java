@@ -18,11 +18,13 @@ public class UserQueryPopulator implements QueryParameterPopulator<User> {
 
 	public static final UserQueryPopulator POPULATOR = new UserQueryPopulator();
 
+	@Override
 	public Class<? extends User> getType() {
 
 		return User.class;
 	}
 
+	@Override
 	public void populate(PreparedStatementQuery query, int paramIndex, Object bean) throws SQLException {
 
 		if(bean == null){

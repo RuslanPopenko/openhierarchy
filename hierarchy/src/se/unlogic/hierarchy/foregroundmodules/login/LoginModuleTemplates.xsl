@@ -6,6 +6,7 @@
 		<div class="contentitem loginModule">	
 			<xsl:apply-templates select="LoginFailed"/>
 			<xsl:apply-templates select="AccountDisabled"/>
+			<xsl:apply-templates select="AccountLocked"/>
 			<xsl:apply-templates select="Login"/>
 		</div>		
 	</xsl:template>
@@ -26,6 +27,14 @@
 		<h1><xsl:value-of select="$LoginFailed.header"/></h1>
 		
 		<p class="error"><xsl:value-of select="$LoginFailed.text"/></p>
+		
+		<xsl:call-template name="LoginForm"/>
+	</xsl:template>
+	
+	<xsl:template match="AccountLocked">
+		<h1><xsl:value-of select="$AccountLocked.header"/></h1>
+		
+		<p class="error"><xsl:value-of select="$AccountLocked.text.part1"/><xsl:value-of select="."/><xsl:value-of select="$AccountLocked.text.part2"/></p>
 		
 		<xsl:call-template name="LoginForm"/>
 	</xsl:template>	

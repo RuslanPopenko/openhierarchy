@@ -45,16 +45,19 @@ public class SimpleViewFragment extends GeneratedElementable implements ViewFrag
 		this.links = null;
 	}
 
+	@Override
 	public List<ScriptTag> getScripts() {
 
 		return scripts;
 	}
 
+	@Override
 	public List<LinkTag> getLinks() {
 
 		return links;
 	}
 
+	@Override
 	public String getHTML() {
 
 		return html;

@@ -68,6 +68,7 @@ public class SimpleUser extends BaseUser implements AttributeSource{
 		return attributeHandler;
 	}
 
+	@Override
 	public List<SimpleUserAttribute> getAttributes() {
 
 		return attributes;
@@ -78,6 +79,7 @@ public class SimpleUser extends BaseUser implements AttributeSource{
 		this.attributes = attributes;
 	}
 
+	@Override
 	public void addAttribute(String name, String value) {
 
 		if(this.attributes == null){

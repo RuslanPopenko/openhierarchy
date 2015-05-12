@@ -10,6 +10,8 @@ package se.unlogic.standardutils.collections;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -30,16 +32,17 @@ public class CollectionUtils {
 
 	public static <T> List<T> getGenericSingletonList(T bean) {
 
-		ArrayList<T> list = new ArrayList<T>(1);
+		if(bean == null){
 
-		list.add(bean);
+			return null;
+		}
 
-		return list;
+		return Collections.singletonList(bean);
 	}
 
 	public static boolean isEmpty(Collection<?> collection) {
 
-		if (collection == null || collection.isEmpty()) {
+		if(collection == null || collection.isEmpty()){
 
 			return true;
 		}
@@ -50,26 +53,26 @@ public class CollectionUtils {
 	public static boolean isEmpty(Map<?, ?> map) {
 
 		if(map == null || map.isEmpty()){
-			
+
 			return true;
 		}
 
 		return false;
-	}	
-	
+	}
+
 	public static <T> List<T> conjunction(Collection<T> c1, Collection<T> c2) {
 
-		if (c1 == null || c2 == null) {
+		if(c1 == null || c2 == null){
 
 			return null;
 
-		} else {
+		}else{
 
 			List<T> result = new ArrayList<T>(c1.size());
 
-			for (T o : c1) {
+			for(T o : c1){
 
-				if (c2.contains(o)) {
+				if(c2.contains(o)){
 
 					result.add(o);
 				}
@@ -80,6 +83,7 @@ public class CollectionUtils {
 
 	/**
 	 * Returns the part of a disjunction of two collections that comes from the first collection (in argument order)
+	 *
 	 * @param <T>
 	 * @param c1 Collection of <T> objects
 	 * @param c2 Collection of <T> objects
@@ -87,7 +91,7 @@ public class CollectionUtils {
 	 */
 	public static <T> Collection<T> exclusiveDisjunction(Collection<T> c1, Collection<T> c2) {
 
-		if(c1 == null && c2 == null) {
+		if(c1 == null && c2 == null){
 
 			return null;
 
@@ -99,7 +103,7 @@ public class CollectionUtils {
 
 		}
 
-		if(c1 != null && c2 == null) {
+		if(c1 != null && c2 == null){
 
 			return c1;
 
@@ -107,9 +111,9 @@ public class CollectionUtils {
 
 		Collection<T> result = new ArrayList<T>(c1.size());
 
-		for (T o : c1) {
+		for(T o : c1){
 
-			if (!c2.contains(o)) {
+			if(!c2.contains(o)){
 
 				result.add(o);
 			}
@@ -121,6 +125,11 @@ public class CollectionUtils {
 
 	public static <T> List<T> getList(T... objects) {
 
+		if(objects == null){
+
+			return null;
+		}
+
 		return Arrays.asList(objects);
 	}
 
@@ -128,11 +137,11 @@ public class CollectionUtils {
 
 		Iterator<?> iterator = list.iterator();
 
-		while (iterator.hasNext()) {
+		while(iterator.hasNext()){
 
 			Object value = iterator.next();
 
-			if (value == null) {
+			if(value == null){
 
 				iterator.remove();
 			}
@@ -156,25 +165,27 @@ public class CollectionUtils {
 	public static int getSize(Collection<?>... collections) {
 
 		int size = 0;
-		
+
 		if(collections != null){
-			
+
 			for(Collection<?> collection : collections){
-				
+
 				size += getSize(collection);
 			}
 		}
-		
+
 		return size;
-	}	
-	
+	}
+
 	/**
-	 * Takes a list of lists as input and returns a single list containing the items of all input lists. If all input lists are empty or null then null is returned.
+	 * Takes a list of lists as input and returns a single list containing the items of all input lists. If all input lists are empty or null then null is
+	 * returned.
+	 *
 	 * @param <T>
 	 * @param lists
 	 * @return
 	 */
-	public static <T> ArrayList<T> combine(Collection<T>... collections){
+	public static <T> ArrayList<T> combine(Collection<T>... collections) {
 
 		int totalSize = 0;
 
@@ -182,7 +193,7 @@ public class CollectionUtils {
 
 			if(getSize(list) > 0){
 
-				totalSize+=list.size();
+				totalSize += list.size();
 			}
 		}
 
@@ -205,12 +216,14 @@ public class CollectionUtils {
 	}
 
 	/**
-	 * Takes a list of lists as input and returns a single set containing the unique items of all input lists. If all input lists are empty or null then null is returned.
+	 * Takes a list of lists as input and returns a single set containing the unique items of all input lists. If all input lists are empty or null then null is
+	 * returned.
+	 *
 	 * @param <T>
 	 * @param lists
 	 * @return
 	 */
-	public static <T> HashSet<T> combineAsSet(Collection<T>... collections){
+	public static <T> HashSet<T> combineAsSet(Collection<T>... collections) {
 
 		int totalSize = 0;
 
@@ -218,7 +231,7 @@ public class CollectionUtils {
 
 			if(getSize(list) > 0){
 
-				totalSize+=list.size();
+				totalSize += list.size();
 			}
 		}
 
@@ -240,7 +253,7 @@ public class CollectionUtils {
 		return set;
 	}
 
-	public static <T> void addNewEntries(List<T> list1, List<T> list2){
+	public static <T> void addNewEntries(List<T> list1, List<T> list2) {
 
 		for(T object : list2){
 
@@ -278,17 +291,89 @@ public class CollectionUtils {
 
 		return list;
 	}
-	
+
 	public static <T> List<T> removeDuplicates(List<T> list) {
 
 		if(list == null){
 			return null;
 		}
-		
+
 		if(list.size() == 1){
 			return list;
 		}
-		
+
 		return new ArrayList<T>(new LinkedHashSet<T>(list));
+	}
+
+	public static <T> void add(Collection<T> targetCollection, Collection<T> collectionToAdd) {
+
+		if(collectionToAdd != null){
+
+			targetCollection.addAll(collectionToAdd);
+		}
+	}
+
+	public static <T> boolean addItem(Collection<? super T> targetCollection, T item) {
+
+		if(item != null){
+
+			return targetCollection.add(item);
+		}
+
+		return false;
+	}
+
+	public static <T> boolean equals(List<T> list1, List<T> list2) {
+
+		if(list1 == null){
+
+			return list2 == null;
+		}
+
+		if(list2 == null){
+
+			return false;
+		}
+
+		return list1.equals(list2);
+	}
+
+	public static <T extends Comparable<T>> int addInOrder(final List<T> list, final T item) {
+
+		final int insertAt;
+
+		final int index = Collections.binarySearch(list, item);
+
+		if(index < 0){
+
+			insertAt = -(index + 1);
+
+		}else{
+
+			insertAt = index + 1;
+		}
+
+		list.add(insertAt, item);
+		return insertAt;
+	}
+
+	public static <T> int addInOrder(final List<T> list, final T item, Comparator<? super T> comparator) {
+
+		final int insertAt;
+
+		final int index = Collections.binarySearch(list, item, comparator);
+
+		if(index < 0){
+
+			insertAt = -(index + 1);
+
+		}else{
+
+			insertAt = index + 1;
+		}
+
+		list.add(insertAt, item);
+
+		return insertAt;
 	}
 }

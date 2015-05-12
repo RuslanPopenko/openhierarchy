@@ -18,6 +18,7 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.Ref;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
@@ -49,7 +50,7 @@ public abstract class PreparedStatementQuery {
 
 	protected PreparedStatement getPreparedStatement(String query) throws SQLException {
 
-		return connection.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS);
+		return connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
 	}
 
 	public PreparedStatementQuery(DataSource dataSource, boolean closeConnectionOnExit, String query) throws SQLException {

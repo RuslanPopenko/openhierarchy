@@ -26,17 +26,20 @@ public class EmailJob implements Runnable {
 	private final QueuedEmail email;
 	private final Session session;
 	private final int maxResendCount;
+	private final int warningResendCount;
 	private final MailDAO mailDAO;
 	private final EmailCounter emailCounter;
 
-	public EmailJob(QueuedEmail email, Session session, int maxResendCount,	MailDAO mailDAO, EmailCounter emailCounter) {
+	public EmailJob(QueuedEmail email, Session session, int maxResendCount, int warningResendCount,	MailDAO mailDAO, EmailCounter emailCounter) {
 		this.email = email;
 		this.session = session;
 		this.maxResendCount = maxResendCount;
+		this.warningResendCount = warningResendCount;
 		this.mailDAO = mailDAO;
 		this.emailCounter = emailCounter;
 	}
 
+	@Override
 	public void run() {
 
 		if(this.checkResendCount(email)){
@@ -78,6 +81,11 @@ public class EmailJob implements Runnable {
 
 	private boolean checkResendCount(QueuedEmail email) {
 
+		if(email.getResendCount() == warningResendCount) {
+			
+			log.error("Unable to send email " + email + " after " + email.getResendCount() + " retries");
+		}
+		
 		if(email.getResendCount() >= maxResendCount){
 			
 			//TODO add option to send warning here

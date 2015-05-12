@@ -71,6 +71,10 @@ public abstract class WildcardModuleCache<DescriptorType extends MultipleAliasMo
 				} else if (alias.endsWith("*")) {
 
 					aliasMappingList.add(new AliasMapping(alias.substring(0, alias.length() - 1), AliasType.WHEN_REQUEST_STARTS_WITH,exclude));
+					
+				}else{
+					
+					log.warn("Unsupported alias detected for module " + moduleDescriptor);
 				}
 			}
 		}

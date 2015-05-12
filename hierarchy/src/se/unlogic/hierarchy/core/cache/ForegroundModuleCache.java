@@ -42,7 +42,7 @@ public class ForegroundModuleCache extends BaseModuleCache<ForegroundModuleDescr
 		w.lock();
 		try {
 			// Get all enabled modules from the database
-			List<? extends ForegroundModuleDescriptor> moduleDescriptorBeanList = moduleDAO.getEnabledModules(this.sectionInterface.getSectionDescriptor());
+			List<? extends ForegroundModuleDescriptor> moduleDescriptorBeanList = moduleDAO.getEnabledModules(this.sectionInterface.getSectionDescriptor().getSectionID());
 
 			if (moduleDescriptorBeanList != null && moduleDescriptorBeanList.size() > 0) {
 

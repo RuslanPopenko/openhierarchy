@@ -103,6 +103,7 @@ public class SimpleDataSourceDescriptor implements Elementable, DataSourceDescri
 	@RequiredIfSet(paramName="type",value="SystemManaged")
 	private Integer maxWait;
 
+	@Override
 	public String getName() {
 		return name;
 	}
@@ -149,6 +150,7 @@ public class SimpleDataSourceDescriptor implements Elementable, DataSourceDescri
 		return true;
 	}
 
+	@Override
 	public Integer getDataSourceID() {
 		return dataSourceID;
 	}
@@ -157,6 +159,7 @@ public class SimpleDataSourceDescriptor implements Elementable, DataSourceDescri
 		this.dataSourceID = datasourceID;
 	}
 
+	@Override
 	public String getUrl() {
 		return url;
 	}
@@ -165,6 +168,7 @@ public class SimpleDataSourceDescriptor implements Elementable, DataSourceDescri
 		this.url = url;
 	}
 
+	@Override
 	public DataSourceType getType() {
 		return type;
 	}
@@ -173,6 +177,7 @@ public class SimpleDataSourceDescriptor implements Elementable, DataSourceDescri
 		this.type = type;
 	}
 
+	@Override
 	public boolean isEnabled() {
 		return enabled;
 	}
@@ -181,6 +186,7 @@ public class SimpleDataSourceDescriptor implements Elementable, DataSourceDescri
 		this.enabled = enabled;
 	}
 
+	@Override
 	public String getDriver() {
 		return driver;
 	}
@@ -189,6 +195,7 @@ public class SimpleDataSourceDescriptor implements Elementable, DataSourceDescri
 		this.driver = driver;
 	}
 
+	@Override
 	public String getUsername() {
 		return username;
 	}
@@ -197,6 +204,7 @@ public class SimpleDataSourceDescriptor implements Elementable, DataSourceDescri
 		this.username = username;
 	}
 
+	@Override
 	public String getPassword() {
 		return password;
 	}
@@ -210,6 +218,7 @@ public class SimpleDataSourceDescriptor implements Elementable, DataSourceDescri
 		return this.url + " (ID: " + this.dataSourceID + ", " + this.type + ")";
 	}
 
+	@Override
 	public boolean removeAbandoned() {
 
 		if(removeAbandoned == null){
@@ -225,6 +234,7 @@ public class SimpleDataSourceDescriptor implements Elementable, DataSourceDescri
 	}
 
 
+	@Override
 	public Integer getRemoveTimeout() {
 		return removeTimeout;
 	}
@@ -235,6 +245,7 @@ public class SimpleDataSourceDescriptor implements Elementable, DataSourceDescri
 	}
 
 
+	@Override
 	public boolean testOnBorrow() {
 
 		if(testOnBorrow == null){
@@ -251,6 +262,7 @@ public class SimpleDataSourceDescriptor implements Elementable, DataSourceDescri
 	}
 
 
+	@Override
 	public String getValidationQuery() {
 		return validationQuery;
 	}
@@ -261,6 +273,7 @@ public class SimpleDataSourceDescriptor implements Elementable, DataSourceDescri
 	}
 
 
+	@Override
 	public Integer getMaxActive() {
 		return maxActive;
 	}
@@ -271,6 +284,7 @@ public class SimpleDataSourceDescriptor implements Elementable, DataSourceDescri
 	}
 
 
+	@Override
 	public Integer getMaxIdle() {
 		return maxIdle;
 	}
@@ -281,6 +295,7 @@ public class SimpleDataSourceDescriptor implements Elementable, DataSourceDescri
 	}
 
 
+	@Override
 	public Integer getMaxWait() {
 		return maxWait;
 	}
@@ -290,6 +305,7 @@ public class SimpleDataSourceDescriptor implements Elementable, DataSourceDescri
 		this.maxWait = maxWait;
 	}
 
+	@Override
 	public boolean logAbandoned() {
 
 		if(logAbandoned == null){
@@ -303,6 +319,7 @@ public class SimpleDataSourceDescriptor implements Elementable, DataSourceDescri
 		this.logAbandoned = logAbandoned;
 	}
 
+	@Override
 	public Integer getMinIdle() {
 		return minIdle;
 	}
@@ -315,10 +332,12 @@ public class SimpleDataSourceDescriptor implements Elementable, DataSourceDescri
 		this.defaultCatalog = defaultCatalog;
 	}
 
+	@Override
 	public String getDefaultCatalog() {
 		return defaultCatalog;
 	}
 
+	@Override
 	public Element toXML(Document doc) {
 
 		Element datasource = doc.createElement("datasource");

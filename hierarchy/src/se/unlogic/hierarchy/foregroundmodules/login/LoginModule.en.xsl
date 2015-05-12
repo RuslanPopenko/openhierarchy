@@ -14,6 +14,10 @@
 	<xsl:variable name="LoginFailed.header" select="'Login'" />
 	<xsl:variable name="LoginFailed.text" select="'Invalid username or password!'" />
 	
+	<xsl:variable name="AccountLocked.header" select="'Login'" />
+	<xsl:variable name="AccountLocked.text.part1" select="'Account is locked for '" />
+	<xsl:variable name="AccountLocked.text.part2" select="' minutes, too many failed login attempts!'" />
+	
 	<xsl:variable name="LoginForm.username" select="'Username:'" />
 	<xsl:variable name="LoginForm.password" select="'Password:'" />
 	<xsl:variable name="LoginForm.submit" select="'Login'" />

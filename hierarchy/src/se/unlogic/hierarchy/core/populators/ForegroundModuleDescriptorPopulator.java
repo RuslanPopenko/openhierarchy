@@ -18,6 +18,7 @@ import se.unlogic.standardutils.enums.EnumUtils;
 
 public class ForegroundModuleDescriptorPopulator implements BeanResultSetPopulator<SimpleForegroundModuleDescriptor> {
 
+	@Override
 	public SimpleForegroundModuleDescriptor populate(ResultSet rs) throws SQLException {
 		SimpleForegroundModuleDescriptor mb = new SimpleForegroundModuleDescriptor();
 

@@ -54,6 +54,7 @@ public abstract class BaseModuleResponse implements ModuleResponse {
 		this.responseType = ResponseType.XML_FOR_SEPARATE_TRANSFORMATION;
 	}
 
+	@Override
 	public void addLink(LinkTag linkTag) {
 
 		if(this.links == null){
@@ -64,6 +65,7 @@ public abstract class BaseModuleResponse implements ModuleResponse {
 		this.links.add(linkTag);
 	}
 
+	@Override
 	public void addLinks(List<LinkTag> linkTags) {
 
 		if(this.links == null){
@@ -74,6 +76,7 @@ public abstract class BaseModuleResponse implements ModuleResponse {
 		this.links.addAll(linkTags);
 	}
 
+	@Override
 	public void addScript(ScriptTag scriptTag) {
 
 		if(this.scripts == null){
@@ -84,6 +87,7 @@ public abstract class BaseModuleResponse implements ModuleResponse {
 		this.scripts.add(scriptTag);
 	}
 
+	@Override
 	public void addScripts(List<ScriptTag> scriptTags) {
 
 		if(this.scripts == null){
@@ -94,11 +98,13 @@ public abstract class BaseModuleResponse implements ModuleResponse {
 		this.scripts.addAll(scriptTags);
 	}
 
+	@Override
 	public List<LinkTag> getLinks() {
 
 		return this.links;
 	}
 
+	@Override
 	public List<ScriptTag> getScripts() {
 
 		return this.scripts;

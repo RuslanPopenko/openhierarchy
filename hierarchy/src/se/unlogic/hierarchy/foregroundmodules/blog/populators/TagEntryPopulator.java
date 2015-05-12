@@ -15,6 +15,7 @@ import se.unlogic.standardutils.dao.BeanResultSetPopulator;
 
 public class TagEntryPopulator implements BeanResultSetPopulator<TagEntry> {
 
+	@Override
 	public TagEntry populate(ResultSet rs) throws SQLException {
 
 		TagEntry entry = new TagEntry();

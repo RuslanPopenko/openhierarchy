@@ -71,7 +71,7 @@ public class XSLVariableReader {
 
 		URI uri = new URI(doc.getBaseURI());
 
-		NodeList nodeList = (NodeList) xpath.evaluate("//import/@href | //include/@href", doc, XPathConstants.NODESET);
+		NodeList nodeList = (NodeList) xpath.evaluate("/stylesheet/import/@href | /stylesheet/include/@href", doc, XPathConstants.NODESET);
 
 		if (nodeList.getLength() > 0) {
 
@@ -112,13 +112,13 @@ public class XSLVariableReader {
 	public String getValue(String name) {
 
 		try {
-			String response = this.xpath.evaluate("//variable[@name='" + name + "']/text()", this.doc.getDocumentElement());
+			String response = this.xpath.evaluate("/stylesheet/variable[@name='" + name + "']/text()", this.doc.getDocumentElement());
 
 			if (subDocuments != null && StringUtils.isEmpty(response)) {
 
 				for (Document document : subDocuments) {
 
-					response = this.xpath.evaluate("//variable[@name='" + name + "']/text()", document.getDocumentElement());
+					response = this.xpath.evaluate("/stylesheet/variable[@name='" + name + "']/text()", document.getDocumentElement());
 
 					if (!StringUtils.isEmpty(response)) {
 

@@ -67,6 +67,7 @@ public class ForegroundModuleTracker<T> implements ForegroundModuleCacheListener
 		}
 	}
 
+	@Override
 	public void systemStarted() {
 
 		writeLock.lock();
@@ -93,6 +94,7 @@ public class ForegroundModuleTracker<T> implements ForegroundModuleCacheListener
 		systemInterface.addForegroundModuleCacheListener(this);
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public void moduleCached(ForegroundModuleDescriptor moduleDescriptor, ForegroundModule moduleInstance) {
 
@@ -118,11 +120,13 @@ public class ForegroundModuleTracker<T> implements ForegroundModuleCacheListener
 		}		
 	}
 
+	@Override
 	public void moduleUpdated(ForegroundModuleDescriptor moduleDescriptor, ForegroundModule moduleInstance) {
 
 		moduleCached(moduleDescriptor, moduleInstance);
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public void moduleUnloaded(ForegroundModuleDescriptor moduleDescriptor, ForegroundModule moduleInstance) {
 

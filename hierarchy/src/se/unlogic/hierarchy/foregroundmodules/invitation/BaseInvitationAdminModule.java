@@ -2,6 +2,7 @@ package se.unlogic.hierarchy.foregroundmodules.invitation;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.Collections;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -204,7 +205,7 @@ public abstract class BaseInvitationAdminModule<I extends BaseInvitation, IT ext
 		return list(req, res, user, uriParser, null);
 	}
 
-	public SimpleForegroundModuleResponse list(HttpServletRequest req, HttpServletResponse res, User user, URIParser uriParser, ValidationError validationError) throws SQLException {
+	public SimpleForegroundModuleResponse list(HttpServletRequest req, HttpServletResponse res, User user, URIParser uriParser, List<ValidationError> validationErrors) throws SQLException {
 
 		log.info("User " + user + " listing invitations and invitation types");
 
@@ -217,8 +218,8 @@ public abstract class BaseInvitationAdminModule<I extends BaseInvitation, IT ext
 
 		XMLUtils.append(doc, invitationListElement, "Invitations", getInvitations());
 
-		if (validationError != null) {
-			invitationListElement.appendChild(validationError.toXML(doc));
+		if (validationErrors != null) {
+			XMLUtils.append(doc, invitationListElement, validationErrors);
 		}
 
 		return new SimpleForegroundModuleResponse(doc, this.moduleDescriptor.getName(), this.getDefaultBreadcrumb());
@@ -228,6 +229,7 @@ public abstract class BaseInvitationAdminModule<I extends BaseInvitation, IT ext
 	public abstract List<IT> getInvitationTypes() throws SQLException;
 	public abstract List<I> getInvitations() throws SQLException;
 
+	@Override
 	public Document createDocument(HttpServletRequest req, URIParser uriParser, User user) {
 
 		Document doc = XMLUtils.createDomDocument();
@@ -280,6 +282,7 @@ public abstract class BaseInvitationAdminModule<I extends BaseInvitation, IT ext
 		return getInvitationCRUD().delete(req, res, user, uriParser);
 	}
 
+	@Override
 	public String getTitlePrefix() {
 
 		return null;
@@ -291,7 +294,7 @@ public abstract class BaseInvitationAdminModule<I extends BaseInvitation, IT ext
 		I invitation = this.getInvitationCRUD().getRequestedBean(req, res, user, uriParser, null);
 
 		if (invitation == null) {
-			return this.list(req, res, user, uriParser, new ValidationError("SendFailedInvitationNotFound"));
+			return this.list(req, res, user, uriParser, Collections.singletonList(new ValidationError("SendFailedInvitationNotFound")));
 		}
 
 		this.sendInvitation(invitation, user, req);

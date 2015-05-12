@@ -35,6 +35,7 @@ import se.unlogic.standardutils.populators.DummyPopulator;
 import se.unlogic.standardutils.populators.EnumPopulator;
 import se.unlogic.standardutils.reflection.ReflectionUtils;
 import se.unlogic.standardutils.string.StringUtils;
+import se.unlogic.standardutils.validation.TooLongContentValidationError;
 import se.unlogic.standardutils.validation.ValidationError;
 import se.unlogic.standardutils.validation.ValidationErrorType;
 import se.unlogic.standardutils.validation.ValidationException;
@@ -497,7 +498,7 @@ public class AnnotatedRequestPopulator<T> implements BeanRequestPopulator<T>{
 
 			}else if(requestMapping.getMaxLength() > 0 && value.length() > requestMapping.getMaxLength()){
 
-				errorList.add(new ValidationError(requestMapping.getParamName(), ValidationErrorType.TooLong));
+				errorList.add(new TooLongContentValidationError(requestMapping.getParamName(), value.length(), requestMapping.getMaxLength()));
 
 			}else if(!requestMapping.getBeanStringPopulator().validateFormat(value)){
 

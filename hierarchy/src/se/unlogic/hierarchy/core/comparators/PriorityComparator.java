@@ -15,6 +15,7 @@ public class PriorityComparator implements Comparator<Prioritized> {
 		this.order = order;
 	}
 
+	@Override
 	public int compare(Prioritized o1, Prioritized o2) {
 
 		if(order == Order.ASC){

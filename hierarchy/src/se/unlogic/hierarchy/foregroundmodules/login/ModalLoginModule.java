@@ -181,11 +181,11 @@ public class ModalLoginModule extends UserProviderLoginModule {
 	}
 
 	@Override
-	public void handleRequest(HttpServletRequest req, HttpServletResponse res, URIParser uriParser, boolean redirectBack) throws Throwable {
+	public void handleRequest(HttpServletRequest req, HttpServletResponse res, URIParser uriParser, String redirectURI) throws Throwable {
 
-		if(!redirectBack){
+		if(redirectURI == null){
 
-			super.handleRequest(req, res, uriParser, redirectBack);
+			super.handleRequest(req, res, uriParser, redirectURI);
 			return;
 		}
 
@@ -195,14 +195,7 @@ public class ModalLoginModule extends UserProviderLoginModule {
 
 			if(referer == null || !referer.startsWith(RequestUtils.getFullContextPathURL(req))){
 
-				String redirect = uriParser.getFormattedURI();
-
-				if(!StringUtils.isEmpty(req.getQueryString())){
-
-					redirect += "?" + req.getQueryString();
-				}
-
-				res.sendRedirect(this.getModuleURI(req) + "?redirect=" + URLEncoder.encode(redirect,"ISO-8859-1") + "#clear");
+				res.sendRedirect(this.getModuleURI(req) + "?redirect=" + URLEncoder.encode(redirectURI,"ISO-8859-1") + "#clear");
 
 			}else if(req.getParameter("requesteduri") != null){
 
@@ -212,22 +205,12 @@ public class ModalLoginModule extends UserProviderLoginModule {
 
 			} else {
 
-				String redirect = uriParser.getFormattedURI();
-
-				if(!StringUtils.isEmpty(req.getQueryString())){
-
-					redirect += "?" + req.getQueryString();
-				}
-
-				referer = StringUtils.substringBefore(referer, "?");
-
-				res.sendRedirect(referer + "?requesteduri=" + URLEncoder.encode(redirect,"ISO-8859-1") + "#" + this.moduleDescriptor.getAlias());
+				res.sendRedirect(referer + "?requesteduri=" + URLEncoder.encode(redirectURI,"ISO-8859-1") + "#" + this.moduleDescriptor.getAlias());
 			}
 
 		} else {
 
-			super.handleRequest(req, res, uriParser, redirectBack);
+			super.handleRequest(req, res, uriParser, redirectURI);
 		}
-
 	}
 }

@@ -88,6 +88,7 @@ public class MySQLMenuIndexDAO extends BaseDAO implements MenuIndexDAO {
 
 	}
 
+	@Override
 	public void updateMenuIndex(Set<MenuItem> menuItems) throws SQLException {
 
 		log.debug("updating menuindexes..");
@@ -192,6 +193,7 @@ public class MySQLMenuIndexDAO extends BaseDAO implements MenuIndexDAO {
 
 	}
 
+	@Override
 	public void populateBundleMenuIndex(Collection<Bundle> bundles) throws SQLException {
 
 		log.debug("Getting menu index for bundles...");
@@ -226,6 +228,7 @@ public class MySQLMenuIndexDAO extends BaseDAO implements MenuIndexDAO {
 		}
 	}
 
+	@Override
 	public void populateModuleMenuIndex(Collection<ModuleMenuItem> moduleMenuItems) throws SQLException {
 
 		log.debug("Getting menuidex for moduleMenuItems...");
@@ -260,6 +263,7 @@ public class MySQLMenuIndexDAO extends BaseDAO implements MenuIndexDAO {
 		}
 	}
 
+	@Override
 	public void populateVirtualMenuIndex(Collection<VirtualMenuItem> virtualMenuItems) throws SQLException {
 
 		log.debug("Getting menuidex for virtualMenuItems...");
@@ -294,6 +298,7 @@ public class MySQLMenuIndexDAO extends BaseDAO implements MenuIndexDAO {
 
 	}
 
+	@Override
 	public void populateSectionMenuIndex(SectionMenuItem sectionMenuItem) throws SQLException {
 
 		log.debug("Getting menuidex for sectionMenuItem");

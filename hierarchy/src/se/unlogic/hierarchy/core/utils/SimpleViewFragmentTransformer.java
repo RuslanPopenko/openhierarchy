@@ -45,6 +45,11 @@ public class SimpleViewFragmentTransformer implements ViewFragmentTransformer {
 			throw new NullPointerException("xslPath cannot be null");
 		}
 
+		if(encoding == null){
+
+			throw new NullPointerException("encoding cannot be null");
+		}
+
 		URL styleSheetURL = baseClass.getResource(xslPath);
 
 		if(styleSheetURL == null){
@@ -52,7 +57,7 @@ public class SimpleViewFragmentTransformer implements ViewFragmentTransformer {
 			throw new ResourceNotFoundException(baseClass.getName().trim(), xslPath);
 		}
 
-		xslTransformer = new URIXSLTransformer(styleSheetURL.toURI(),ClassPathURIResolver.getInstance());
+		xslTransformer = new URIXSLTransformer(styleSheetURL.toURI(),ClassPathURIResolver.getInstance(), true);
 
 		XSLVariableReader variableReader = new XSLVariableReader(styleSheetURL.toURI());
 
@@ -73,12 +78,18 @@ public class SimpleViewFragmentTransformer implements ViewFragmentTransformer {
 			throw new NullPointerException("xslTransformer cannot be null");
 		}
 
+		if(encoding == null){
+
+			throw new NullPointerException("encoding cannot be null");
+		}
+
 		this.xslTransformer = xslTransformer;
 		this.scriptTags = scriptTags;
 		this.linkTags = linkTags;
 		this.encoding = encoding;
-	}	
-	
+	}
+
+	@Override
 	public ViewFragment createViewFragment(Document doc) throws TransformerConfigurationException, TransformerException {
 
 		StringWriter stringWriter = new StringWriter();

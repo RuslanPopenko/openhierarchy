@@ -10,22 +10,31 @@ package se.unlogic.standardutils.datatypes;
 import java.io.Serializable;
 import java.util.Map.Entry;
 
-public class SimpleEntry<KeyType, ValueType> implements Entry<KeyType,ValueType>, Serializable{
+public class SimpleEntry<KeyType, ValueType> implements Entry<KeyType, ValueType>, Serializable {
 
 	private static final long serialVersionUID = 2017770345032632182L;
 
+	private final KeyType key;
+	private ValueType value;
+
 	public SimpleEntry(KeyType key, ValueType value) {
+
 		super();
 		this.key = key;
 		this.value = value;
 	}
 
-	private final KeyType key;
-	private ValueType value;
-
+	public SimpleEntry(Entry<KeyType, ValueType> entry){
+		
+		this.key = entry.getKey();
+		this.value = entry.getValue();
+	}
+	
 	public ValueType getValue() {
+
 		return value;
 	}
+
 	public ValueType setValue(ValueType value) {
 
 		ValueType oldValue = this.value;
@@ -34,9 +43,12 @@ public class SimpleEntry<KeyType, ValueType> implements Entry<KeyType,ValueType>
 
 		return oldValue;
 	}
+
 	public KeyType getKey() {
+
 		return key;
 	}
+
 	@Override
 	public int hashCode() {
 
@@ -46,6 +58,7 @@ public class SimpleEntry<KeyType, ValueType> implements Entry<KeyType,ValueType>
 		result = prime * result + ((value == null) ? 0 : value.hashCode());
 		return result;
 	}
+
 	@Override
 	public boolean equals(Object obj) {
 
@@ -58,7 +71,7 @@ public class SimpleEntry<KeyType, ValueType> implements Entry<KeyType,ValueType>
 		if (getClass() != obj.getClass()) {
 			return false;
 		}
-		SimpleEntry<?,?> other = (SimpleEntry<?,?>) obj;
+		SimpleEntry<?, ?> other = (SimpleEntry<?, ?>) obj;
 		if (key == null) {
 			if (other.key != null) {
 				return false;

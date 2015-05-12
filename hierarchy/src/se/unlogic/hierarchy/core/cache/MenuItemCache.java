@@ -34,6 +34,7 @@ import se.unlogic.hierarchy.core.interfaces.ForegroundModule;
 import se.unlogic.hierarchy.core.interfaces.ForegroundModuleCacheListener;
 import se.unlogic.hierarchy.core.interfaces.ForegroundModuleDescriptor;
 import se.unlogic.hierarchy.core.interfaces.MenuItemDescriptor;
+import se.unlogic.hierarchy.core.interfaces.MenuSorter;
 import se.unlogic.hierarchy.core.interfaces.SectionCacheListener;
 import se.unlogic.hierarchy.core.interfaces.SectionDescriptor;
 import se.unlogic.hierarchy.core.sections.Section;
@@ -45,22 +46,24 @@ import se.unlogic.webutils.http.URIParser;
 
 public class MenuItemCache implements ForegroundModuleCacheListener, SectionCacheListener {
 
+	private static final MenuItemComparator COMPARATOR = new MenuItemComparator();
+	
 	private final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
 	private final Lock r = rwl.readLock();
 	private final Lock w = rwl.writeLock();
-	private SectionDescriptor sectionDescriptor;
-
+	
 	private final HashMap<ForegroundModuleDescriptor, List<ModuleMenuItem>> moduleMenuItemMap = new HashMap<ForegroundModuleDescriptor, List<ModuleMenuItem>>();
 	private final HashMap<ForegroundModuleDescriptor, List<Bundle>> bundleMenuItemMap = new HashMap<ForegroundModuleDescriptor, List<Bundle>>();
 	private final HashMap<SectionDescriptor, SectionMenuItem> sectionMenuItemMap = new HashMap<SectionDescriptor, SectionMenuItem>();
 	private final ArrayList<VirtualMenuItem> virtualMenuItems = new ArrayList<VirtualMenuItem>();
 
-	private static MenuItemComparator mComp = new MenuItemComparator();
-	private final TreeSet<MenuItem> menuItemSet = new TreeSet<MenuItem>(mComp);
+	private final TreeSet<MenuItem> menuItemSet = new TreeSet<MenuItem>(COMPARATOR);
 	private final MenuIndexDAO menuIndexDAO;
 	private final VirtualMenuItemDAO virtualMenuItemDAO;
 	private final Logger log = Logger.getLogger(this.getClass());
 
+	private SectionDescriptor sectionDescriptor;	
+	
 	public MenuItemCache(CoreDaoFactory coreDaoFactory, SectionDescriptor sectionDesciptor) {
 		this.menuIndexDAO = coreDaoFactory.getMenuIndexDAO();
 		this.virtualMenuItemDAO = coreDaoFactory.getVirtualMenuItemDAO();
@@ -100,6 +103,7 @@ public class MenuItemCache implements ForegroundModuleCacheListener, SectionCach
 
 					log.debug("Adding to virtual menuitem " + virtualMenuItem + " to menuitem cache for section " + sectionDescriptor);
 
+					//TODO add handling to detect relative URL's
 					virtualMenuItem.setUrlType(URLType.FULL);
 					virtualMenuItem.setSectionID(sectionDescriptor.getSectionID());
 					this.virtualMenuItems.add(virtualMenuItem);
@@ -117,7 +121,7 @@ public class MenuItemCache implements ForegroundModuleCacheListener, SectionCach
 		}
 	}
 
-	public void rebuiltIndex() {
+	public void rebuildIndex() {
 		w.lock();
 		try {
 			log.debug("Rebuilding menu index for menucache for section " + sectionDescriptor);
@@ -143,7 +147,6 @@ public class MenuItemCache implements ForegroundModuleCacheListener, SectionCach
 	public void saveIndex() {
 		w.lock();
 		try {
-
 			menuIndexDAO.updateMenuIndex(this.menuItemSet);
 		} catch (SQLException e) {
 			log.error("Error " + e + " saveing menuindex.");
@@ -152,6 +155,7 @@ public class MenuItemCache implements ForegroundModuleCacheListener, SectionCach
 		}
 	}
 
+	@Override
 	public void moduleCached(ForegroundModuleDescriptor moduleDescriptor, ForegroundModule moduleInstance) {
 		w.lock();
 		try {
@@ -204,6 +208,7 @@ public class MenuItemCache implements ForegroundModuleCacheListener, SectionCach
 		}
 	}
 
+	@Override
 	public void moduleUnloaded(ForegroundModuleDescriptor moduleDescriptor, ForegroundModule moduleInstance) {
 		w.lock();
 		try {
@@ -221,6 +226,7 @@ public class MenuItemCache implements ForegroundModuleCacheListener, SectionCach
 		}
 	}
 
+	@Override
 	public void moduleUpdated(ForegroundModuleDescriptor moduleDescriptor, ForegroundModule moduleInstance) {
 		w.lock();
 		try {
@@ -433,6 +439,7 @@ public class MenuItemCache implements ForegroundModuleCacheListener, SectionCach
 		}
 	}
 
+	@Override
 	public void sectionCached(SectionDescriptor sectionDescriptor, Section sectionInstance) throws KeyAlreadyCachedException {
 		w.lock();
 		try {
@@ -474,6 +481,7 @@ public class MenuItemCache implements ForegroundModuleCacheListener, SectionCach
 		return menuItem;
 	}
 
+	@Override
 	public void sectionUnloaded(SectionDescriptor sectionDescriptor, Section sectionInstance) throws KeyNotCachedException {
 		w.lock();
 		try {
@@ -488,6 +496,7 @@ public class MenuItemCache implements ForegroundModuleCacheListener, SectionCach
 		}
 	}
 
+	@Override
 	public void sectionUpdated(SectionDescriptor sectionDescriptor, Section sectionInstance) throws KeyNotCachedException {
 		w.lock();
 		try {
@@ -601,4 +610,20 @@ public class MenuItemCache implements ForegroundModuleCacheListener, SectionCach
 
 		return false;
 	}
+
+	public void sortMenu(MenuSorter menuSorter){
+
+		w.lock();
+		try {
+
+			menuSorter.sort(new ArrayList<MenuItem>(menuItemSet));
+
+			rebuildIndex();
+			saveIndex();
+
+		} finally {
+			w.unlock();
+		}
+	}
+
 }

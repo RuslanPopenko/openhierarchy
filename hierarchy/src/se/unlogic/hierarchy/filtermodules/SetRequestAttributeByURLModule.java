@@ -71,6 +71,7 @@ public class SetRequestAttributeByURLModule extends AnnotatedFilterModule {
 		}
 	}
 
+	@Override
 	public void doFilter(HttpServletRequest req, HttpServletResponse res, User user, URIParser uriParser, FilterChain filterChain) throws Exception {
 
 		for(Entry<Pattern,Entry<String,Object>> entry : this.patterns) {

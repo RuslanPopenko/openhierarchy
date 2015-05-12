@@ -9,6 +9,7 @@ package se.unlogic.hierarchy.core.daos.interfaces;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 
 import se.unlogic.hierarchy.core.beans.SimpleSectionDescriptor;
 import se.unlogic.hierarchy.core.interfaces.SectionDescriptor;
@@ -32,5 +33,7 @@ public interface SectionDAO {
 	public abstract void delete(SimpleSectionDescriptor simpleSectionDescriptor) throws SQLException;
 
 	public abstract SimpleSectionDescriptor getSection(Integer sectionID, String alias) throws SQLException;
+
+	public abstract List<SimpleSectionDescriptor> getSectionsByAttribute(String name, String value) throws SQLException;
 
 }

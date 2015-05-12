@@ -52,16 +52,16 @@ public class StringUtils {
 		}
 	}
 
-	private static final char[] HEX_ARRAY = {'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
+	private static final char[] HEX_ARRAY = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
 
 	public static String toHexString(byte[] bytes) {
 
 		char[] hexChars = new char[bytes.length * 2];
 		int v;
-		for ( int j = 0; j < bytes.length; j++ ) {
+		for (int j = 0; j < bytes.length; j++) {
 			v = bytes[j] & 0xFF;
-			hexChars[j*2] = HEX_ARRAY[v/16];
-			hexChars[j*2 + 1] = HEX_ARRAY[v%16];
+			hexChars[j * 2] = HEX_ARRAY[v / 16];
+			hexChars[j * 2 + 1] = HEX_ARRAY[v % 16];
 		}
 		return new String(hexChars);
 	}
@@ -76,8 +76,7 @@ public class StringUtils {
 	 * 
 	 * Based on a fixed set of escaped HTML characters from the latin-1 set
 	 * 
-	 * @param sequence
-	 *            - the secuence of characters to unescape characters in
+	 * @param sequence - the secuence of characters to unescape characters in
 	 * @return - a sequenced without escaped HTML characters
 	 */
 	public static String unEscapeHTML(String sequence) {
@@ -88,35 +87,32 @@ public class StringUtils {
 	/**
 	 * Replaces characters in a character sequence
 	 * 
-	 * @param sequence
-	 *            - the secuence of characters to replace characters in
-	 * @param characterSet
-	 *            - a set of key=value character mappings, e.g. &num;=#. Occurences of key, e.g. "&num;" will be replaced by value, e.g. "#"
+	 * @param sequence - the secuence of characters to replace characters in
+	 * @param characterSet - a set of key=value character mappings, e.g. &num;=#. Occurences of key, e.g. "&num;" will be replaced by value, e.g. "#"
 	 * 
 	 * @return - a sequenced with replaced characters
 	 */
 	private static String replaceCharacters(String sequence, Properties characterSet, boolean reverse) {
 
-		if(reverse){
+		if (reverse) {
 
 			for (Entry<Object, Object> entry : characterSet.entrySet()) {
 				sequence = sequence.replaceAll(String.valueOf(entry.getValue()), String.valueOf(entry.getKey()));
 			}
 
-		}else{
+		} else {
 
 			for (Entry<Object, Object> entry : characterSet.entrySet()) {
 				sequence = sequence.replaceAll(String.valueOf(entry.getKey()), String.valueOf(entry.getValue()));
 			}
 		}
 
-
 		return sequence;
 	}
 
 	public static String removeHTMLTags(String sequence) {
 
-		if(sequence == null){
+		if (sequence == null) {
 
 			return null;
 		}
@@ -221,7 +217,7 @@ public class StringUtils {
 		FileReader fileReader = null;
 		BufferedReader bufferedReader = null;
 
-		try{
+		try {
 			fileReader = new FileReader(file);
 			bufferedReader = new BufferedReader(fileReader);
 
@@ -231,7 +227,7 @@ public class StringUtils {
 
 			return stringWriter.toString();
 
-		}finally{
+		} finally {
 
 			ReadWriteUtils.closeReader(bufferedReader);
 			ReadWriteUtils.closeReader(fileReader);
@@ -243,7 +239,7 @@ public class StringUtils {
 		InputStreamReader inputStreamReader = null;
 		BufferedReader bufferedReader = null;
 
-		try{
+		try {
 			inputStreamReader = new InputStreamReader(inputStream);
 			bufferedReader = new BufferedReader(inputStreamReader);
 
@@ -253,7 +249,7 @@ public class StringUtils {
 
 			return stringWriter.toString();
 
-		}finally{
+		} finally {
 
 			ReadWriteUtils.closeReader(bufferedReader);
 			ReadWriteUtils.closeReader(inputStreamReader);
@@ -328,31 +324,31 @@ public class StringUtils {
 	}
 
 	/**
-	 *  Takes a string and splits it on linebreaks (\n) and also removes any linebreak (\n) and carriage return (\r) characters from the string segments
+	 * Takes a string and splits it on linebreaks (\n) and also removes any linebreak (\n) and carriage return (\r) characters from the string segments
 	 * 
 	 * @param string the string to be split
 	 * @return String array containing the split segments of the string
 	 */
-	public static ArrayList<String> splitOnLineBreak(String string, boolean removeDuplicates){
+	public static ArrayList<String> splitOnLineBreak(String string, boolean removeDuplicates) {
 
-		if(!StringUtils.isEmpty(string)){
+		if (!StringUtils.isEmpty(string)) {
 
 			ArrayList<String> stringList = new ArrayList<String>();
 
 			String[] lines = string.split("\n");
 
-			for(String line : lines){
+			for (String line : lines) {
 
 				line = line.replace("\n", "");
 				line = line.replace("\r", "");
 
-				if(!StringUtils.isEmpty(line) && (!removeDuplicates || !stringList.contains(line))){
+				if (!StringUtils.isEmpty(line) && (!removeDuplicates || !stringList.contains(line))) {
 
 					stringList.add(line);
 				}
 			}
 
-			if(!stringList.isEmpty()){
+			if (!stringList.isEmpty()) {
 
 				return stringList;
 			}
@@ -378,11 +374,11 @@ public class StringUtils {
 
 		int index = string.indexOf(snippet);
 
-		if(index == -1){
+		if (index == -1) {
 
 			return string;
 
-		}else if(index == 0){
+		} else if (index == 0) {
 
 			return "";
 		}
@@ -399,21 +395,21 @@ public class StringUtils {
 
 		return substringAfter(string, snippet, string.lastIndexOf(snippet));
 	}
-	
+
 	protected static String substringAfter(String string, String snippet, int index) {
 
-		if(index == -1 || (index + snippet.length()) > string.length()){
+		if (index == -1 || (index + snippet.length()) > string.length()) {
 
 			return "";
 
-		}else if(index == 0){
+		} else if (index == 0) {
 
 			return string;
 		}
 
 		return string.substring(index + snippet.length());
-	}	
-	
+	}
+
 	public static InputStream getInputStream(String text) {
 
 		return new ByteArrayInputStream(text.getBytes());
@@ -425,30 +421,47 @@ public class StringUtils {
 		text = text.replace("“", "\"");
 		text = text.replace("‘", "'");
 		text = text.replace("’", "'");
-		
+
 		return text;
 	}
 
 	public static boolean isEmpty(String[] strings) {
 
-		if(strings == null){
-			
+		if (strings == null) {
+
 			return true;
 		}
-		
-		for(String string : strings){
-			
-			if(!StringUtils.isEmpty(string)){
-				
+
+		for (String string : strings) {
+
+			if (!StringUtils.isEmpty(string)) {
+
 				return false;
 			}
 		}
-		
+
 		return true;
 	}
-	
+
 	public static boolean compare(String string1, String string2) {
-	    
+
 		return (string1 == null ? string2 == null : string1.equals(string2));
-	}	
+	}
+
+	public static String trim(String string) {
+
+		if (string == null) {
+
+			return null;
+		}
+		
+		string = string.trim();
+		
+		if (string.length() == 0) {
+			
+			return null;
+		}
+		
+		return string;
+	}
 }

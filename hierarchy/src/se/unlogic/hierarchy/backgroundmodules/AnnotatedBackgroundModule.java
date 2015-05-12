@@ -25,13 +25,14 @@ public abstract class AnnotatedBackgroundModule extends AnnotatedSectionModule<B
 		return "b";
 	}
 
+	@Override
 	public BackgroundModuleResponse processRequest(HttpServletRequest req, User user, URIParser uriParser) throws Exception {
 
 		BackgroundModuleResponse moduleResponse;
 		
 		if(dependencyLock != null){
 			
-			readLock.lock();
+			dependencyReadLock.lock();
 			
 			try{
 				if(hasRequiredDependencies){
@@ -50,7 +51,7 @@ public abstract class AnnotatedBackgroundModule extends AnnotatedSectionModule<B
 				
 			}finally{
 
-				readLock.unlock();
+				dependencyReadLock.unlock();
 			}
 			
 		}else{

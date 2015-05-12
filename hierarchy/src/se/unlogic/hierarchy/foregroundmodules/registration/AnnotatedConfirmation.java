@@ -46,6 +46,7 @@ public class AnnotatedConfirmation implements Confirmation {
 	/* (non-Javadoc)
 	 * @see se.unlogic.hierarchy.foregroundmodules.registration.Confirmation#getUserID()
 	 */
+	@Override
 	public Integer getUserID() {
 		return userID;
 	}
@@ -57,6 +58,7 @@ public class AnnotatedConfirmation implements Confirmation {
 	/* (non-Javadoc)
 	 * @see se.unlogic.hierarchy.foregroundmodules.registration.Confirmation#getLinkID()
 	 */
+	@Override
 	public String getLinkID() {
 		return linkID;
 	}
@@ -68,6 +70,7 @@ public class AnnotatedConfirmation implements Confirmation {
 	/* (non-Javadoc)
 	 * @see se.unlogic.hierarchy.foregroundmodules.registration.Confirmation#getIp()
 	 */
+	@Override
 	public String getHost() {
 		return host;
 	}

@@ -17,6 +17,7 @@ import se.unlogic.webutils.http.URIParser;
 
 public class SlowModule extends SimpleForegroundModule {
 
+	@Override
 	public ForegroundModuleResponse processRequest(HttpServletRequest req, HttpServletResponse res, User user, URIParser uriParser) throws Exception, Throwable {
 
 		ThreadUtils.sleep(15 * MillisecondTimeUnits.SECOND);

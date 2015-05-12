@@ -46,6 +46,7 @@ public class SettingTestModule extends SimpleForegroundModule {
 		return settings;
 	}
 
+	@Override
 	public SimpleForegroundModuleResponse processRequest(HttpServletRequest req, HttpServletResponse res, User user, URIParser uriParser) throws Exception {
 
 		MutableSettingHandler mutableSettingHandler = this.moduleDescriptor.getMutableSettingHandler();

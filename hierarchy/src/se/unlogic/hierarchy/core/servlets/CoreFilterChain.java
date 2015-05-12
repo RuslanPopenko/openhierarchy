@@ -31,6 +31,7 @@ public class CoreFilterChain implements FilterChain{
 		this.filterModules = filterModules;
 	}
 
+	@Override
 	public void doFilter(HttpServletRequest req, HttpServletResponse res, User user, URIParser uriParser) throws TransformerException, IOException {
 
 		if(filterIndex < filterModules.size()){

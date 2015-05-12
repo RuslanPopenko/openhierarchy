@@ -101,6 +101,7 @@ public class BlogPost implements RSSItem, Serializable {
 		this.updated = updated;
 	}
 
+	@Override
 	public String getTitle() {
 
 		return title;
@@ -298,11 +299,13 @@ public class BlogPost implements RSSItem, Serializable {
 
 	//RSSItem methods
 
+	@Override
 	public Collection<String> getCategories() {
 
 		return getTags();
 	}
 
+	@Override
 	public String getAuthor() {
 
 		if(editor != null){
@@ -317,16 +320,19 @@ public class BlogPost implements RSSItem, Serializable {
 		return null;
 	}
 
+	@Override
 	public String getGuid() {
 
 		return link;
 	}
 
+	@Override
 	public Date getPubDate() {
 
 		return updated == null ? added : updated;
 	}
 
+	@Override
 	public String getDescription() {
 
 		String description;
@@ -360,6 +366,7 @@ public class BlogPost implements RSSItem, Serializable {
 		return description;
 	}
 
+	@Override
 	public String getLink() {
 
 		return link;
@@ -370,6 +377,7 @@ public class BlogPost implements RSSItem, Serializable {
 		this.link = blogURL + "/post/" + this.getAlias();
 	}
 
+	@Override
 	public String getCommentsLink() {
 
 		return link + "#comments";

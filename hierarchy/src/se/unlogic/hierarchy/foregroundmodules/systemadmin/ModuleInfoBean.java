@@ -62,6 +62,7 @@ public class ModuleInfoBean implements Elementable{
 		this.moduleType = moduleType;
 	}
 
+	@Override
 	public Element toXML(Document doc) {
 
 		Element moduleInfo = this.moduleDescriptor.toXML(doc);

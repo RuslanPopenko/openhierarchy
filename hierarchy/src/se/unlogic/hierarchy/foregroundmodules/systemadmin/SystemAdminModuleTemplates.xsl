@@ -7,18 +7,21 @@
 
 	<xsl:variable name="globalscripts">
 		/jquery/jquery.js
+		/jquery/jquery-ui.js
 		/ckeditor/ckeditor.js
 		/ckeditor/adapters/jquery.js
 		/ckeditor/init.js
 	</xsl:variable>
-
+	
 	<xsl:variable name="scripts">
 		/dtree/dtree.js
 		/js/askBeforeRedirect.js		
+		/js/UserGroupList.js
 	</xsl:variable>	
 
 	<xsl:variable name="links">
 		/dtree/dtree.css
+		/css/UserGroupList.css
 	</xsl:variable>
 
 	<xsl:template match="document">
@@ -652,9 +655,9 @@
 				</tr>			
 			</table>
 			
-			<xsl:apply-templates select="groups"/>
+			<xsl:call-template name="groups"/>
 			
-			<xsl:apply-templates select="users"/>			
+			<xsl:call-template name="users"/>
 			
 			<div align="right">
 				<input type="submit" value="{$i18n.addSubSection}"/>
@@ -1081,9 +1084,9 @@
 				</tr>			
 			</table>
 			
-			<xsl:apply-templates select="groups"/>
+			<xsl:call-template name="groups"/>
 			
-			<xsl:apply-templates select="users"/>			
+			<xsl:call-template name="users"/>
 			
 			<div align="right">
 				<input type="submit" value="{$i18n.saveChanges}"/>
@@ -1179,9 +1182,9 @@
 				</tr>																							
 			</table>
 			
-			<xsl:apply-templates select="groups"/>
+			<xsl:call-template name="groups"/>
 			
-			<xsl:apply-templates select="users"/>			
+			<xsl:call-template name="users"/>
 			
 			<div align="right">
 				<input type="submit" value="{$i18n.addModule}"/>
@@ -1387,9 +1390,9 @@
 				</tr>
 			</table>
 			
-			<xsl:apply-templates select="groups" />
+			<xsl:call-template name="groups"/>
 			
-			<xsl:apply-templates select="users" />			
+			<xsl:call-template name="users"/>
 			
 			<div align="right">
 				<input type="submit" value="{$i18n.saveChanges}" />
@@ -1519,9 +1522,9 @@
 				</tr>																							
 			</table>
 			
-			<xsl:apply-templates select="groups"/>
+			<xsl:call-template name="groups"/>
 			
-			<xsl:apply-templates select="users"/>			
+			<xsl:call-template name="users"/>		
 			
 			<div align="right">
 				<input type="submit" value="{$i18n.addModule}"/>
@@ -1779,9 +1782,9 @@
 				</tr>
 			</table>
 			
-			<xsl:apply-templates select="groups" />
+			<xsl:call-template name="groups"/>
 			
-			<xsl:apply-templates select="users" />			
+			<xsl:call-template name="users"/>
 			
 			<div align="right">
 				<input type="submit" value="{$i18n.saveChanges}" />
@@ -1956,9 +1959,9 @@
 				</tr>																							
 			</table>
 			
-			<xsl:apply-templates select="groups"/>
+			<xsl:call-template name="groups"/>
 			
-			<xsl:apply-templates select="users"/>			
+			<xsl:call-template name="users"/>		
 			
 			<div align="right">
 				<input type="submit" value="{$i18n.addModule}"/>
@@ -2242,9 +2245,9 @@
 				</tr>
 			</table>
 			
-			<xsl:apply-templates select="groups" />
+			<xsl:call-template name="groups"/>
 			
-			<xsl:apply-templates select="users" />			
+			<xsl:call-template name="users"/>
 			
 			<div align="right">
 				<input type="submit" value="{$i18n.saveChanges}" />
@@ -2343,107 +2346,23 @@
 				</div>
 			</div>			
 			
+			<div class="floatleft full marginbottom">
+				<div class="floatleft twenty">
+					<xsl:value-of select="$i18n.preserveDataSourceIDs" />
+					<xsl:text>:</xsl:text>
+				</div>
+				<div class="floatleft eighty">				
+					<input type="checkbox" name="preserveDataSourceIDs"/>
+				</div>
+			</div>			
+			
 			<div align="right">
 				<input type="submit" value="{$i18n.importModules}"/>
 			</div>				
 		</form>
 	</xsl:template>	
 	
-	<xsl:template match="group">
-		<div class="floatleft full border marginbottom">
-			<div class="floatleft">
-				<xsl:choose>
-					<xsl:when test="enabled='true'">
-						<img class="alignbottom" src="{/document/requestinfo/contextpath}/static/f/{/document/module/sectionID}/{/document/module/moduleID}/pics/group.png"/>
-					</xsl:when>
-					<xsl:otherwise>
-						<img class="alignbottom" src="{/document/requestinfo/contextpath}/static/f/{/document/module/sectionID}/{/document/module/moduleID}/pics/group_disabled.png"/>
-					</xsl:otherwise>
-				</xsl:choose>
-				
-				<xsl:text>&#x20;</xsl:text>
-				
-				<xsl:value-of select="name"/>			
-			</div>
-			<div class="floatright marginright">
-				
-				<xsl:variable name="groupID" select="groupID"/>
-			
-				<input type="checkbox" name="group" value="{groupID}">
-					<xsl:choose>
-						<xsl:when test="../../requestparameters">
-							<xsl:if test="../../requestparameters/parameter[name='group'][value=$groupID]">
-								<xsl:attribute name="checked"/>
-							</xsl:if>						
-						</xsl:when>
-						<xsl:when test="../../module">
-							<xsl:if test="../../module/allowedGroupIDs[groupID=$groupID]">
-								<xsl:attribute name="checked"/>
-							</xsl:if>								
-						</xsl:when>
-						<xsl:when test="../../section and ../../../updateSection">
-							<xsl:if test="../../section/allowedGroupIDs[groupID=$groupID]">
-								<xsl:attribute name="checked"/>
-							</xsl:if>								
-						</xsl:when>						
-					</xsl:choose>
-				</input>
-			</div>				
-		</div>
-	</xsl:template>	
-	
-	<xsl:template match="user">
-		<div class="floatleft full border marginbottom">
-			<div class="floatleft">
-				<xsl:choose>
-					<xsl:when test="enabled='true'">
-						<img class="alignbottom" src="{/document/requestinfo/contextpath}/static/f/{/document/module/sectionID}/{/document/module/moduleID}/pics/user.png"/>
-					</xsl:when>
-					<xsl:otherwise>
-						<img class="alignbottom" src="{/document/requestinfo/contextpath}/static/f/{/document/module/sectionID}/{/document/module/moduleID}/pics/user_disabled.png"/>
-					</xsl:otherwise>
-				</xsl:choose>
-				
-				<xsl:text>&#x20;</xsl:text>
-				
-				<xsl:value-of select="firstname"/>
-				
-				<xsl:text>&#x20;</xsl:text>
-				
-				<xsl:value-of select="lastname"/>
-				
-				<xsl:text>&#x20;</xsl:text>
-				
-				<xsl:text>(</xsl:text>
-					<xsl:value-of select="username"/>
-				<xsl:text>)</xsl:text>			
-			</div>
-			<div class="floatright marginright">
-				
-				<xsl:variable name="userID" select="userID"/>
-			
-				<input type="checkbox" name="user" value="{userID}">
-					<xsl:choose>
-						<xsl:when test="../../requestparameters">
-							<xsl:if test="../../requestparameters/parameter[name='user'][value=$userID]">
-								<xsl:attribute name="checked"/>
-							</xsl:if>						
-						</xsl:when>						
-						<xsl:when test="../../module">
-							<xsl:if test="../../module/allowedUserIDs[userID=$userID]">
-								<xsl:attribute name="checked"/>
-							</xsl:if>								
-						</xsl:when>
-						<xsl:when test="../../section and ../../../updateSection">
-							<xsl:if test="../../section/allowedUserIDs[userID=$userID]">
-								<xsl:attribute name="checked"/>
-							</xsl:if>								
-						</xsl:when>							
-					</xsl:choose>
-				</input>
-			</div>				
-		</div>
-	</xsl:template>		
+
 	
 	<xsl:template match="dataSources">
 		<xsl:param name="dataSourceID"/>
@@ -2518,7 +2437,7 @@
 					
 						<xsl:variable name="requestid">modulesetting.<xsl:value-of select="id"/></xsl:variable>
 					
-						<input type="text" name="modulesetting.{id}" id="modulesetting.{id}" size="40">
+						<input type="text" name="modulesetting.{id}" id="modulesetting.{id}" size="40" class="ninety">
 							<xsl:attribute name="value">
 								<xsl:choose>
 									<xsl:when test="../../requestparameters/parameter[name=$requestid]">
@@ -2591,7 +2510,20 @@
 											<xsl:value-of select="../../requestparameters/parameter[name=$requestid]/value"/>
 										</xsl:when>
 										<xsl:when test="../../module/settings/setting[id=$id]/value">
-											<xsl:value-of select="../../module/settings/setting[id=$id]/value"/>
+											
+											<xsl:choose>
+												<xsl:when test="splitOnLineBreak = 'true'">
+												
+													<xsl:apply-templates select="../../module/settings/setting[id=$id]/value" mode="textarea-line"/>
+												
+												</xsl:when>
+												<xsl:otherwise>
+													
+													<xsl:value-of select="../../module/settings/setting[id=$id]/value"/>
+																									
+												</xsl:otherwise>
+											</xsl:choose>
+											
 										</xsl:when>									
 										<xsl:otherwise>
 											<xsl:value-of select="defaultValue"/>
@@ -2788,7 +2720,7 @@
 		</label>
 		<br/>
 	</xsl:template>
-	
+
 	<xsl:template match="valueDescriptor" mode="select">
 	
 		<xsl:variable name="id" select="../../id"/>
@@ -2815,23 +2747,40 @@
 			<xsl:value-of select="name"/>
 		</option>
 	</xsl:template>	
-		
-	<xsl:template match="groups">
-		<h3><xsl:value-of select="$i18n.groups"/></h3>
 
-		<div class="scrolllist">			
-			<xsl:apply-templates select="group"/>
-		</div>
+	<xsl:template name="groups" >
+		<h3><xsl:value-of select="$i18n.groups"/></h3>
+		
+		<xsl:call-template name="GroupList">
+			<xsl:with-param name="connectorURL">
+				<xsl:value-of select="/document/requestinfo/currentURI"/>
+				<xsl:text>/</xsl:text>
+				<xsl:value-of select="/document/module/alias"/>
+				<xsl:text>/groups</xsl:text>
+			</xsl:with-param>
+			<xsl:with-param name="name" select="'group'"/>
+			<xsl:with-param name="groups" select="groups" />
+			<xsl:with-param name="document" select="/document" />
+		</xsl:call-template>
 		
 		<br/>
 	</xsl:template>	
 	
-	<xsl:template match="users">
+	<xsl:template name ="users" >
 		<h3><xsl:value-of select="$i18n.users"/></h3>
 		
-		<div class="scrolllist">			
-			<xsl:apply-templates select="user"/>
-		</div>
+		<xsl:call-template name="UserList">
+			<xsl:with-param name="connectorURL">
+				<xsl:value-of select="/document/requestinfo/currentURI"/>
+				<xsl:text>/</xsl:text>
+				<xsl:value-of select="/document/module/alias"/>
+				<xsl:text>/users</xsl:text>
+			</xsl:with-param>
+			<xsl:with-param name="name" select="'user'"/>
+			<xsl:with-param name="users" select="users" />
+			<xsl:with-param name="document" select="/document" />
+			<xsl:with-param name="showUsername" select="true()" />
+		</xsl:call-template>
 		
 		<br/>
 	</xsl:template>
@@ -2862,5 +2811,16 @@
 			</xsl:with-param>
 		</xsl:call-template>
 		
-	</xsl:template>								
+	</xsl:template>	
+	
+	<xsl:template match="value" mode="textarea-line">
+		
+		<xsl:if test="position() != 1">
+			<xsl:text>&#xa;</xsl:text>
+		</xsl:if>
+	
+		<xsl:value-of select="."/>
+	
+	</xsl:template>
+								
 </xsl:stylesheet>

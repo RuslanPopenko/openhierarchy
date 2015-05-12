@@ -77,11 +77,11 @@ public abstract class GenericCRUD<BeanType extends Elementable, IDType, UserType
 	public ForegroundModuleResponse add(HttpServletRequest req, HttpServletResponse res, UserType user, URIParser uriParser) throws Exception {
 
 		try{
-			req = parseRequest(req, user);
-			
 			ValidationException validationException = null;
 
 			try {
+				req = parseRequest(req, user);
+				
 				this.checkAddAccess(user,req,uriParser);
 
 				if (req.getMethod().equalsIgnoreCase("POST")) {
@@ -125,7 +125,7 @@ public abstract class GenericCRUD<BeanType extends Elementable, IDType, UserType
 
 		this.appendAddFormData(doc, addTypeElement, user, req, uriParser);
 
-		SimpleForegroundModuleResponse moduleResponse = new SimpleForegroundModuleResponse(doc, this.getAddTitle(req, user, uriParser));
+		SimpleForegroundModuleResponse moduleResponse = createAddFormModuleResponse(doc, req, user, uriParser);
 
 		moduleResponse.addBreadcrumbsLast(this.getAddBreadcrumbs(req, user, uriParser));
 
@@ -134,7 +134,7 @@ public abstract class GenericCRUD<BeanType extends Elementable, IDType, UserType
 
 	/**
 	 * This method is used for parsing special requests such as multipart requests where the request object is replaced by another implementation
-	 * 
+	 *
 	 * @param req
 	 * @param user
 	 * @return
@@ -146,7 +146,7 @@ public abstract class GenericCRUD<BeanType extends Elementable, IDType, UserType
 
 	/**
 	 * This method is used as trigger to indicate that the CRUD is finished with a request previously parsed by the {@parseRequest} method
-	 * 
+	 *
 	 * @param req
 	 * @param user
 	 */
@@ -154,16 +154,17 @@ public abstract class GenericCRUD<BeanType extends Elementable, IDType, UserType
 
 	/**
 	 * This methods is used for appending default breadscrumbs shared between all CRUD operation (add, update, delete, show). Please note that the bean parameter is null for add operations
-	 * 
+	 *
 	 * @param breadcrumbs
 	 * @param bean
+	 * @throws Exception 
 	 */
-	protected void appendDefaultBreadcrumbs(List<Breadcrumb> breadcrumbs, BeanType bean, HttpServletRequest req, UserType user, URIParser uriParser){
+	protected void appendDefaultBreadcrumbs(List<Breadcrumb> breadcrumbs, BeanType bean, HttpServletRequest req, UserType user, URIParser uriParser) throws Exception{
 
 		breadcrumbs.add(callback.getDefaultBreadcrumb());
 	}
 
-	protected List<Breadcrumb> getAddBreadcrumbs(HttpServletRequest req, UserType user, URIParser uriParser) {
+	protected List<Breadcrumb> getAddBreadcrumbs(HttpServletRequest req, UserType user, URIParser uriParser) throws Exception {
 
 		List<Breadcrumb> breadcrumbs = new ArrayList<Breadcrumb>(2);
 
@@ -181,7 +182,7 @@ public abstract class GenericCRUD<BeanType extends Elementable, IDType, UserType
 
 	/**
 	 * If this method returns null no breadcrumb apart from the default breadscrumbs will be added during add operations unless the {@link GenericCRUD#getAddBreadcrumbs(HttpServletRequest, HttpServletResponse, User, URIParser)} method is overridden.
-	 * 
+	 *
 	 * @return
 	 */
 	protected String getAddTextPrefix() {
@@ -215,13 +216,32 @@ public abstract class GenericCRUD<BeanType extends Elementable, IDType, UserType
 	public ForegroundModuleResponse update(HttpServletRequest req, HttpServletResponse res, UserType user, URIParser uriParser) throws Exception {
 
 		try {
-			req = parseRequest(req, user);
-			
+			ValidationException validationException = null;
+
+			try {
+				req = parseRequest(req, user);
+				
+			} catch (ValidationException parseException) {
+
+				//Try to get bean anyway so we can show the update form
+				BeanType bean;
+				
+				try {
+					bean = this.getRequestedBean(req, res, user, uriParser, UPDATE);
+					
+					if(bean != null){
+						
+						return showUpdateForm(bean, req, res, user, uriParser, validationException);
+					}					
+					
+				} catch (Exception getBeanException) {}
+
+				return list(req, res, user, uriParser, parseException.getErrors());
+			}
+
 			BeanType bean = this.getRequestedBean(req, res, user, uriParser, UPDATE);
 
 			if (bean != null) {
-
-				ValidationException validationException = null;
 
 				try {
 					this.checkUpdateAccess(bean, user, req, uriParser);
@@ -247,7 +267,7 @@ public abstract class GenericCRUD<BeanType extends Elementable, IDType, UserType
 				return showUpdateForm(bean, req, res, user, uriParser, validationException);
 
 			} else {
-				return list(req, res, user, uriParser, new ValidationError("UpdateFailed" + typeElementName + "NotFound"));
+				return list(req, res, user, uriParser, Collections.singletonList(new ValidationError("UpdateFailed" + typeElementName + "NotFound")));
 			}
 
 		} finally {
@@ -264,7 +284,7 @@ public abstract class GenericCRUD<BeanType extends Elementable, IDType, UserType
 		Element updateTypeElement = doc.createElement("Update" + typeElementName);
 		doc.getFirstChild().appendChild(updateTypeElement);
 
-		appendBean(bean, updateTypeElement, doc);
+		appendBean(bean, updateTypeElement, doc, user);
 
 		if (validationException != null) {
 			updateTypeElement.appendChild(validationException.toXML(doc));
@@ -273,14 +293,14 @@ public abstract class GenericCRUD<BeanType extends Elementable, IDType, UserType
 
 		this.appendUpdateFormData(bean, doc, updateTypeElement, user, req, uriParser);
 
-		SimpleForegroundModuleResponse moduleResponse = new SimpleForegroundModuleResponse(doc, getUpdateTitle(bean, req, user, uriParser));
+		SimpleForegroundModuleResponse moduleResponse = createUpdateFormModuleResponse(bean, doc, req, user, uriParser);
 
 		moduleResponse.addBreadcrumbsLast(getUpdateBreadcrumbs(bean,req, user, uriParser));
 
 		return moduleResponse;
 	}
 
-	protected void appendBean(BeanType bean, Element targetElement, Document doc) {
+	protected void appendBean(BeanType bean, Element targetElement, Document doc, UserType user) {
 
 		targetElement.appendChild(bean.toXML(doc));
 	}
@@ -295,7 +315,14 @@ public abstract class GenericCRUD<BeanType extends Elementable, IDType, UserType
 
 		}else{
 
-			return callbackTitle + " " + listTextPrefix;
+			if(listTextPrefix == null){
+
+				return callbackTitle;
+
+			}else{
+
+				return callbackTitle + " " + listTextPrefix;
+			}
 		}
 	}
 
@@ -357,7 +384,7 @@ public abstract class GenericCRUD<BeanType extends Elementable, IDType, UserType
 		return updateTextPrefix;
 	}
 
-	protected List<Breadcrumb> getShowBreadcrumbs(BeanType bean, HttpServletRequest req, UserType user, URIParser uriParser) {
+	protected List<Breadcrumb> getShowBreadcrumbs(BeanType bean, HttpServletRequest req, UserType user, URIParser uriParser) throws Exception {
 
 		List<Breadcrumb> breadcrumbs = new ArrayList<Breadcrumb>(3);
 
@@ -429,17 +456,17 @@ public abstract class GenericCRUD<BeanType extends Elementable, IDType, UserType
 
 				this.deleteBean(bean, req, user, uriParser);
 
-				return this.beanDeleted(bean, req, res, user, uriParser);			
-				
+				return this.beanDeleted(bean, req, res, user, uriParser);
+
 			} else {
-				
-				return list(req, res, user, uriParser, new ValidationError("DeleteFailed" + typeElementName + "NotFound"));
-			}			
-			
+
+				return list(req, res, user, uriParser, Collections.singletonList(new ValidationError("DeleteFailed" + typeElementName + "NotFound")));
+			}
+
 		}finally{
-			
+
 			releaseRequest(req, user);
-		}		
+		}
 	}
 
 	protected void checkDeleteAccess(BeanType bean, UserType user, HttpServletRequest req, URIParser uriParser) throws AccessDeniedException, URINotFoundException, SQLException{
@@ -482,8 +509,8 @@ public abstract class GenericCRUD<BeanType extends Elementable, IDType, UserType
 
 		this.populator = populator;
 	}
-
-	public ForegroundModuleResponse list(HttpServletRequest req, HttpServletResponse res, UserType user, URIParser uriParser, ValidationError validationError) throws Exception {
+	
+	public ForegroundModuleResponse list(HttpServletRequest req, HttpServletResponse res, UserType user, URIParser uriParser, List<ValidationError> validationErrors) throws Exception {
 
 		this.checkListAccess(user,req,uriParser);
 
@@ -493,18 +520,18 @@ public abstract class GenericCRUD<BeanType extends Elementable, IDType, UserType
 		Element listTypeElement = doc.createElement("List" + this.typeElementPluralName);
 		doc.getFirstChild().appendChild(listTypeElement);
 
-		this.appendAllBeans(doc, listTypeElement, user, req, uriParser, validationError);
+		this.appendAllBeans(doc, listTypeElement, user, req, uriParser, validationErrors);
 
-		if (validationError != null) {
-			listTypeElement.appendChild(validationError.toXML(doc));
+		if (validationErrors != null) {
+			XMLUtils.append(doc, listTypeElement, validationErrors);
 			listTypeElement.appendChild(RequestUtils.getRequestParameters(req, doc));
 		}
 
-		this.appendListFormData(doc, listTypeElement, user, req, uriParser, validationError);
+		this.appendListFormData(doc, listTypeElement, user, req, uriParser, validationErrors);
 
-		SimpleForegroundModuleResponse moduleResponse = new SimpleForegroundModuleResponse(doc, getListTitle(req, user, uriParser));
+		SimpleForegroundModuleResponse moduleResponse = createListModuleResponse(doc, req, user, uriParser);
 
-		moduleResponse.addBreadcrumbsLast(getListBreadcrumbs(req, user, uriParser,validationError));
+		moduleResponse.addBreadcrumbsLast(getListBreadcrumbs(req, user, uriParser,validationErrors));
 
 		return moduleResponse;
 	}
@@ -524,20 +551,20 @@ public abstract class GenericCRUD<BeanType extends Elementable, IDType, UserType
 
 		} else {
 
-			return list(req, res, user, uriParser, new ValidationError("ShowFailed" + typeElementName + "NotFound"));
+			return list(req, res, user, uriParser, Collections.singletonList(new ValidationError("ShowFailed" + typeElementName + "NotFound")));
 		}
 	}
 
 	public ForegroundModuleResponse showBean(BeanType bean, HttpServletRequest req, HttpServletResponse res, UserType user, URIParser uriParser, ValidationError validationError) throws Exception {
 
 		if(validationError != null){
-			
+
 			return showBean(bean, req, res, user, uriParser, Collections.singletonList(validationError));
 		}
-		
+
 		return showBean(bean, req, res, user, uriParser, (List<ValidationError>)null);
 	}
-	
+
 	public ForegroundModuleResponse showBean(BeanType bean, HttpServletRequest req, HttpServletResponse res, UserType user, URIParser uriParser, List<ValidationError> validationErrors) throws Exception {
 
 		this.checkShowAccess(bean,user,req,uriParser);
@@ -548,7 +575,7 @@ public abstract class GenericCRUD<BeanType extends Elementable, IDType, UserType
 		Element showTypeElement = doc.createElement("Show" + typeElementName);
 		doc.getFirstChild().appendChild(showTypeElement);
 
-		this.appendBean(bean, showTypeElement, doc);
+		this.appendBean(bean, showTypeElement, doc, user);
 
 		this.appendShowFormData(bean, doc, showTypeElement, user, req, res, uriParser);
 
@@ -562,7 +589,7 @@ public abstract class GenericCRUD<BeanType extends Elementable, IDType, UserType
 			showTypeElement.appendChild(RequestUtils.getRequestParameters(req, doc));
 		}
 
-		SimpleForegroundModuleResponse moduleResponse = new SimpleForegroundModuleResponse(doc, getShowTitle(bean, req, user, uriParser));
+		SimpleForegroundModuleResponse moduleResponse = createShowBeanModuleResponse(bean, doc, req, user, uriParser);
 
 		List<Breadcrumb> breadcrumbs = getShowBreadcrumbs(bean,req, user, uriParser);
 
@@ -590,13 +617,13 @@ public abstract class GenericCRUD<BeanType extends Elementable, IDType, UserType
 		return getAllBeans(user);
 	}
 
-	protected void appendAllBeans(Document doc, Element listTypeElement, UserType user, HttpServletRequest req, URIParser uriParser, ValidationError validationError) throws SQLException {
+	protected void appendAllBeans(Document doc, Element listTypeElement, UserType user, HttpServletRequest req, URIParser uriParser, List<ValidationError> validationError) throws SQLException {
 
 		XMLUtils.append(doc, listTypeElement, this.typeElementPluralName, getAllBeans(user, req, uriParser));
 
 	}
 
-	protected List<Breadcrumb> getListBreadcrumbs(HttpServletRequest req, UserType user, URIParser uriParser, ValidationError validationError) {
+	protected List<Breadcrumb> getListBreadcrumbs(HttpServletRequest req, UserType user, URIParser uriParser, List<ValidationError> validationError) throws Exception {
 
 		List<Breadcrumb> breadcrumbs = new ArrayList<Breadcrumb>(2);
 
@@ -612,13 +639,33 @@ public abstract class GenericCRUD<BeanType extends Elementable, IDType, UserType
 		return breadcrumbs;
 	}
 
-	protected void appendListFormData(Document doc, Element listTypeElement, UserType user, HttpServletRequest req, URIParser uriParser, ValidationError validationError) throws SQLException {}
+	protected void appendListFormData(Document doc, Element listTypeElement, UserType user, HttpServletRequest req, URIParser uriParser, List<ValidationError> validationError) throws SQLException {}
 
 	protected void redirectToListMethod(HttpServletRequest req, HttpServletResponse res, BeanType bean) throws Exception {
 
 		res.sendRedirect(req.getContextPath() + callback.getFullAlias() + listMethodAlias);
 	}
+	
+	protected SimpleForegroundModuleResponse createListModuleResponse(Document doc, HttpServletRequest req, UserType user, URIParser uriParser) {
+		
+		return new SimpleForegroundModuleResponse(doc, getListTitle(req, user, uriParser));
+	}
 
+	protected SimpleForegroundModuleResponse createShowBeanModuleResponse(BeanType bean, Document doc, HttpServletRequest req, UserType user, URIParser uriParser) {
+		
+		return new SimpleForegroundModuleResponse(doc, getShowTitle(bean, req, user, uriParser));
+	}
+	
+	protected SimpleForegroundModuleResponse createAddFormModuleResponse(Document doc, HttpServletRequest req, UserType user, URIParser uriParser) {
+		
+		return new SimpleForegroundModuleResponse(doc, this.getAddTitle(req, user, uriParser));
+	}
+	
+	protected SimpleForegroundModuleResponse createUpdateFormModuleResponse(BeanType bean, Document doc, HttpServletRequest req, UserType user, URIParser uriParser) {
+		
+		return new SimpleForegroundModuleResponse(doc, getUpdateTitle(bean, req, user, uriParser));
+	}
+	
 	public void setShowTextPrefix(String showBreadcrumbPrefix) {
 
 		this.showTextPrefix = showBreadcrumbPrefix;

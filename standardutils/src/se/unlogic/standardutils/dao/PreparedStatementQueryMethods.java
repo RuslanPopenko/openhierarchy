@@ -16,11 +16,11 @@ import se.unlogic.standardutils.dao.querys.PreparedStatementQuery;
 
 /**
  * This class provides a static map containing mappings from classes to their corresponding set methods in the {@link PreparedStatement} interface.<p>
- * 
+ *
  * {@link Integer}, {@link Long}, {@link Double}, {@link Float}, {@link Boolean} and {@link Byte} types are mapped to the setObject method in order to allow null values.<p>
- * 
+ *
  * All other types are mapped to their default set method in the {@link PreparedStatement} interface.
- * 
+ *
  * @author Robert "Unlogic" Olofsson (unlogic@unlogic.se)
  *
  */
@@ -31,12 +31,14 @@ public class PreparedStatementQueryMethods {
 	static{
 		try {
 			//Special methods mappings
-			QUERY_METHOD_MAP.put(Integer.class, PreparedStatementQuery.class.getMethod("setObject", int.class,Object.class));
-			QUERY_METHOD_MAP.put(Long.class, PreparedStatementQuery.class.getMethod("setObject", int.class,Object.class));
-			QUERY_METHOD_MAP.put(Double.class, PreparedStatementQuery.class.getMethod("setObject", int.class,Object.class));
-			QUERY_METHOD_MAP.put(Float.class, PreparedStatementQuery.class.getMethod("setObject", int.class,Object.class));
-			QUERY_METHOD_MAP.put(Boolean.class, PreparedStatementQuery.class.getMethod("setObject", int.class,Object.class));
-			QUERY_METHOD_MAP.put(Byte.class, PreparedStatementQuery.class.getMethod("setObject", int.class,Object.class));
+			SET_OBJECT_METHOD = PreparedStatementQuery.class.getMethod("setObject", int.class,Object.class);
+
+			QUERY_METHOD_MAP.put(Integer.class, SET_OBJECT_METHOD);
+			QUERY_METHOD_MAP.put(Long.class, SET_OBJECT_METHOD);
+			QUERY_METHOD_MAP.put(Double.class, SET_OBJECT_METHOD);
+			QUERY_METHOD_MAP.put(Float.class, SET_OBJECT_METHOD);
+			QUERY_METHOD_MAP.put(Boolean.class, SET_OBJECT_METHOD);
+			QUERY_METHOD_MAP.put(Byte.class, SET_OBJECT_METHOD);
 
 			Method[] methods = PreparedStatementQuery.class.getMethods();
 
@@ -48,8 +50,6 @@ public class PreparedStatementQueryMethods {
 					QUERY_METHOD_MAP.put(method.getParameterTypes()[1], method);
 				}
 			}
-
-			SET_OBJECT_METHOD = PreparedStatementQuery.class.getMethod("setObject", int.class,Object.class);
 
 		} catch (SecurityException e) {
 

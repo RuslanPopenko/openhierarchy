@@ -16,16 +16,19 @@ public class GroupListUserFormCallback implements UserFormCallback {
 		this.groups = groups;
 	}
 
+	@Override
 	public boolean allowGroupAdministration() {
 
 		return true;
 	}
 
+	@Override
 	public List<Group> getAvailableGroups() {
 
 		return groups;
 	}
 
+	@Override
 	public Group getGroup(Integer groupID) {
 
 
@@ -40,6 +43,7 @@ public class GroupListUserFormCallback implements UserFormCallback {
 		return null;
 	}
 
+	@Override
 	public boolean allowAdminFlagAccess() {
 
 		return false;

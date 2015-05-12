@@ -20,6 +20,7 @@ public class GlobalBackgroundModuleCacheListener implements BackgroundModuleCach
 
 	private CopyOnWriteArrayList<BackgroundModuleCacheListener> cacheListeners = new CopyOnWriteArrayList<BackgroundModuleCacheListener>();
 
+	@Override
 	public void moduleCached(BackgroundModuleDescriptor moduleDescriptor, BackgroundModule moduleInstance) throws KeyAlreadyCachedException {
 
 		for(BackgroundModuleCacheListener cacheListener : cacheListeners){
@@ -28,6 +29,7 @@ public class GlobalBackgroundModuleCacheListener implements BackgroundModuleCach
 		}
 	}
 
+	@Override
 	public void moduleUpdated(BackgroundModuleDescriptor moduleDescriptor, BackgroundModule moduleInstance) throws KeyNotCachedException {
 
 		for(BackgroundModuleCacheListener cacheListener : cacheListeners){
@@ -36,6 +38,7 @@ public class GlobalBackgroundModuleCacheListener implements BackgroundModuleCach
 		}
 	}	
 	
+	@Override
 	public void moduleUnloaded(BackgroundModuleDescriptor moduleDescriptor, BackgroundModule moduleInstance) throws KeyNotCachedException {
 
 		for(BackgroundModuleCacheListener cacheListener : cacheListeners){

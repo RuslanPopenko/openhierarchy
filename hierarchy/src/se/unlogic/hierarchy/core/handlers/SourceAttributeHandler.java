@@ -33,31 +33,37 @@ public class SourceAttributeHandler implements MutableAttributeHandler {
 		this.maxValueLength = maxValueLength;
 	}
 
+	@Override
 	public boolean isSet(String name) {
 
 		return getAttribute(name) != null;
 	}
 
+	@Override
 	public String getString(String name) {
 		
 		return getAttributeValue(name);
 	}
 
+	@Override
 	public Integer getInt(String name) {
 
 		return NumberUtils.toInt(getAttributeValue(name));
 	}
 
+	@Override
 	public Long getLong(String name) {
 
 		return NumberUtils.toLong(getAttributeValue(name));
 	}
 
+	@Override
 	public Double getDouble(String name) {
 
 		return NumberUtils.toDouble(getAttributeValue(name));
 	}
 
+	@Override
 	public Boolean getBoolean(String name) {
 
 		String value = getAttributeValue(name);
@@ -70,6 +76,7 @@ public class SourceAttributeHandler implements MutableAttributeHandler {
 		return Boolean.parseBoolean(value);
 	}
 
+	@Override
 	public boolean isEmpty() {
 
 		List<? extends Attribute> attributes = atttributeSource.getAttributes();
@@ -82,6 +89,7 @@ public class SourceAttributeHandler implements MutableAttributeHandler {
 		return true;
 	}
 
+	@Override
 	public Set<String> getNames() {
 
 		List<? extends Attribute> attributes = atttributeSource.getAttributes();
@@ -101,6 +109,7 @@ public class SourceAttributeHandler implements MutableAttributeHandler {
 		return attributeSet;
 	}
 
+	@Override
 	public int size() {
 
 		List<? extends Attribute> attributes = atttributeSource.getAttributes();
@@ -113,11 +122,13 @@ public class SourceAttributeHandler implements MutableAttributeHandler {
 		return 0;
 	}
 
+	@Override
 	public boolean getPrimitiveBoolean(String name) {
 
 		return Boolean.parseBoolean(getAttributeValue(name));
 	}
 
+	@Override
 	public Map<String, String> getAttributeMap() {
 
 		List<? extends Attribute> attributes = atttributeSource.getAttributes();
@@ -137,6 +148,7 @@ public class SourceAttributeHandler implements MutableAttributeHandler {
 		return attributeMap;
 	}
 
+	@Override
 	public Element toXML(Document doc) {
 
 		Element attributesElement = doc.createElement("Attributes");
@@ -157,6 +169,7 @@ public class SourceAttributeHandler implements MutableAttributeHandler {
 		return attributesElement;
 	}
 
+	@Override
 	public synchronized boolean setAttribute(String name, Object valueObject) {
 
 		if(valueObject == null){
@@ -187,6 +200,7 @@ public class SourceAttributeHandler implements MutableAttributeHandler {
 		return true;
 	}
 
+	@Override
 	public synchronized void removeAttribute(String name) {
 
 		List<? extends Attribute> attributeList = atttributeSource.getAttributes();
@@ -204,6 +218,7 @@ public class SourceAttributeHandler implements MutableAttributeHandler {
 		}
 	}
 
+	@Override
 	public void clear() {
 
 		List<? extends Attribute> attributeList = atttributeSource.getAttributes();
@@ -214,11 +229,13 @@ public class SourceAttributeHandler implements MutableAttributeHandler {
 		}
 	}
 
+	@Override
 	public int getMaxNameLength() {
 
 		return maxNameLength;
 	}
 
+	@Override
 	public int getMaxValueLength() {
 
 		return maxValueLength;

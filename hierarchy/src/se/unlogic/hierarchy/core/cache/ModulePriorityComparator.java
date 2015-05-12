@@ -14,6 +14,7 @@ import se.unlogic.hierarchy.core.interfaces.MultipleAliasModuleDescriptor;
 
 public class ModulePriorityComparator implements Comparator<ModuleMapping<? extends MultipleAliasModuleDescriptor>> {
 
+	@Override
 	public int compare(ModuleMapping<? extends MultipleAliasModuleDescriptor> o1, ModuleMapping<? extends MultipleAliasModuleDescriptor> o2) {
 		
 		int value1 = o1.getModuleDescriptor().getPriority();

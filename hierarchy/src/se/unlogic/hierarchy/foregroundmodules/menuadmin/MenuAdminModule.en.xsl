@@ -3,6 +3,8 @@
 	<xsl:output method="html" version="4.0" encoding="ISO-8859-1" />
 
 	<xsl:include href="MenuAdminModuleTemplates.xsl" />
+	
+	<xsl:include href="classpath://se/unlogic/hierarchy/core/utils/usergrouplist/UserGroupList.en.xsl"/>
 
 	<!-- Naming template.mode.field.type -->
 
@@ -47,6 +49,7 @@
 	<xsl:variable name="validationError.requiredField" select="'You must fill in field'" />
 	<xsl:variable name="validationError.invalidFormat" select="'Invalid format in field'" />
 	<xsl:variable name="validationError.unknown" select="'Unknown error in field'" />
+	<xsl:variable name="validationError.tooLong">Too long content in field</xsl:variable>
 
 	<xsl:variable name="validationError.duplicateAlias" select="'A menu with this alias already exists in this section'" />
 	<xsl:variable name="validationError.unknownErrorOccurred" select="'An unknown error has occurred'" />

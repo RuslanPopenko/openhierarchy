@@ -22,6 +22,7 @@ public class CommentPopulator implements BeanResultSetPopulator<Comment> {
 		this.userHandler = userHandler;
 	}
 
+	@Override
 	public Comment populate(ResultSet rs) throws SQLException {
 
 		Comment comment = new Comment();

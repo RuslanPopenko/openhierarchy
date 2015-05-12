@@ -18,6 +18,7 @@ import se.unlogic.webutils.http.URIParser;
 
 public class HelloWorld extends SimpleBackgroundModule{
 	
+	@Override
 	public BackgroundModuleResponse processRequest(HttpServletRequest req, User user, URIParser uriParser) throws Exception {
 		
 		return new SimpleBackgroundModuleResponse("<div class=\"contentitem\"><h1>Hello world!</h1><p>This background module is called " + this.moduleDescriptor.getName() + "</p><p>Current URI: "  + uriParser.getCurrentURI(false) + "</p><p>Remaining URI: " + uriParser.getRemainingURI() + "</p></div>");

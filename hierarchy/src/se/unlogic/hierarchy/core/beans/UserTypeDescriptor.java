@@ -75,6 +75,7 @@ public class UserTypeDescriptor extends GeneratedElementable implements Comparab
 		return name + " (ID: " + userTypeID + ")";
 	}
 
+	@Override
 	public int compareTo(UserTypeDescriptor o) {
 
 		return this.name.compareTo(o.name);

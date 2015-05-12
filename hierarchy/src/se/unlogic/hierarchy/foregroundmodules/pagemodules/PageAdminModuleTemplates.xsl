@@ -7,6 +7,7 @@
 
 	<xsl:variable name="globalscripts">
 		/jquery/jquery.js
+		/jquery/jquery-ui.js
 		/ckeditor/ckeditor.js
 		/ckeditor/adapters/jquery.js
 		/ckeditor/init.js
@@ -15,10 +16,12 @@
 	<xsl:variable name="scripts">
 		/dtree/dtree.js
 		/js/askBeforeRedirect.js
+		/js/UserGroupList.js
 	</xsl:variable>	
 
 	<xsl:variable name="links">
 		/dtree/dtree.css
+		/css/UserGroupList.css
 	</xsl:variable>
 
 	<xsl:template match="document">
@@ -128,203 +131,209 @@
 		
 		<form method="post" action="{/document/requestinfo/uri}" accept-charset="ISO-8859-1">
 			
-			<table width="100%">
-				<tr>
-					<td><xsl:value-of select="$name"/>:</td>
-					<td>
-						<input type="text" name="name" size="40">
-							<xsl:attribute name="value">
+			<div class="floatleft full bigmarginbottom">
+				<table width="100%">
+					<tr>
+						<td><xsl:value-of select="$name"/>:</td>
+						<td>
+							<input type="text" name="name" size="40">
+								<xsl:attribute name="value">
+									<xsl:choose>
+										<xsl:when test="requestparameters/parameter[name='name']">
+											<xsl:value-of select="requestparameters/parameter[name='name']/value"/>
+										</xsl:when>
+										<xsl:otherwise>
+											<xsl:value-of select="page/name"/>
+										</xsl:otherwise>
+									</xsl:choose>
+								</xsl:attribute>
+							</input>					
+						</td>
+					</tr>
+					<tr>
+						<td><xsl:value-of select="$description"/>:</td>
+						<td>
+							<input type="text" name="description" size="40">
+								<xsl:attribute name="value">
+									<xsl:choose>
+										<xsl:when test="requestparameters/parameter[name='description']">
+											<xsl:value-of select="requestparameters/parameter[name='description']/value"/>
+										</xsl:when>
+										<xsl:otherwise>
+											<xsl:value-of select="page/description"/>
+										</xsl:otherwise>
+									</xsl:choose>
+								</xsl:attribute>
+							</input>					
+						</td>
+					</tr>
+					<tr>
+						<td><xsl:value-of select="$alias"/></td>
+						<td>
+							<input type="text" name="alias" size="40">
+								<xsl:attribute name="value">
+									<xsl:choose>
+										<xsl:when test="requestparameters/parameter[name='alias']">
+											<xsl:value-of select="requestparameters/parameter[name='alias']/value"/>
+										</xsl:when>
+										<xsl:otherwise>
+											<xsl:value-of select="page/alias"/>
+										</xsl:otherwise>
+									</xsl:choose>
+								</xsl:attribute>
+							</input>
+						</td>
+					</tr>
+					<tr>
+						<td colspan="2">
+							<h2><xsl:value-of select="$content"/></h2>
+							
+							<textarea class="fckeditor" name="text" rows="20">
 								<xsl:choose>
-									<xsl:when test="requestparameters/parameter[name='name']">
-										<xsl:value-of select="requestparameters/parameter[name='name']/value"/>
+									<xsl:when test="requestparameters/parameter[name='text']">
+										<xsl:call-template name="removeLineBreak">
+											<xsl:with-param name="string">
+												<xsl:value-of select="requestparameters/parameter[name='text']/value"/>
+											</xsl:with-param>
+										</xsl:call-template>
 									</xsl:when>
 									<xsl:otherwise>
-										<xsl:value-of select="page/name"/>
+										<xsl:call-template name="removeLineBreak">
+											<xsl:with-param name="string">
+												<xsl:value-of select="page/text"/>
+											</xsl:with-param>
+										</xsl:call-template>
 									</xsl:otherwise>
 								</xsl:choose>
-							</xsl:attribute>
-						</input>					
-					</td>
-				</tr>
-				<tr>
-					<td><xsl:value-of select="$description"/>:</td>
-					<td>
-						<input type="text" name="description" size="40">
-							<xsl:attribute name="value">
-								<xsl:choose>
-									<xsl:when test="requestparameters/parameter[name='description']">
-										<xsl:value-of select="requestparameters/parameter[name='description']/value"/>
-									</xsl:when>
-									<xsl:otherwise>
-										<xsl:value-of select="page/description"/>
-									</xsl:otherwise>
-								</xsl:choose>
-							</xsl:attribute>
-						</input>					
-					</td>
-				</tr>
-				<tr>
-					<td><xsl:value-of select="$alias"/></td>
-					<td>
-						<input type="text" name="alias" size="40">
-							<xsl:attribute name="value">
-								<xsl:choose>
-									<xsl:when test="requestparameters/parameter[name='alias']">
-										<xsl:value-of select="requestparameters/parameter[name='alias']/value"/>
-									</xsl:when>
-									<xsl:otherwise>
-										<xsl:value-of select="page/alias"/>
-									</xsl:otherwise>
-								</xsl:choose>
-							</xsl:attribute>
-						</input>					
-					</td>
-				</tr>				
-				<tr>
-					<td colspan="2">
-						<h2><xsl:value-of select="$content"/></h2>							
-						
-						<textarea class="fckeditor" name="text" rows="20">
-							<xsl:choose>
-								<xsl:when test="requestparameters/parameter[name='text']">
-									<xsl:call-template name="removeLineBreak">
-										<xsl:with-param name="string">
-											<xsl:value-of select="requestparameters/parameter[name='text']/value"/>
-										</xsl:with-param>
-									</xsl:call-template>
-								</xsl:when>
-								<xsl:otherwise>
-									<xsl:call-template name="removeLineBreak">
-										<xsl:with-param name="string">
-											<xsl:value-of select="page/text"/>
-										</xsl:with-param>
-									</xsl:call-template>
-								</xsl:otherwise>
-							</xsl:choose>
-						</textarea>						
-						
-						<xsl:call-template name="initFCKEditor" /> 					
-					</td>
-				</tr>
-			</table>
+							</textarea>
+							
+							<xsl:call-template name="initFCKEditor" />
+						</td>
+					</tr>
+				</table>
+			</div>
 			
 			<h2><xsl:value-of select="$additionalSettings"/></h2>
 			
-			<table>
-				<tr>
-					<td>
-						<input type="checkbox" name="enabled">
-							
-							<xsl:choose>
-								<xsl:when test="requestparameters">
-									<xsl:if test="requestparameters/parameter[name='enabled']">
+			<div class="floatleft full bigmarginbottom">
+				<table>
+					<tr>
+						<td>
+							<input type="checkbox" name="enabled">
+								
+								<xsl:choose>
+									<xsl:when test="requestparameters">
+										<xsl:if test="requestparameters/parameter[name='enabled']">
+											<xsl:attribute name="checked"/>
+										</xsl:if>
+									</xsl:when>
+									<xsl:when test="page/enabled='true'">
 										<xsl:attribute name="checked"/>
-									</xsl:if>
-								</xsl:when>
-								<xsl:when test="page/enabled='true'">
-									<xsl:attribute name="checked"/>
-								</xsl:when>
-							</xsl:choose>						
-						</input>
-											
-						<xsl:value-of select="$activatePage"/>
-					</td>
-				</tr>			
-			
-				<tr>
-					<td>
-						<input type="checkbox" name="visibleInMenu">
-							<xsl:choose>
-								<xsl:when test="requestparameters">
-									<xsl:if test="requestparameters/parameter[name='visibleInMenu']">
-										<xsl:attribute name="checked"/>
-									</xsl:if>
-								</xsl:when>
-								<xsl:when test="page/visibleInMenu='true'">
-									<xsl:attribute name="checked"/>
-								</xsl:when>
-							</xsl:choose>
-						</input><xsl:value-of select="$showInMenu"/>
-					</td>
-				</tr>
+									</xsl:when>
+								</xsl:choose>						
+							</input>
+												
+							<xsl:value-of select="$activatePage"/>
+						</td>
+					</tr>
 				
-				<tr>
-					<td>
-						<input type="checkbox" name="breadCrumb">
-							<xsl:choose>
-								<xsl:when test="requestparameters">
-									<xsl:if test="requestparameters/parameter[name='breadCrumb']">
+					<tr>
+						<td>
+							<input type="checkbox" name="visibleInMenu">
+								<xsl:choose>
+									<xsl:when test="requestparameters">
+										<xsl:if test="requestparameters/parameter[name='visibleInMenu']">
+											<xsl:attribute name="checked"/>
+										</xsl:if>
+									</xsl:when>
+									<xsl:when test="page/visibleInMenu='true'">
 										<xsl:attribute name="checked"/>
-									</xsl:if>
-								</xsl:when>
-								<xsl:when test="page/breadCrumb='true'">
-									<xsl:attribute name="checked"/>
-								</xsl:when>
-							</xsl:choose>
-						</input><xsl:value-of select="$showBreadCrumb"/>
-					</td>
-				</tr>				
+									</xsl:when>
+								</xsl:choose>
+							</input><xsl:value-of select="$showInMenu"/>
+						</td>
+					</tr>
+					
+					<tr>
+						<td>
+							<input type="checkbox" name="breadCrumb">
+								<xsl:choose>
+									<xsl:when test="requestparameters">
+										<xsl:if test="requestparameters/parameter[name='breadCrumb']">
+											<xsl:attribute name="checked"/>
+										</xsl:if>
+									</xsl:when>
+									<xsl:when test="page/breadCrumb='true'">
+										<xsl:attribute name="checked"/>
+									</xsl:when>
+								</xsl:choose>
+							</input><xsl:value-of select="$showBreadCrumb"/>
+						</td>
+					</tr>
 			</table>
+			</div>
 			
 			<h2><xsl:value-of select="$access"/></h2>
 			
-			<table>
-				<tr>
-					<td colspan="2">
-						<input type="checkbox" name="adminAccess" value="true">
-							<xsl:choose>
-								<xsl:when test="requestparameters">
-									<xsl:if test="requestparameters/parameter[name='adminAccess']">
+			<div class="floatleft full bigmarginbottom">
+				<table>
+					<tr>
+						<td colspan="2">
+							<input type="checkbox" name="adminAccess" value="true">
+								<xsl:choose>
+									<xsl:when test="requestparameters">
+										<xsl:if test="requestparameters/parameter[name='adminAccess']">
+											<xsl:attribute name="checked"/>
+										</xsl:if>
+									</xsl:when>
+									<xsl:when test="page/adminAccess='true'">
 										<xsl:attribute name="checked"/>
-									</xsl:if>
-								</xsl:when>
-								<xsl:when test="page/adminAccess='true'">
-									<xsl:attribute name="checked"/>
-								</xsl:when>
-							</xsl:choose>
-						</input>
-						<xsl:value-of select="$admins"/>
-					</td>
-				</tr>
-				<tr>
-					<td colspan="2">
-						<input type="checkbox" name="userAccess" value="true">
-							<xsl:choose>
-								<xsl:when test="requestparameters">
-									<xsl:if test="requestparameters/parameter[name='userAccess']">
+									</xsl:when>
+								</xsl:choose>
+							</input>
+							<xsl:value-of select="$admins"/>
+						</td>
+					</tr>
+					<tr>
+						<td colspan="2">
+							<input type="checkbox" name="userAccess" value="true">
+								<xsl:choose>
+									<xsl:when test="requestparameters">
+										<xsl:if test="requestparameters/parameter[name='userAccess']">
+											<xsl:attribute name="checked"/>
+										</xsl:if>
+									</xsl:when>
+									<xsl:when test="page/userAccess='true'">
 										<xsl:attribute name="checked"/>
-									</xsl:if>
-								</xsl:when>
-								<xsl:when test="page/userAccess='true'">
-									<xsl:attribute name="checked"/>
-								</xsl:when>
-							</xsl:choose>
-						</input>
-						<xsl:value-of select="$loggedInUsers"/>
-					</td>
-				</tr>			
-				<tr>
-					<td colspan="2">
-						<input type="checkbox" name="anonymousAccess" value="true">
-							<xsl:choose>
-								<xsl:when test="requestparameters">
-									<xsl:if test="requestparameters/parameter[name='anonymousAccess']">
+									</xsl:when>
+								</xsl:choose>
+							</input>
+							<xsl:value-of select="$loggedInUsers"/>
+						</td>
+					</tr>			
+					<tr>
+						<td colspan="2">
+							<input type="checkbox" name="anonymousAccess" value="true">
+								<xsl:choose>
+									<xsl:when test="requestparameters">
+										<xsl:if test="requestparameters/parameter[name='anonymousAccess']">
+											<xsl:attribute name="checked"/>
+										</xsl:if>
+									</xsl:when>
+									<xsl:when test="page/anonymousAccess='true'">
 										<xsl:attribute name="checked"/>
-									</xsl:if>
-								</xsl:when>
-								<xsl:when test="page/anonymousAccess='true'">
-									<xsl:attribute name="checked"/>
-								</xsl:when>
-							</xsl:choose>						
-						</input>
-						<xsl:value-of select="$nonLoggedInUsers"/>
-					</td>
-				</tr>
-			</table>
+									</xsl:when>
+								</xsl:choose>						
+							</input>
+							<xsl:value-of select="$nonLoggedInUsers"/>
+						</td>
+					</tr>
+				</table>
+			</div>
 			
-			<xsl:apply-templates select="groups"/>
+			<xsl:call-template name="groups"/>
 			
-			<xsl:apply-templates select="users"/>	
+			<xsl:call-template name="users"/>
 			
 			<div align="right">
 				<input type="submit" value="{$saveChanges}"/>			
@@ -431,128 +440,134 @@
 		
 		<form method="post" action="{/document/requestinfo/uri}" accept-charset="ISO-8859-1">
 			
-			<table width="100%">
-				<tr>
-					<td><xsl:value-of select="$name"/>:</td>
-					<td><input type="text" size="50" maxlength="255" name="name" value="{requestparameters/parameter[name='name']/value}"/></td>
-				</tr>
-				<tr>
-					<td><xsl:value-of select="$description"/>:</td>
-					<td><input type="text" size="50" maxlength="255" name="description" value="{requestparameters/parameter[name='description']/value}"/></td>
-				</tr>
-				<tr>
-					<td><xsl:value-of select="$alias"/>:</td>
-					<td><input type="text" size="50" maxlength="255" name="alias" value="{requestparameters/parameter[name='alias']/value}"/></td>
-				</tr>				
-				<tr>
-					<td colspan="2">
-						<h2><xsl:value-of select="$content"/></h2>							
-												
-						<textarea class="fckeditor" name="text" rows="20">
-							<xsl:value-of select="requestparameters/parameter[name='text']/value"/>
-						</textarea>						
-						
-						<xsl:call-template name="initFCKEditor" /> 
-					</td>
-				</tr>
-			</table>
+			<div class="floatleft full bigmarginbottom">
+				<table width="100%">
+					<tr>
+						<td><xsl:value-of select="$name"/>:</td>
+						<td><input type="text" size="50" maxlength="255" name="name" value="{requestparameters/parameter[name='name']/value}"/></td>
+					</tr>
+					<tr>
+						<td><xsl:value-of select="$description"/>:</td>
+						<td><input type="text" size="50" maxlength="255" name="description" value="{requestparameters/parameter[name='description']/value}"/></td>
+					</tr>
+					<tr>
+						<td><xsl:value-of select="$alias"/>:</td>
+						<td><input type="text" size="50" maxlength="255" name="alias" value="{requestparameters/parameter[name='alias']/value}"/></td>
+					</tr>				
+					<tr>
+						<td colspan="2">
+							<h2><xsl:value-of select="$content"/></h2>							
+													
+							<textarea class="fckeditor" name="text" rows="20">
+								<xsl:value-of select="requestparameters/parameter[name='text']/value"/>
+							</textarea>						
+							
+							<xsl:call-template name="initFCKEditor" /> 
+						</td>
+					</tr>
+				</table>
+			</div>
 			
 			<h2><xsl:value-of select="$additionalSettings"/></h2>
 			
-			<table>
-				<tr>
-					<td>
-						<input type="checkbox" name="enabled">
-							
-							<xsl:choose>
-								<xsl:when test="requestparameters">
-									<xsl:if test="requestparameters/parameter[name='enabled']">
+			<div class="floatleft full bigmarginbottom">
+				<table>
+					<tr>
+						<td>
+							<input type="checkbox" name="enabled">
+								
+								<xsl:choose>
+									<xsl:when test="requestparameters">
+										<xsl:if test="requestparameters/parameter[name='enabled']">
+											<xsl:attribute name="checked">true</xsl:attribute>
+										</xsl:if>								
+									</xsl:when>
+									<xsl:otherwise>
 										<xsl:attribute name="checked">true</xsl:attribute>
-									</xsl:if>								
-								</xsl:when>
-								<xsl:otherwise>
-									<xsl:attribute name="checked">true</xsl:attribute>
-								</xsl:otherwise>
-							</xsl:choose>
-							
-						</input><xsl:value-of select="$activatePage"/>
-					</td>
-				</tr>						
-							
-				<tr>
-					<td>
-						<input type="checkbox" name="visibleInMenu">
-		
-							<xsl:choose>
-								<xsl:when test="requestparameters">
-									<xsl:if test="requestparameters/parameter[name='visibleInMenu']">
+									</xsl:otherwise>
+								</xsl:choose>
+								
+							</input><xsl:value-of select="$activatePage"/>
+						</td>
+					</tr>						
+								
+					<tr>
+						<td>
+							<input type="checkbox" name="visibleInMenu">
+			
+								<xsl:choose>
+									<xsl:when test="requestparameters">
+										<xsl:if test="requestparameters/parameter[name='visibleInMenu']">
+											<xsl:attribute name="checked">true</xsl:attribute>
+										</xsl:if>								
+									</xsl:when>
+									<xsl:otherwise>
 										<xsl:attribute name="checked">true</xsl:attribute>
-									</xsl:if>								
-								</xsl:when>
-								<xsl:otherwise>
-									<xsl:attribute name="checked">true</xsl:attribute>
-								</xsl:otherwise>
-							</xsl:choose>
-																					
-						</input><xsl:value-of select="$showInMenu"/>
-					</td>
-				</tr>
-				
-				<tr>
-					<td>
-						<input type="checkbox" name="breadCrumb">
-							
-							<xsl:choose>
-								<xsl:when test="requestparameters">
-									<xsl:if test="requestparameters/parameter[name='breadCrumb']">
+									</xsl:otherwise>
+								</xsl:choose>
+																						
+							</input><xsl:value-of select="$showInMenu"/>
+						</td>
+					</tr>
+					
+					<tr>
+						<td>
+							<input type="checkbox" name="breadCrumb">
+								
+								<xsl:choose>
+									<xsl:when test="requestparameters">
+										<xsl:if test="requestparameters/parameter[name='breadCrumb']">
+											<xsl:attribute name="checked">true</xsl:attribute>
+										</xsl:if>								
+									</xsl:when>
+									<xsl:otherwise>
 										<xsl:attribute name="checked">true</xsl:attribute>
-									</xsl:if>								
-								</xsl:when>
-								<xsl:otherwise>
-									<xsl:attribute name="checked">true</xsl:attribute>
-								</xsl:otherwise>
-							</xsl:choose>
-							
-						</input><xsl:value-of select="$showBreadCrumb"/>
-					</td>
-				</tr>				
-			</table>
+									</xsl:otherwise>
+								</xsl:choose>
+								
+							</input><xsl:value-of select="$showBreadCrumb"/>
+						</td>
+					</tr>
+					
+				</table>
+			</div>
 			
 			<h2><xsl:value-of select="$access"/></h2>
 			
-			<table>					
-				<tr>
-					<td>
-						<input type="checkbox" name="adminAccess">
-							<xsl:if test="requestparameters/parameter[name='adminAccess']">
-								<xsl:attribute name="checked">true</xsl:attribute>
-							</xsl:if>						
-						</input><xsl:value-of select="$admins"/>
-					</td>
-				</tr><tr>
-					<td>
-						<input type="checkbox" name="userAccess">
-							<xsl:if test="requestparameters/parameter[name='userAccess']">
-								<xsl:attribute name="checked">true</xsl:attribute>
-							</xsl:if>
-						</input><xsl:value-of select="$loggedInUsers"/>
-					</td>
-				</tr><tr>
-					<td>
-						<input type="checkbox" name="anonymousAccess">
-							<xsl:if test="requestparameters/parameter[name='anonymousAccess']">
-								<xsl:attribute name="checked">true</xsl:attribute>
-							</xsl:if>
-						</input><xsl:value-of select="$nonLoggedInUsers"/>
-					</td>
-				</tr>
-				
-																																											
-			</table>
+			<div class="floatleft full bigmarginbottom">
+				<table>					
+					<tr>
+						<td>
+							<input type="checkbox" name="adminAccess">
+								<xsl:if test="requestparameters/parameter[name='adminAccess']">
+									<xsl:attribute name="checked">true</xsl:attribute>
+								</xsl:if>						
+							</input><xsl:value-of select="$admins"/>
+						</td>
+					</tr><tr>
+						<td>
+							<input type="checkbox" name="userAccess">
+								<xsl:if test="requestparameters/parameter[name='userAccess']">
+									<xsl:attribute name="checked">true</xsl:attribute>
+								</xsl:if>
+							</input><xsl:value-of select="$loggedInUsers"/>
+						</td>
+					</tr><tr>
+						<td>
+							<input type="checkbox" name="anonymousAccess">
+								<xsl:if test="requestparameters/parameter[name='anonymousAccess']">
+									<xsl:attribute name="checked">true</xsl:attribute>
+								</xsl:if>
+							</input><xsl:value-of select="$nonLoggedInUsers"/>
+						</td>
+					</tr>
+					
+				</table>
+			</div>
 			
-			<xsl:apply-templates select="groups"/>
+			<xsl:call-template name="groups"/>
 			
-			<xsl:apply-templates select="users"/>			
+			<xsl:call-template name="users"/>
 			
 			<div align="right">
 				<input type="submit" value="{$addPage}"/>
@@ -560,126 +575,44 @@
 		</form>		
 	</xsl:template>	
 	
-	<xsl:template match="group">
-		<div class="floatleft full border marginbottom">
-			<div class="floatleft">
-				<xsl:choose>
-					<xsl:when test="enabled='true'">
-						<img class="alignbottom" src="{/document/requestinfo/contextpath}/static/f/{/document/module/sectionID}/{/document/module/moduleID}/pics/group.png"/>
-					</xsl:when>
-					<xsl:otherwise>
-						<img class="alignbottom" src="{/document/requestinfo/contextpath}/static/f/{/document/module/sectionID}/{/document/module/moduleID}/pics/group_disabled.png"/>
-					</xsl:otherwise>
-				</xsl:choose>
-				
-				<xsl:text>&#x20;</xsl:text>
-				
-				<xsl:value-of select="name"/>			
-			</div>
-			<div class="floatright marginright">
-				
-				<xsl:variable name="groupID" select="groupID"/>
-			
-				<input type="checkbox" name="group" value="{groupID}">
-					<xsl:choose>
-						<xsl:when test="../../requestparameters">
-							<xsl:if test="../../requestparameters/parameter[name='group'][value=$groupID]">
-								<xsl:attribute name="checked"/>
-							</xsl:if>						
-						</xsl:when>
-						<xsl:when test="../../page">
-							<xsl:if test="../../page/allowedGroupIDs[groupID=$groupID]">
-								<xsl:attribute name="checked"/>
-							</xsl:if>								
-						</xsl:when>					
-					</xsl:choose>
-				</input>
-			</div>				
-		</div>
-	</xsl:template>	
-	
-	<xsl:template match="user">
-		<div class="floatleft full border marginbottom">
-			<div class="floatleft">
-				<xsl:choose>
-					<xsl:when test="enabled='true'">
-						<img class="alignbottom" src="{/document/requestinfo/contextpath}/static/f/{/document/module/sectionID}/{/document/module/moduleID}/pics/user.png"/>
-					</xsl:when>
-					<xsl:otherwise>
-						<img class="alignbottom" src="{/document/requestinfo/contextpath}/static/f/{/document/module/sectionID}/{/document/module/moduleID}/pics/user_disabled.png"/>
-					</xsl:otherwise>
-				</xsl:choose>
-				
-				<xsl:text>&#x20;</xsl:text>
-				
-				<xsl:value-of select="firstname"/>
-				
-				<xsl:text>&#x20;</xsl:text>
-				
-				<xsl:value-of select="lastname"/>
-				
-				<xsl:text>&#x20;</xsl:text>
-				
-				<xsl:text>(</xsl:text>
-					<xsl:value-of select="username"/>
-				<xsl:text>)</xsl:text>			
-			</div>
-			<div class="floatright marginright">
-				
-				<xsl:variable name="userID" select="userID"/>
-			
-				<input type="checkbox" name="user" value="{userID}">
-					<xsl:choose>
-						<xsl:when test="../../requestparameters">
-							<xsl:if test="../../requestparameters/parameter[name='user'][value=$userID]">
-								<xsl:attribute name="checked"/>
-							</xsl:if>						
-						</xsl:when>						
-						<xsl:when test="../../page">
-							<xsl:if test="../../page/allowedUserIDs[userID=$userID]">
-								<xsl:attribute name="checked"/>
-							</xsl:if>								
-						</xsl:when>						
-					</xsl:choose>
-				</input>
-			</div>				
-		</div>
-	</xsl:template>		
-	
 	<xsl:template match="preview">
+						
+		<div class="border border-radius-small padding marginbottom">
+		
+			<div align="right" style="float:right">
+				<!--
+				<a href="{/document/requestinfo/currentURI}/{/document/module/alias}/export/{page/pageID}" title="Exporta sidan {page/name} till XML">
+					<img src="{/document/requestinfo/contextpath}/static/f/{/document/module/sectionID}/{/document/module/moduleID}/pics/exportpage.gif"/>
+				</a>
+				 -->
+				 
+				<a href="{/document/requestinfo/currentURI}/{/document/module/alias}/move/{page/pageID}" title="{$movePage}: {page/name}">
+					<img src="{/document/requestinfo/contextpath}/static/f/{/document/module/sectionID}/{/document/module/moduleID}/pics/page_move.png"/>
+				</a>
 				
-		<div align="right" style="float:right">
-			<!--
-			<a href="{/document/requestinfo/currentURI}/{/document/module/alias}/export/{page/pageID}" title="Exporta sidan {page/name} till XML">
-				<img src="{/document/requestinfo/contextpath}/static/f/{/document/module/sectionID}/{/document/module/moduleID}/pics/exportpage.gif"/>
-			</a>
-			 -->
+				<a href="{/document/requestinfo/currentURI}/{/document/module/alias}/copy/{page/pageID}" title="{$copyPage}: {page/name}">
+					<img src="{/document/requestinfo/contextpath}/static/f/{/document/module/sectionID}/{/document/module/moduleID}/pics/page_copy.png"/>
+				</a>		 
 			 
-			<a href="{/document/requestinfo/currentURI}/{/document/module/alias}/move/{page/pageID}" title="{$movePage}: {page/name}">
-				<img src="{/document/requestinfo/contextpath}/static/f/{/document/module/sectionID}/{/document/module/moduleID}/pics/page_move.png"/>
-			</a>
+				<a href="{/document/requestinfo/currentURI}/{/document/module/alias}/update/{page/pageID}" title="{$editPage} {page/name}">
+					<img src="{/document/requestinfo/contextpath}/static/f/{/document/module/sectionID}/{/document/module/moduleID}/pics/page_edit.png"/>
+				</a>				
 			
-			<a href="{/document/requestinfo/currentURI}/{/document/module/alias}/copy/{page/pageID}" title="{$copyPage}: {page/name}">
-				<img src="{/document/requestinfo/contextpath}/static/f/{/document/module/sectionID}/{/document/module/moduleID}/pics/page_copy.png"/>
-			</a>		 
-		 
-			<a href="{/document/requestinfo/currentURI}/{/document/module/alias}/update/{page/pageID}" title="{$editPage} {page/name}">
-				<img src="{/document/requestinfo/contextpath}/static/f/{/document/module/sectionID}/{/document/module/moduleID}/pics/page_edit.png"/>
-			</a>				
-		
-			<a title="{$deletePage}: {page/name}">
-				<xsl:attribute name="href">javascript:askBeforeRedirect('<xsl:value-of select="$deletePage"/> "<xsl:value-of select="page/name"/>?','<xsl:value-of select="/document/requestinfo/currentURI"/>/<xsl:value-of select="/document/module/alias"/>/delete/<xsl:value-of select="page/pageID"/>');</xsl:attribute>					
-				<img src="{/document/requestinfo/contextpath}/static/f/{/document/module/sectionID}/{/document/module/moduleID}/pics/page_delete.png" border="0" alt="{$deletePage}"/>
-			</a>
-		</div>
-		
-		<h1><xsl:value-of select="pagePreview"/> "<xsl:value-of select="page/name"/>" <xsl:value-of select="$inSection"/> "<xsl:value-of select="section/name"/>"</h1>
-		
-		<xsl:if test="module">
-			<p><a href="{/document/requestinfo/contextpath}{section/fullAlias}/{module/alias}/{page/alias}"><xsl:value-of select="$showPageOutsideAdminView"/></a></p>
-		</xsl:if>
-		
-		<br/>		
+				<a title="{$deletePage}: {page/name}">
+					<xsl:attribute name="href">javascript:askBeforeRedirect('<xsl:value-of select="$deletePage"/> "<xsl:value-of select="page/name"/>?','<xsl:value-of select="/document/requestinfo/currentURI"/>/<xsl:value-of select="/document/module/alias"/>/delete/<xsl:value-of select="page/pageID"/>');</xsl:attribute>					
+					<img src="{/document/requestinfo/contextpath}/static/f/{/document/module/sectionID}/{/document/module/moduleID}/pics/page_delete.png" border="0" alt="{$deletePage}"/>
+				</a>
+			</div>
+					
+			<strong>
+				<xsl:value-of select="$pagePreview"/> "<xsl:value-of select="page/name"/>" <xsl:value-of select="$inSection"/> "<xsl:value-of select="section/name"/>"
+			</strong>
+			
+			<xsl:if test="module">
+				<br/>
+				<a href="{/document/requestinfo/contextpath}{section/fullAlias}/{module/alias}/{page/alias}"><xsl:value-of select="$showPageOutsideAdminView"/></a>
+			</xsl:if>	
+		</div>	
 
 		<xsl:value-of select="page/text" disable-output-escaping="yes"/>
 	</xsl:template>		
@@ -782,26 +715,42 @@
 		<xsl:apply-templates select="subsections/section" mode="copy"/>
 	</xsl:template>
 	
-	<xsl:template match="groups">
+	<xsl:template name="groups" >
 		<h3><xsl:value-of select="$groups"/></h3>
-
-		<div class="scrolllist">			
-			<xsl:apply-templates select="group"/>
-		</div>
+		
+		<xsl:call-template name="GroupList">
+			<xsl:with-param name="connectorURL">
+				<xsl:value-of select="/document/requestinfo/currentURI"/>
+				<xsl:text>/</xsl:text>
+				<xsl:value-of select="/document/module/alias"/>
+				<xsl:text>/groups</xsl:text>
+			</xsl:with-param>
+			<xsl:with-param name="name" select="'group'"/>
+			<xsl:with-param name="groups" select="groups" />
+			<xsl:with-param name="document" select="/document" />
+		</xsl:call-template>
 		
 		<br/>
-	</xsl:template>	
+	</xsl:template>
 	
-	<xsl:template match="users">
+	<xsl:template name ="users" >
 		<h3><xsl:value-of select="$users"/></h3>
 		
-		<div class="scrolllist">			
-			<xsl:apply-templates select="user"/>
-		</div>
+		<xsl:call-template name="UserList">
+			<xsl:with-param name="connectorURL">
+				<xsl:value-of select="/document/requestinfo/currentURI"/>
+				<xsl:text>/</xsl:text>
+				<xsl:value-of select="/document/module/alias"/>
+				<xsl:text>/users</xsl:text>
+			</xsl:with-param>
+			<xsl:with-param name="name" select="'user'"/>
+			<xsl:with-param name="users" select="users" />
+			<xsl:with-param name="document" select="/document" />
+			<xsl:with-param name="showUsername" select="true()" />
+		</xsl:call-template>
 		
 		<br/>
-	</xsl:template>		
-	
+	</xsl:template>
 	
 	<xsl:template name="initFCKEditor">
 		

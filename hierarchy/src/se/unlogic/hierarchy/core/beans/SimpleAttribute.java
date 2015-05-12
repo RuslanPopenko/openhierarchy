@@ -29,6 +29,7 @@ public class SimpleAttribute extends GeneratedElementable implements Serializabl
 		this.value = value;
 	}
 
+	@Override
 	public String getName() {
 
 		return name;
@@ -39,11 +40,13 @@ public class SimpleAttribute extends GeneratedElementable implements Serializabl
 		this.name = name;
 	}
 
+	@Override
 	public String getValue() {
 
 		return value;
 	}
 
+	@Override
 	public void setValue(String value) {
 
 		this.value = value;

@@ -94,6 +94,25 @@ public class AnnotatedDAOWrapper<BeanType, KeyType> implements CRUDDAO<BeanType,
 		this.annotatedDAO.delete(bean, transactionHandler);
 	}
 
+	public Integer deleteByID(KeyType beanID) throws SQLException {
+
+		return this.deleteByID(beanID, null);
+	}
+
+	public Integer deleteByID(KeyType beanID, TransactionHandler transactionHandler) throws SQLException {
+
+		HighLevelQuery<BeanType> query = getGetQuery(beanID);
+
+		if(transactionHandler != null){
+
+			return annotatedDAO.delete(query,transactionHandler);
+
+		}else{
+
+			return annotatedDAO.delete(query);
+		}
+	}
+
 	public BeanType get(KeyType beanID) throws SQLException {
 
 		return this.get(beanID, null);

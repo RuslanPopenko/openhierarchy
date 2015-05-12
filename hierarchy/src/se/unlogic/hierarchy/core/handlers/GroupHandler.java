@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.locks.Lock;
@@ -197,7 +198,7 @@ public class GroupHandler {
 		}
 	}
 
-	public ArrayList<Group> searchGroups(String query, boolean attributes) {
+	public List<Group> searchGroups(String query, boolean attributes, Integer maxHits) {
 
 		r.lock();
 		try {
@@ -207,7 +208,7 @@ public class GroupHandler {
 
 				Collection<? extends Group> groups;
 				try {
-					groups = groupProvider.searchGroups(query, attributes);
+					groups = groupProvider.searchGroups(query, attributes, maxHits);
 
 					if (groups != null) {
 						groupList.addAll(groups);
@@ -224,6 +225,54 @@ public class GroupHandler {
 				if (groupProviders.size() > 1) {
 
 					Collections.sort(groupList, ASC_GROUP_COMPARATOR);
+				}
+
+				if(maxHits != null && groupList.size() > maxHits){
+
+					return groupList.subList(0, maxHits);
+				}
+
+				return groupList;
+			}
+
+			return null;
+		} finally {
+			r.unlock();
+		}
+	}
+
+	public List<Group> searchGroupsWithAttribute(String query, boolean attributes, String attributeName, Integer maxHits) {
+
+		r.lock();
+		try {
+			ArrayList<Group> groupList = new ArrayList<Group>();
+
+			for (GroupProvider groupProvider : this.groupProviders) {
+
+				Collection<? extends Group> groups;
+				try {
+					groups = groupProvider.searchGroupsWithAttribute(query, attributes, attributeName, maxHits);
+
+					if (groups != null) {
+						groupList.addAll(groups);
+					}
+
+				} catch (Exception e) {
+
+					log.error("Error getting groups using search query " + query + " and attribute " + attributeName + " from group provider " + groupProvider, e);
+				}
+			}
+
+			if (!groupList.isEmpty()) {
+
+				if (groupProviders.size() > 1) {
+
+					Collections.sort(groupList, ASC_GROUP_COMPARATOR);
+				}
+
+				if(maxHits != null && groupList.size() > maxHits){
+
+					return groupList.subList(0, maxHits);
 				}
 
 				return groupList;
@@ -267,7 +316,7 @@ public class GroupHandler {
 		}
 	}
 
-	public List<Group> getGroups(List<Integer> groupIDs, boolean attributes) {
+	public List<Group> getGroups(Collection<Integer> groupIDs, boolean attributes) {
 
 		r.lock();
 		try {
@@ -316,6 +365,149 @@ public class GroupHandler {
 
 				return groups;
 			}
+
+		} finally {
+			r.unlock();
+		}
+	}
+
+	public List<Group> getGroupsByAttribute(String attributeName, boolean attributes) {
+
+		r.lock();
+		try {
+
+			ArrayList<Group> groups = new ArrayList<Group>();
+
+			for (GroupProvider groupProvider : this.groupProviders) {
+
+				try {
+
+					List<? extends Group> providerGroups = groupProvider.getGroupsByAttribute(attributeName, attributes);
+
+					if (providerGroups != null) {
+
+						groups.addAll(providerGroups);
+
+					}
+
+				} catch (Exception e) {
+
+					log.error("Error getting groups by attribute name " + attributeName + " from group provider " + groupProvider, e);
+				}
+
+			}
+
+			if (groups.isEmpty()) {
+
+				return null;
+
+			} else {
+
+				return groups;
+			}
+
+		} finally {
+			r.unlock();
+		}
+
+	}
+
+	public List<Group> getGroupsByAttribute(String attributeName, String attributeValue, boolean attributes) {
+
+		r.lock();
+		try {
+
+			ArrayList<Group> groups = new ArrayList<Group>();
+
+			for (GroupProvider groupProvider : this.groupProviders) {
+
+				try {
+
+					List<? extends Group> providerGroups = groupProvider.getGroupsByAttribute(attributeName, attributeValue, attributes);
+
+					if (providerGroups != null) {
+
+						groups.addAll(providerGroups);
+
+					}
+
+				} catch (Exception e) {
+
+					log.error("Error getting groups by attribute name " + attributeName + " with value " + attributeValue + " from group provider " + groupProvider, e);
+				}
+
+			}
+
+			if (groups.isEmpty()) {
+
+				return null;
+
+			} else {
+
+				return groups;
+			}
+
+		} finally {
+			r.unlock();
+		}
+
+	}
+
+	public Group getGroupByAttribute(String attributeName, String attributeValue, boolean attributes) {
+
+		r.lock();
+		try {
+			Group group = null;
+
+			for (GroupProvider groupProvider : this.groupProviders) {
+
+				try {
+
+					group = groupProvider.getGroupByAttribute(attributeName, attributeValue, attributes);
+
+					if (group != null) {
+
+						return group;
+					}
+
+				} catch (Exception e) {
+
+					log.error("Error getting group by attribute name " + attributeName + " with value " + attributeValue + " from group provider " + groupProvider, e);
+				}
+			}
+
+			return null;
+
+		} finally {
+			r.unlock();
+		}
+
+	}
+
+	public Group getGroupByAttributes(List<Entry<String, String>> attributeEntries, boolean attributes) {
+
+		r.lock();
+		try {
+			Group group = null;
+
+			for (GroupProvider groupProvider : this.groupProviders) {
+
+				try {
+
+					group = groupProvider.getGroupByAttributes(attributeEntries, attributes);
+
+					if (group != null) {
+
+						return group;
+					}
+
+				} catch (Exception e) {
+
+					log.error("Error getting group by " + attributeEntries.size() + " attributes from group provider " + groupProvider, e);
+				}
+			}
+
+			return null;
 
 		} finally {
 			r.unlock();

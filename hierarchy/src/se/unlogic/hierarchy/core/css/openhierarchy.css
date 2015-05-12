@@ -22,6 +22,7 @@
 .ninety{width: 90%;}
 .half{width: 50%;}/*legacy*/
 .full {width: 100%;}
+.width-auto{width: auto;};
 
 /* Margin classes */
 .nomargin { margin: 0; }
@@ -101,7 +102,7 @@ p.success { color: green; }
 .required{color: red;}
 .error{color: red;}
 .disabledtext{color: gray;}
-.tiny{font-size:80%; margin: 0px; padding: 0px; text-align: left;}
+.tiny{font-size:80%; margin: 0px; padding: 0px;}
 
 /* Vertical align classes */
 .vertical-align-middle { vertical-align: middle; }

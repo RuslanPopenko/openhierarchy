@@ -7,10 +7,14 @@
  ******************************************************************************/
 package se.unlogic.standardutils.validation;
 
+import java.io.Serializable;
+
 import se.unlogic.standardutils.numbers.NumberUtils;
 
 
-public class StringIntegerValidator extends StringNumberValidator<Integer> {
+public class StringIntegerValidator extends StringNumberValidator<Integer> implements Serializable{
+
+	private static final long serialVersionUID = 1724653805439617682L;
 
 	public StringIntegerValidator() {
 		super(null, null);

@@ -65,6 +65,11 @@ public class JsonArray implements JsonNode {
 		this.nodes.add(new JsonLeaf(value));
 	}
 
+	public void addNode(Object value) {
+
+		this.nodes.add(new JsonLeaf(value.toString()));
+	}
+	
 	public void removeNode(JsonNode node) {
 
 		this.nodes.remove(node);

@@ -190,4 +190,30 @@ public class URLRewriter {
 
 		return fields;
 	}
+	
+	public static String removeAbsoluteUrls(String url, HttpServletRequest req) {
+
+		String absoluteContextPathURL = RequestUtils.getFullContextPathURL(req);
+
+		url = url.replace(absoluteContextPathURL, URLRewriter.RELATIVE_URL_MARKER);
+		
+		String relativeContextPathURL = req.getContextPath();
+
+		if(!StringUtils.isEmpty(relativeContextPathURL)){
+
+			url = url.replace(relativeContextPathURL, URLRewriter.RELATIVE_URL_MARKER);
+		}
+
+		return url;
+		
+	}
+	
+	public static String setAbsoluteUrls(String url, HttpServletRequest req) {
+
+		String fullContextPathURL = RequestUtils.getFullContextPathURL(req);
+
+		return url.replace(URLRewriter.RELATIVE_URL_MARKER, fullContextPathURL);
+		
+	}
+	
 }

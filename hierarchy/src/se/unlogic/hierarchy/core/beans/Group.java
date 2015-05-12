@@ -30,6 +30,7 @@ public abstract class Group implements Serializable, Elementable {
 
 	public abstract boolean isEnabled();
 
+	@Override
 	public final Element toXML(Document doc) {
 
 		Element groupElement = doc.createElement("group");

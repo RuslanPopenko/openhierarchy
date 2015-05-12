@@ -17,6 +17,7 @@ public class LoginTriggerModule extends AnnotatedFilterModule {
 	@TextFieldSettingDescriptor(name="Parameter name", description="The name of the parameter that triggers this module", required=true)
 	private String parameterName = "triggerlogin";
 
+	@Override
 	public void doFilter(HttpServletRequest req, HttpServletResponse res, User user, URIParser uriParser, FilterChain filterChain) throws Exception {
 
 		if(user == null && req.getParameter(parameterName) != null){

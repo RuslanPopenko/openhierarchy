@@ -3,6 +3,7 @@
 	<xsl:output encoding="ISO-8859-1" method="html" version="4.0"/>
 
 	<xsl:include href="SystemAdminModuleTemplates.xsl"/>
+	<xsl:include href="classpath://se/unlogic/hierarchy/core/utils/usergrouplist/UserGroupList.en.xsl"/>
 	<!-- Naming template.mode.field.type -->
 	
 	<xsl:variable name="addForegroundModuleBreadCrumbText">Add foreground module</xsl:variable>
@@ -107,6 +108,7 @@
 	<xsl:variable name="i18n.startAllModules">All modules</xsl:variable>
 	<xsl:variable name="i18n.importModules">Import modules</xsl:variable>
 	<xsl:variable name="i18n.preserveModuleIDs">Preserve module ID's</xsl:variable>
+	<xsl:variable name="i18n.preserveDataSourceIDs">Preserve data source ID's</xsl:variable>
 	<xsl:variable name="i18n.FilterModuleImportInSubsection">Filter modules can only be imported in the root section</xsl:variable>
 	<xsl:variable name="i18n.NoDescriptorsfound">No descriptors found</xsl:variable>
 	<xsl:variable name="i18n.UnableToParseRequest">Unable to parse request</xsl:variable>
@@ -138,4 +140,5 @@
 	
 	<xsl:variable name="i18n.UnableToParseFile.part1">Unable to parse </xsl:variable>
 	<xsl:variable name="i18n.UnableToParseFile.part2">!</xsl:variable>
+
 </xsl:stylesheet>

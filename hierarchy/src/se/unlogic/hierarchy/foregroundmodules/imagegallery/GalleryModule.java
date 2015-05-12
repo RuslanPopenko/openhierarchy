@@ -1194,6 +1194,7 @@ public class GalleryModule extends AnnotatedForegroundModule implements AccessIn
 		return null;
 	}
 
+	@SuppressWarnings("deprecation")
 	@WebPublic
 	public SimpleForegroundModuleResponse addGallery(HttpServletRequest req, HttpServletResponse res, User user, URIParser uriParser) throws Exception {
 
@@ -1267,6 +1268,7 @@ public class GalleryModule extends AnnotatedForegroundModule implements AccessIn
 		return new SimpleForegroundModuleResponse(doc, this.moduleDescriptor.getName(), this.getDefaultBreadcrumb());
 	}
 
+	@SuppressWarnings("deprecation")
 	@WebPublic
 	public SimpleForegroundModuleResponse addImages(HttpServletRequest req, HttpServletResponse res, User user, URIParser uriParser) throws Exception {
 
@@ -1351,6 +1353,7 @@ public class GalleryModule extends AnnotatedForegroundModule implements AccessIn
 
 	}
 
+	@SuppressWarnings("deprecation")
 	@WebPublic
 	public SimpleForegroundModuleResponse updateGallery(HttpServletRequest req, HttpServletResponse res, User user, URIParser uriParser) throws IOException, SQLException, URINotFoundException, AccessDeniedException {
 
@@ -1522,26 +1525,31 @@ public class GalleryModule extends AnnotatedForegroundModule implements AccessIn
 		}
 	}
 
+	@Override
 	public boolean allowsAdminAccess() {
 
 		return false;
 	}
 
+	@Override
 	public boolean allowsAnonymousAccess() {
 
 		return false;
 	}
 
+	@Override
 	public boolean allowsUserAccess() {
 
 		return false;
 	}
 
+	@Override
 	public Collection<Integer> getAllowedGroupIDs() {
 
 		return this.adminGroupIDs;
 	}
 
+	@Override
 	public Collection<Integer> getAllowedUserIDs() {
 
 		return this.adminUserIDs;

@@ -31,21 +31,25 @@ public class GroupTypePopulator implements BeanStringPopulator<Group> {
 		this.getAttrbutes = getAttrbutes;
 	}
 
+	@Override
 	public String getPopulatorID() {
 
 		return null;
 	}
 
+	@Override
 	public Class<? extends Group> getType() {
 
 		return Group.class;
 	}
 
+	@Override
 	public Group getValue(String value) {
 
 		return this.groupHandler.getGroup(Integer.parseInt(value), getAttrbutes);
 	}
 
+	@Override
 	public boolean validateFormat(String value) {
 
 		return NumberUtils.isInt(value);

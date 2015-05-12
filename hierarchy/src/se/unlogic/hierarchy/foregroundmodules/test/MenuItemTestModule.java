@@ -26,6 +26,7 @@ import se.unlogic.webutils.http.URIParser;
 
 public class MenuItemTestModule extends SimpleForegroundModule {
 
+	@Override
 	public SimpleForegroundModuleResponse processRequest(HttpServletRequest req, HttpServletResponse res, User user, URIParser uriParser) throws Exception {
 
 		StringBuilder stringBuilder = new StringBuilder();

@@ -3,9 +3,12 @@ package se.unlogic.hierarchy.core.handlers;
 import java.util.HashMap;
 
 import se.unlogic.hierarchy.core.interfaces.MutableAttributeHandler;
+import se.unlogic.standardutils.validation.ValidationException;
+import se.unlogic.standardutils.xml.XMLParser;
+import se.unlogic.standardutils.xml.XMLParserPopulateable;
 
 
-public class SimpleMutableAttributeHandler extends SimpleAttributeHandler implements MutableAttributeHandler {
+public class SimpleMutableAttributeHandler extends SimpleAttributeHandler implements MutableAttributeHandler, XMLParserPopulateable {
 
 	private static final long serialVersionUID = -308921362713744890L;
 
@@ -26,6 +29,14 @@ public class SimpleMutableAttributeHandler extends SimpleAttributeHandler implem
 		this.maxValueLength = maxValueLength;
 	}
 
+	public SimpleMutableAttributeHandler(XMLParser xmlParser, int maxNameLength, int maxValueLength) throws ValidationException {
+
+		super(xmlParser);
+		this.maxNameLength = maxNameLength;
+		this.maxValueLength = maxValueLength;
+	}
+
+	@Override
 	public boolean setAttribute(String name, Object value) {
 
 		String valueString = value.toString();
@@ -40,23 +51,33 @@ public class SimpleMutableAttributeHandler extends SimpleAttributeHandler implem
 		return true;
 	}
 
+	@Override
 	public void removeAttribute(String name) {
 
 		this.attributeMap.remove(name);
 	}
 
+	@Override
 	public void clear() {
 
 		this.attributeMap.clear();
 	}
 
+	@Override
 	public int getMaxNameLength() {
 
 		return maxNameLength;
 	}
 
+	@Override
 	public int getMaxValueLength() {
 
 		return maxValueLength;
+	}
+
+	@Override
+	public void populate(XMLParser xmlParser) throws ValidationException {
+
+		super.populate(xmlParser);
 	}
 }

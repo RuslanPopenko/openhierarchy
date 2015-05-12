@@ -10,7 +10,7 @@ package se.unlogic.standardutils.operation;
 import se.unlogic.standardutils.time.TimeUtils;
 
 
-public class ProgressMeter implements ProgressListener {
+public class ProgressMeter implements ProgressListener{
 	private long start;
 	private long finish;
 	private long currentPosition;

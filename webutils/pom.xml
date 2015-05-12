@@ -3,18 +3,19 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>se.unlogic</groupId>
   <artifactId>webutils</artifactId>
-  <version>1.2.0</version>
+  <version>1.2.4</version>
   <packaging>jar</packaging>
   <dependencies>
     <dependency>
         <groupId>javax.servlet</groupId>
         <artifactId>servlet-api</artifactId>
         <version>2.5</version>
+        <scope>provided</scope>
     </dependency>
     <dependency>
         <groupId>se.unlogic</groupId>
         <artifactId>standardutils</artifactId>
-        <version>1.2.0</version>
+        <version>1.2.4</version>
     </dependency>
   </dependencies>
   <build>

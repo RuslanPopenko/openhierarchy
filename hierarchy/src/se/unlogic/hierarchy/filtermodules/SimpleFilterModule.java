@@ -19,6 +19,7 @@ public abstract class SimpleFilterModule extends BaseModule<FilterModuleDescript
 	
 	protected SystemInterface systemInterface;
 	
+	@Override
 	public void init(FilterModuleDescriptor moduleDescriptor, SystemInterface systemInterface, DataSource dataSource) throws Exception {
 
 		this.moduleDescriptor = moduleDescriptor;

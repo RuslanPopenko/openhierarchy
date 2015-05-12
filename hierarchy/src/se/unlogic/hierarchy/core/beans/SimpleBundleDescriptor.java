@@ -34,6 +34,7 @@ public class SimpleBundleDescriptor implements BundleDescriptor {
 
 	List<? extends MenuItemDescriptor> menuItemDescriptors;
 
+	@Override
 	public String getName() {
 		return name;
 	}
@@ -42,6 +43,7 @@ public class SimpleBundleDescriptor implements BundleDescriptor {
 		this.name = name;
 	}
 
+	@Override
 	public String getDescription() {
 		return description;
 	}
@@ -50,6 +52,7 @@ public class SimpleBundleDescriptor implements BundleDescriptor {
 		this.description = description;
 	}
 
+	@Override
 	public String getUrl() {
 		return url;
 	}
@@ -58,6 +61,7 @@ public class SimpleBundleDescriptor implements BundleDescriptor {
 		this.url = url;
 	}
 
+	@Override
 	public URLType getUrlType() {
 		return urlType;
 	}
@@ -66,6 +70,7 @@ public class SimpleBundleDescriptor implements BundleDescriptor {
 		this.urlType = urlType;
 	}
 
+	@Override
 	public List<? extends MenuItemDescriptor> getMenuItemDescriptors() {
 		return menuItemDescriptors;
 	}
@@ -74,6 +79,7 @@ public class SimpleBundleDescriptor implements BundleDescriptor {
 		this.menuItemDescriptors = menuItemDescriptors;
 	}
 
+	@Override
 	public MenuItemType getItemType() {
 		return itemType;
 	}
@@ -86,6 +92,7 @@ public class SimpleBundleDescriptor implements BundleDescriptor {
 		this.adminAccess = adminAccess;
 	}
 
+	@Override
 	public boolean allowsAdminAccess() {
 		return adminAccess;
 	}
@@ -94,6 +101,7 @@ public class SimpleBundleDescriptor implements BundleDescriptor {
 		this.anonymousAccess = anonymousAccess;
 	}
 
+	@Override
 	public boolean allowsAnonymousAccess() {
 		return anonymousAccess;
 	}
@@ -102,6 +110,7 @@ public class SimpleBundleDescriptor implements BundleDescriptor {
 		this.userAccess = userAccess;
 	}
 
+	@Override
 	public boolean allowsUserAccess() {
 		return userAccess;
 	}
@@ -110,6 +119,7 @@ public class SimpleBundleDescriptor implements BundleDescriptor {
 		this.allowedGroupIDs = allowedGroupIDs;
 	}
 
+	@Override
 	public Collection<Integer> getAllowedGroupIDs() {
 		return allowedGroupIDs;
 	}
@@ -118,6 +128,7 @@ public class SimpleBundleDescriptor implements BundleDescriptor {
 		this.allowedUserIDs = allowedUserIDs;
 	}
 
+	@Override
 	public Collection<Integer> getAllowedUserIDs() {
 		return allowedUserIDs;
 	}
@@ -127,6 +138,7 @@ public class SimpleBundleDescriptor implements BundleDescriptor {
 		return this.name;
 	}
 
+	@Override
 	public String getUniqueID() {
 		return uniqueID;
 	}

@@ -296,4 +296,26 @@ public class ReflectionUtils {
 			throw new RuntimeException(e);
 		}
 	}
+
+	public static void printFields(Object object){
+
+		List<Field> fields = getFields(object.getClass());
+
+		try{
+			for(Field field : fields){
+
+				fixFieldAccess(field);
+
+				System.out.println(field.getName() + ": " + field.get(object));
+			}
+
+		}catch(IllegalArgumentException e){
+
+			throw new RuntimeException(e);
+
+		}catch(IllegalAccessException e){
+
+			throw new RuntimeException(e);
+		}
+	}
 }

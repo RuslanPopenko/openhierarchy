@@ -42,6 +42,10 @@ public abstract class AnnotatedMutableUserFormProviderModule<UserType extends Mu
 	protected boolean includeDebugData = false;
 
 	@ModuleSetting
+	@CheckboxSettingDescriptor(name="List as addable user type", description="Controls if this user type is listed as a form addable user type in the user handler")
+	protected boolean listAsAddableType = true;
+
+	@ModuleSetting
 	@TextFieldSettingDescriptor(name="User type name", description="The name of this user type")
 	protected String userTypeName = userClass.getSimpleName();
 
@@ -67,7 +71,7 @@ public abstract class AnnotatedMutableUserFormProviderModule<UserType extends Mu
 	protected void moduleConfigured() throws Exception{
 
 		super.moduleConfigured();
-		
+
 		userFormCRUD = createUserFormCRUD();
 
 		this.userTypeDescriptor = new UserTypeDescriptor(userClass.getSimpleName().toString() + "-" + this.moduleDescriptor.getModuleID(), userTypeName);
@@ -100,9 +104,15 @@ public abstract class AnnotatedMutableUserFormProviderModule<UserType extends Mu
 		return new AnnotatedRequestPopulator<UserType>(userClass, new EmailPopulator());
 	}
 
+	@Override
 	public UserTypeDescriptor getAddableUserType() {
 
-		return userTypeDescriptor;
+		if(listAsAddableType){
+
+			return userTypeDescriptor;
+		}
+
+		return null;
 	}
 
 	public void updateUser(UserType user) throws SQLException{
@@ -120,6 +130,7 @@ public abstract class AnnotatedMutableUserFormProviderModule<UserType extends Mu
 		return systemInterface.getUserHandler();
 	}
 
+	@Override
 	public ViewFragment getAddForm(HttpServletRequest req, User user, URIParser uriParser, ValidationException validationException, UserFormCallback callback) throws Exception {
 
 		checkCRUD();
@@ -127,6 +138,7 @@ public abstract class AnnotatedMutableUserFormProviderModule<UserType extends Mu
 		return userFormCRUD.showAddForm(req, user, uriParser, validationException, callback);
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public ViewFragment getUpdateForm(User bean, HttpServletRequest req, User user, URIParser uriParser, ValidationException validationException, UserFormCallback callback) throws Exception {
 
@@ -135,6 +147,7 @@ public abstract class AnnotatedMutableUserFormProviderModule<UserType extends Mu
 		return userFormCRUD.showUpdateForm((UserType)bean, req, user, uriParser, validationException, callback);
 	}
 
+	@Override
 	public User populate(HttpServletRequest req, User user, URIParser uriParser, UserFormCallback callback) throws Exception {
 
 		checkCRUD();
@@ -142,6 +155,7 @@ public abstract class AnnotatedMutableUserFormProviderModule<UserType extends Mu
 		return userFormCRUD.populateFromAddRequest(req, user, uriParser, callback);
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public User populate(User bean, HttpServletRequest req, User user, URIParser uriParser, UserFormCallback callback) throws Exception {
 
@@ -150,6 +164,7 @@ public abstract class AnnotatedMutableUserFormProviderModule<UserType extends Mu
 		return userFormCRUD.populateFromUpdateRequest((UserType)bean, req, user, uriParser, callback);
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public ViewFragment getBeanView(User requestedUser, HttpServletRequest req, User user, URIParser uriParser, UserFormCallback callback) throws Exception {
 
@@ -171,11 +186,13 @@ public abstract class AnnotatedMutableUserFormProviderModule<UserType extends Mu
 		return attributes;
 	}
 
+	@Override
 	public void add(User user, UserFormCallback callback) throws Exception {
 
 		addUser(user);
 	}
 
+	@Override
 	public void update(User user, UserFormCallback callback) throws Exception {
 
 		updateUser(user, false, callback.allowGroupAdministration(), true);

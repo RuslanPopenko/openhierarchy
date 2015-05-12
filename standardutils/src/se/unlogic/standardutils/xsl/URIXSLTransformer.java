@@ -16,31 +16,42 @@ import javax.xml.transform.stream.StreamSource;
 
 public class URIXSLTransformer extends BaseXSLTransformer {
 
-	private URI uri;
-	private URIResolver uriResolver;
+	private final URI uri;
+	private final URIResolver uriResolver;
+	private final boolean useCache;
 
-	public URIXSLTransformer(URI uri) throws TransformerConfigurationException {
+	public URIXSLTransformer(URI uri, boolean useCache) throws TransformerConfigurationException {
 		super();
 		this.uri = uri;
+		this.uriResolver = null;
+		this.useCache = useCache;
 		this.reloadStyleSheet();
 	}
 
-	public URIXSLTransformer(URI uri, URIResolver uriResolver) throws TransformerConfigurationException {
+	public URIXSLTransformer(URI uri, URIResolver uriResolver, boolean useCache) throws TransformerConfigurationException {
 
 		this.uri = uri;
 		this.uriResolver = uriResolver;
+		this.useCache = useCache;
 		this.reloadStyleSheet();
 	}
 
 	public void reloadStyleSheet() throws TransformerConfigurationException {
 
-		TransformerFactory transFact = TransformerFactory.newInstance();
+		if(useCache){
+			
+			this.templates = TemplateCache.getTemplates(new TemplateDescriptor(uri, uriResolver));
+			
+		}else{
+		
+			TransformerFactory transFact = TransformerFactory.newInstance();
 
-		if(uriResolver != null){
-			transFact.setURIResolver(uriResolver);
+			if(uriResolver != null){
+				transFact.setURIResolver(uriResolver);
+			}
+
+			this.templates = transFact.newTemplates(new StreamSource(uri.toString()));			
 		}
-
-		this.templates = transFact.newTemplates(new StreamSource(uri.toString()));
 	}
 
 	@Override

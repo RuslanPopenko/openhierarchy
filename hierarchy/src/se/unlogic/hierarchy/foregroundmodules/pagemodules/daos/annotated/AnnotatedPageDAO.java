@@ -40,6 +40,7 @@ public class AnnotatedPageDAO extends AnnotatedDAO<Page> implements PageDAO {
 		visibleInMenuParameter = this.getParamFactory("visibleInMenu", boolean.class).getParameter(true);
 	}
 
+	@Override
 	public List<Page> getEnabledPages(int sectionID) throws SQLException {
 
 		HighLevelQuery<Page> query = new HighLevelQuery<Page>();
@@ -50,6 +51,7 @@ public class AnnotatedPageDAO extends AnnotatedDAO<Page> implements PageDAO {
 		return this.getAll(query);
 	}
 
+	@Override
 	public Page getPage(int pageID, int sectionID) throws SQLException {
 
 		HighLevelQuery<Page> query = new HighLevelQuery<Page>();
@@ -60,6 +62,7 @@ public class AnnotatedPageDAO extends AnnotatedDAO<Page> implements PageDAO {
 		return this.get(query);
 	}
 
+	@Override
 	public Page getPage(int pageID) throws SQLException {
 
 		HighLevelQuery<Page> query = new HighLevelQuery<Page>();
@@ -69,6 +72,7 @@ public class AnnotatedPageDAO extends AnnotatedDAO<Page> implements PageDAO {
 		return this.get(query);
 	}
 
+	@Override
 	public Page getPage(String alias, int sectionID) throws SQLException {
 
 		HighLevelQuery<Page> query = new HighLevelQuery<Page>();
@@ -79,6 +83,7 @@ public class AnnotatedPageDAO extends AnnotatedDAO<Page> implements PageDAO {
 		return this.get(query);
 	}
 
+	@Override
 	public List<Page> getPages(int sectionID) throws SQLException {
 
 		HighLevelQuery<Page> query = new HighLevelQuery<Page>();
@@ -88,6 +93,7 @@ public class AnnotatedPageDAO extends AnnotatedDAO<Page> implements PageDAO {
 		return this.getAll(query);
 	}
 
+	@Override
 	public List<Page> getVisibleEnabledPages(int sectionID) throws SQLException {
 
 		HighLevelQuery<Page> query = new HighLevelQuery<Page>();
@@ -99,6 +105,7 @@ public class AnnotatedPageDAO extends AnnotatedDAO<Page> implements PageDAO {
 		return this.getAll(query);
 	}
 
+	@Override
 	public boolean sectionHasEnabledPages(int sectionID) throws SQLException {
 
 		HighLevelQuery<Page> query = new HighLevelQuery<Page>();

@@ -677,10 +677,15 @@
 			
 			<xsl:choose>
 				<xsl:when test="$part2='true'">
-					<xsl:if test="/Document/allowComments and comments">
-						<a name="comments"/>
-						<h2><xsl:value-of select="$BlogPost.comments" /></h2>				
-						<xsl:apply-templates select="comments/Comment" />
+					<xsl:if test="/Document/allowComments">
+						
+						<xsl:if test="comments">
+
+							<a name="comments"/>
+							<h2><xsl:value-of select="$BlogPost.comments" /></h2>				
+							<xsl:apply-templates select="comments/Comment" />
+						
+						</xsl:if>
 					
 						<hr />
 						

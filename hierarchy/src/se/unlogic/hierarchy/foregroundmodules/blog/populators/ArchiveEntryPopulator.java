@@ -17,6 +17,7 @@ import se.unlogic.standardutils.enums.Month;
 
 public class ArchiveEntryPopulator implements BeanResultSetPopulator<ArchiveEntry> {
 
+	@Override
 	public ArchiveEntry populate(ResultSet rs) throws SQLException {
 
 		ArchiveEntry archiveEntry = new ArchiveEntry();

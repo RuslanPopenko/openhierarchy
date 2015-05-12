@@ -9,8 +9,11 @@ package se.unlogic.hierarchy.core.daos.factories;
 
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
-
+import se.unlogic.hierarchy.core.beans.SimpleBackgroundModuleDescriptor;
+import se.unlogic.hierarchy.core.beans.SimpleFilterModuleDescriptor;
+import se.unlogic.hierarchy.core.beans.SimpleForegroundModuleDescriptor;
+import se.unlogic.hierarchy.core.beans.SimpleSectionDescriptor;
+import se.unlogic.hierarchy.core.daos.interfaces.AttributeDAO;
 import se.unlogic.hierarchy.core.daos.interfaces.BackgroundModuleDAO;
 import se.unlogic.hierarchy.core.daos.interfaces.BackgroundModuleSettingDAO;
 import se.unlogic.hierarchy.core.daos.interfaces.DataSourceDAO;
@@ -22,29 +25,35 @@ import se.unlogic.hierarchy.core.daos.interfaces.MenuIndexDAO;
 import se.unlogic.hierarchy.core.daos.interfaces.SectionDAO;
 import se.unlogic.hierarchy.core.daos.interfaces.VirtualMenuItemDAO;
 
-public abstract class CoreDaoFactory {
+public interface CoreDaoFactory {
 
-	protected static Logger log = Logger.getLogger(CoreDaoFactory.class);
+	public void init(DataSource dataSource) throws Exception;
 
-	public abstract void init(DataSource dataSource) throws Exception;
+	public DataSourceDAO getDataSourceDAO();
 
-	public abstract DataSourceDAO getDataSourceDAO();
+	public MenuIndexDAO getMenuIndexDAO();
 
-	public abstract MenuIndexDAO getMenuIndexDAO();
+	public ForegroundModuleDAO getForegroundModuleDAO();
 
-	public abstract ForegroundModuleDAO getForegroundModuleDAO();
+	public BackgroundModuleDAO getBackgroundModuleDAO();
 
-	public abstract BackgroundModuleDAO getBackgroundModuleDAO();
+	public ForegroundModuleSettingDAO getForegroundModuleSettingDAO();
 
-	public abstract ForegroundModuleSettingDAO getForegroundModuleSettingDAO();
+	public BackgroundModuleSettingDAO getBackgroundModuleSettingDAO();
 
-	public abstract BackgroundModuleSettingDAO getBackgroundModuleSettingDAO();
+	public FilterModuleSettingDAO getFilterModuleSettingDAO();
 
-	public abstract FilterModuleSettingDAO getFilterModuleSettingDAO();
+	public SectionDAO getSectionDAO();
 
-	public abstract SectionDAO getSectionDAO();
+	public VirtualMenuItemDAO getVirtualMenuItemDAO();
 
-	public abstract VirtualMenuItemDAO getVirtualMenuItemDAO();
+	public FilterModuleDAO getFilterModuleDAO();
 
-	public abstract FilterModuleDAO getFilterModuleDAO();
+	public AttributeDAO<SimpleForegroundModuleDescriptor> getForegroundModuleAttributeDAO();
+
+	public AttributeDAO<SimpleBackgroundModuleDescriptor> getBackgroundModuleAttributeDAO();
+
+	public AttributeDAO<SimpleFilterModuleDescriptor> getFilterModuleAttributeDAO();
+
+	public AttributeDAO<SimpleSectionDescriptor> getSectionAttributeDAO();
 }

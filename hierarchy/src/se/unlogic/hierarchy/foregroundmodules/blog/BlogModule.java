@@ -249,6 +249,10 @@ public class BlogModule extends AnnotatedForegroundModule implements AccessInter
 
 	@ModuleSetting
 	private Integer archiveBundleLimit = 10;
+	
+	@ModuleSetting
+	@CheckboxSettingDescriptor(name="Add module to instance handle", description="Controls if this module should register itself in the global instance handler on startup")
+	private boolean addToInstanceHandler = true;
 
 	/* Feed Settings */
 	@ModuleSetting
@@ -310,9 +314,9 @@ public class BlogModule extends AnnotatedForegroundModule implements AccessInter
 
 		super.init(moduleDescriptor, sectionInterface, dataSource);
 
-		if(!systemInterface.getInstanceHandler().addInstance(BlogModule.class, this)){
+		if(addToInstanceHandler && !systemInterface.getInstanceHandler().addInstance(BlogModule.class, this)){
 
-			throw new RuntimeException("Unable to register module in global instance handler using key " + BlogModule.class.getSimpleName() + ", another instance is already registered using this key.");
+			log.warn("Unable to register module " + this.moduleDescriptor + " in global instance handler using key " + BlogModule.class.getSimpleName() + ", another instance is already registered using this key.");
 		}
 		
 		this.connector = new FCKConnector(this.filestorePath, this.diskThreshold, this.ramThreshold);
@@ -327,17 +331,6 @@ public class BlogModule extends AnnotatedForegroundModule implements AccessInter
 	}
 	
 	@Override
-	public void unload() throws Exception {
-
-		if(this.equals(systemInterface.getInstanceHandler().getInstance(BlogModule.class))){
-		
-			systemInterface.getInstanceHandler().removeInstance(BlogModule.class);
-		}
-		
-		super.unload();
-	}
-
-	@Override
 	public void update(ForegroundModuleDescriptor moduleDescriptor, DataSource dataSource) throws Exception {
 
 		super.update(moduleDescriptor, dataSource);
@@ -351,6 +344,38 @@ public class BlogModule extends AnnotatedForegroundModule implements AccessInter
 		this.rssUserStringyfier = new RSSUserStringyfier(displayFullName);
 
 		this.cacheRSSFeed();
+		
+		if(addToInstanceHandler){
+			
+			BlogModule blogModule = systemInterface.getInstanceHandler().getInstance(BlogModule.class);
+			
+			if(blogModule == null){
+				
+				systemInterface.getInstanceHandler().addInstance(BlogModule.class, this);
+				
+			}else if(!blogModule.equals(this)){
+				
+				log.warn("Unable to register module " + this.moduleDescriptor + " in global instance handler using key " + BlogModule.class.getSimpleName() + ", another instance is already registered using this key.");
+			}
+			
+		}else{
+			
+			if(this.equals(systemInterface.getInstanceHandler().getInstance(BlogModule.class))){
+				
+				systemInterface.getInstanceHandler().removeInstance(BlogModule.class);
+			}
+		}
+	}
+	
+	@Override
+	public void unload() throws Exception {
+
+		if(this.equals(systemInterface.getInstanceHandler().getInstance(BlogModule.class))){
+		
+			systemInterface.getInstanceHandler().removeInstance(BlogModule.class);
+		}
+		
+		super.unload();
 	}
 
 	private synchronized void cacheRSSFeed() {
@@ -1130,26 +1155,31 @@ public class BlogModule extends AnnotatedForegroundModule implements AccessInter
 		return AccessUtils.checkAccess(user, this);
 	}
 
+	@Override
 	public boolean allowsAdminAccess() {
 
 		return false;
 	}
 
+	@Override
 	public boolean allowsAnonymousAccess() {
 
 		return false;
 	}
 
+	@Override
 	public boolean allowsUserAccess() {
 
 		return false;
 	}
 
+	@Override
 	public Collection<Integer> getAllowedGroupIDs() {
 
 		return this.adminGroupIDs;
 	}
 
+	@Override
 	public Collection<Integer> getAllowedUserIDs() {
 
 		return this.adminUserIDs;
@@ -1411,62 +1441,74 @@ public class BlogModule extends AnnotatedForegroundModule implements AccessInter
 
 	//RSSChannel methods
 
+	@Override
 	public Date getPubDate() {
 
 		return new Date();
 	}
 
+	@Override
 	public Date getLastBuildDate() {
 
 		//In an optimal word this would be calculated from DB or post cache...
 		return new Date();
 	}
 
+	@Override
 	public Integer getTtl() {
 
 		return feedTTL;
 	}
 
+	@Override
 	public String getLanguage() {
 
 		return feedLanguage;
 	}
 
+	@Override
 	public String getCopyright() {
 
 		return feedCopyright;
 	}
 
+	@Override
 	public String getWebmaster() {
 
 		return feedWebmaster;
 	}
 
+	@Override
 	public String getManagingEditor() {
 
 		return feedManagingEditor;
 	}
 
+	@Override
 	public Integer getItemsPerChannel() {
 
 		return feedItemsPerChannel;
 	}
 
+	@Override
 	public String getLink() {
 
 		return feedLink;
 	}
 
+	@Override
 	public String getDescription() {
 
 		return feedDescription;
 	}
 
+	@Override
 	public String getTitle() {
 
 		return feedTitle;
 	}
 
+	@Override
 	public Collection<String> getCategories() {
 
 		try{
@@ -1478,6 +1520,7 @@ public class BlogModule extends AnnotatedForegroundModule implements AccessInter
 		}
 	}
 
+	@Override
 	public String getFeedLink() {
 
 		return feedLink + "/feed";

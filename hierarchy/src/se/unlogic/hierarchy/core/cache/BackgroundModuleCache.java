@@ -35,7 +35,7 @@ public class BackgroundModuleCache extends WildcardModuleCache<BackgroundModuleD
 		w.lock();
 		try {
 			// Get all enabled modules from the database
-			List<? extends BackgroundModuleDescriptor> moduleDescriptorBeanList = moduleDAO.getEnabledModules(this.sectionInterface.getSectionDescriptor());
+			List<? extends BackgroundModuleDescriptor> moduleDescriptorBeanList = moduleDAO.getEnabledModules(this.sectionInterface.getSectionDescriptor().getSectionID());
 
 			if (moduleDescriptorBeanList != null && moduleDescriptorBeanList.size() > 0) {
 

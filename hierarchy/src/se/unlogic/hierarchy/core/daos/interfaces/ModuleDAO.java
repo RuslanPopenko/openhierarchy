@@ -8,6 +8,7 @@
 package se.unlogic.hierarchy.core.daos.interfaces;
 
 import java.sql.SQLException;
+import java.util.List;
 
 import se.unlogic.hierarchy.core.interfaces.ModuleDescriptor;
 
@@ -19,5 +20,7 @@ public interface ModuleDAO<T extends ModuleDescriptor> {
 
 	public abstract void delete(T moduleDescriptor) throws SQLException;
 
-	public abstract T getModule(Integer moduleID) throws SQLException;	
+	public abstract T getModule(Integer moduleID) throws SQLException;
+	
+	public abstract List<T> getModulesByAttribute(String name, String value)  throws SQLException;
 }

@@ -28,10 +28,10 @@ import se.unlogic.hierarchy.core.daos.factories.CoreDaoFactory;
 import se.unlogic.hierarchy.core.daos.interfaces.SectionDAO;
 import se.unlogic.hierarchy.core.daos.interfaces.VirtualMenuItemDAO;
 import se.unlogic.hierarchy.core.interfaces.ForegroundModuleDescriptor;
+import se.unlogic.hierarchy.core.interfaces.ForegroundModuleResponse;
 import se.unlogic.hierarchy.core.interfaces.SectionInterface;
 import se.unlogic.hierarchy.core.populators.VirtualMenuItemPopulator;
-import se.unlogic.hierarchy.core.sections.Section;
-import se.unlogic.hierarchy.core.utils.AccessUtils;
+import se.unlogic.hierarchy.core.utils.usergrouplist.UserGroupListConnector;
 import se.unlogic.hierarchy.foregroundmodules.AnnotatedForegroundModule;
 import se.unlogic.standardutils.numbers.NumberUtils;
 import se.unlogic.standardutils.string.StringUtils;
@@ -42,10 +42,13 @@ import se.unlogic.webutils.http.URIParser;
 
 public class MenuAdminModule extends AnnotatedForegroundModule {
 
-	private static VirtualMenuItemPopulator virtualMenuItemPopulator = new VirtualMenuItemPopulator();
+	private static final VirtualMenuItemPopulator POPULATOR = new VirtualMenuItemPopulator();
+
 	private SectionDAO sectionDAO;
 	private VirtualMenuItemDAO virtualMenuItemDAO;
 
+	protected UserGroupListConnector userGroupListConnector;
+	
 	@Override
 	public void init(ForegroundModuleDescriptor moduleDescriptorBean, SectionInterface sectionInterface, DataSource dataSource) throws Exception {
 
@@ -55,6 +58,8 @@ public class MenuAdminModule extends AnnotatedForegroundModule {
 
 		this.sectionDAO = coreDaoFactory.getSectionDAO();
 		this.virtualMenuItemDAO = coreDaoFactory.getVirtualMenuItemDAO();
+		
+		this.userGroupListConnector = new UserGroupListConnector(systemInterface);
 	}
 
 	@Override
@@ -96,7 +101,7 @@ public class MenuAdminModule extends AnnotatedForegroundModule {
 				if (req.getMethod().equalsIgnoreCase("POST")) {
 
 					try {
-						VirtualMenuItem virtualMenuItem = virtualMenuItemPopulator.populate(req);
+						VirtualMenuItem virtualMenuItem = POPULATOR.populate(req);
 
 						virtualMenuItem.setSectionID(sectionID);
 
@@ -127,8 +132,6 @@ public class MenuAdminModule extends AnnotatedForegroundModule {
 					addMenuItem.appendChild(RequestUtils.getRequestParameters(req, doc));
 				}
 
-				AccessUtils.appendGroupsAndUsers(doc, addMenuItem, systemInterface.getUserHandler(), systemInterface.getGroupHandler());
-
 				return new SimpleForegroundModuleResponse(doc, this.moduleDescriptor.getName(), getDefaultBreadcrumb());
 
 			} else {
@@ -150,7 +153,7 @@ public class MenuAdminModule extends AnnotatedForegroundModule {
 
 	private void reloadVirtualMenuItemCache(Integer sectionID) throws SQLException {
 
-		SectionInterface sectionInterface = Section.getSectionInterface(sectionID);
+		SectionInterface sectionInterface = systemInterface.getSectionInterface(sectionID);
 
 		if (sectionInterface != null) {
 			sectionInterface.getMenuCache().cacheVirtualMenuItems();
@@ -173,7 +176,7 @@ public class MenuAdminModule extends AnnotatedForegroundModule {
 				if (req.getMethod().equalsIgnoreCase("POST")) {
 
 					try {
-						virtualMenuItem = virtualMenuItemPopulator.populate(virtualMenuItem, req);
+						virtualMenuItem = POPULATOR.populate(virtualMenuItem, req);
 
 						log.info("User " + user + " updating virtual menuitem " + virtualMenuItem);
 
@@ -202,8 +205,16 @@ public class MenuAdminModule extends AnnotatedForegroundModule {
 					updateMenuItem.appendChild(RequestUtils.getRequestParameters(req, doc));
 				}
 
-				AccessUtils.appendGroupsAndUsers(doc, updateMenuItem, systemInterface.getUserHandler(), systemInterface.getGroupHandler());
+				if(virtualMenuItem.getAllowedUserIDs() != null){
+					
+					XMLUtils.append(doc, updateMenuItem, "Users", systemInterface.getUserHandler().getUsers(virtualMenuItem.getAllowedUserIDs(), false, true));
+				}
 
+				if(virtualMenuItem.getAllowedGroupIDs() != null){
+					
+					XMLUtils.append(doc, updateMenuItem, "Groups", systemInterface.getGroupHandler().getGroups(virtualMenuItem.getAllowedGroupIDs(), false));
+				}
+				
 				return new SimpleForegroundModuleResponse(doc, this.moduleDescriptor.getName(), getDefaultBreadcrumb());
 
 			} else {
@@ -351,7 +362,7 @@ public class MenuAdminModule extends AnnotatedForegroundModule {
 		if (uriParser.size() == 3 && (sectionID = NumberUtils.toInt(uriParser.get(2))) != null) {
 
 			// Get sectioninterface
-			SectionInterface sectionInterface = Section.getSectionInterface(sectionID);
+			SectionInterface sectionInterface = systemInterface.getSectionInterface(sectionID);
 
 			if (sectionInterface != null) {
 
@@ -379,7 +390,7 @@ public class MenuAdminModule extends AnnotatedForegroundModule {
 						menuItemArray[Integer.parseInt(itemPositions[i])].setMenuIndex(menuIndexArray[i]);
 					}
 
-					sectionInterface.getMenuCache().rebuiltIndex();
+					sectionInterface.getMenuCache().rebuildIndex();
 					sectionInterface.getMenuCache().saveIndex();
 
 					this.redirectToDefaultMethod(req, res);
@@ -432,7 +443,7 @@ public class MenuAdminModule extends AnnotatedForegroundModule {
 		Element sectionElement = simpleSectionDescriptor.toXML(doc);
 		parentSection.appendChild(sectionElement);
 
-		SectionInterface sectionInterface = Section.getSectionInterface(simpleSectionDescriptor.getSectionID());
+		SectionInterface sectionInterface = systemInterface.getSectionInterface(simpleSectionDescriptor.getSectionID());
 
 		if (sectionInterface == null) {
 			// Section not cached
@@ -484,5 +495,17 @@ public class MenuAdminModule extends AnnotatedForegroundModule {
 		document.appendChild(this.moduleDescriptor.toXML(doc));
 		doc.appendChild(document);
 		return doc;
+	}
+	
+	@WebPublic(alias = "users")
+	public ForegroundModuleResponse getUsers(HttpServletRequest req, HttpServletResponse res, User user, URIParser uriParser) throws Throwable {
+
+		return userGroupListConnector.getUsers(req, res, user, uriParser);
+	}
+
+	@WebPublic(alias = "groups")
+	public ForegroundModuleResponse getGroups(HttpServletRequest req, HttpServletResponse res, User user, URIParser uriParser) throws Throwable {
+
+		return userGroupListConnector.getGroups(req, res, user, uriParser);
 	}
 }

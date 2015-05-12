@@ -51,9 +51,10 @@ public class SimpleForegroundModuleDescriptor extends BaseVisibleModuleDescripto
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see se.unlogic.hierarchy.core.beans.ModuleDescriptor#isVisibleInMenu()
 	 */
+	@Override
 	public boolean isVisibleInMenu() {
 
 		return visibleInMenu;
@@ -66,9 +67,10 @@ public class SimpleForegroundModuleDescriptor extends BaseVisibleModuleDescripto
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see se.unlogic.hierarchy.core.beans.ModuleDescriptor#getAlias()
 	 */
+	@Override
 	public String getAlias() {
 
 		return alias;
@@ -81,9 +83,10 @@ public class SimpleForegroundModuleDescriptor extends BaseVisibleModuleDescripto
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see se.unlogic.hierarchy.core.beans.ModuleDescriptor#getDescription()
 	 */
+	@Override
 	public String getDescription() {
 
 		return description;
@@ -94,6 +97,7 @@ public class SimpleForegroundModuleDescriptor extends BaseVisibleModuleDescripto
 		this.description = description;
 	}
 
+	@Override
 	public HTTPProtocol getRequiredProtocol() {
 
 		return this.requiredProtocol;
@@ -109,7 +113,7 @@ public class SimpleForegroundModuleDescriptor extends BaseVisibleModuleDescripto
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see se.unlogic.hierarchy.core.beans.ModuleDescriptor#toXML(org.w3c.dom.Document )
 	 */
 
@@ -133,9 +137,16 @@ public class SimpleForegroundModuleDescriptor extends BaseVisibleModuleDescripto
 		return name + " (ID: " + this.moduleID + ", alias: " + alias + ")";
 	}
 
+	@Override
 	public void saveSettings(SystemInterface systemInterface) throws SQLException {
 
 		systemInterface.getCoreDaoFactory().getForegroundModuleSettingDAO().set(this);
+	}
+
+	@Override
+	public void saveAttributes(SystemInterface systemInterface) throws SQLException {
+
+		systemInterface.getCoreDaoFactory().getForegroundModuleAttributeDAO().set(this);
 	}
 
 	@Override
@@ -144,29 +155,30 @@ public class SimpleForegroundModuleDescriptor extends BaseVisibleModuleDescripto
 		List<ValidationError> errors = null;
 
 		try{
-			super.populate(xmlParser);	
-			
+			super.populate(xmlParser);
+
 		}catch(ValidationException e){
-			
+
 			errors = e.getErrors();
 		}
-		
+
 		if(errors == null){
-			
+
 			errors = new ArrayList<ValidationError>(2);
 		}
-		
+
 		this.description = XMLValidationUtils.validateParameter("description", xmlParser, true, 1, 255, StringPopulator.getPopulator(), errors);
 		this.alias = XMLValidationUtils.validateParameter("alias", xmlParser, true, 1, 255, StringPopulator.getPopulator(), errors);
 		this.requiredProtocol = XMLValidationUtils.validateParameter("requiredProtocol", xmlParser, false, new EnumPopulator<HTTPProtocol>(HTTPProtocol.class), errors);
 		this.visibleInMenu = xmlParser.getBoolean("visibleInMenu");
-		
+
 		if(!errors.isEmpty()){
-			
+
 			throw new ValidationException(errors);
 		}
 	}
 
+	@Override
 	public ModuleType getType() {
 
 		return ModuleType.FOREGROUND;

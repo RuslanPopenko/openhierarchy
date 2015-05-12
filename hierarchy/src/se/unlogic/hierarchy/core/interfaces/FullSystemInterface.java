@@ -20,7 +20,11 @@ public interface FullSystemInterface extends SystemInterface {
 	public GlobalForegroundModuleCacheListener getGlobalForegroundModuleCacheListener();
 
 	public GlobalBackgroundModuleCacheListener getGlobalBackgroundModuleCacheListener();
-
-	public void setRootSection(Section section);
-
+	
+	@Override
+	public Section getSectionInterface(Integer sectionID);
+	
+	public void addSection(Section section);
+	
+	public void removeSection(Section section);	
 }

@@ -67,22 +67,27 @@ public abstract class MenuItem implements AccessInterface, Cloneable {
 		return sectionID;
 	}
 
+	@Override
 	public boolean allowsAdminAccess() {
 		return this.adminAccess;
 	}
 
+	@Override
 	public boolean allowsAnonymousAccess() {
 		return this.anonymousAccess;
 	}
 
+	@Override
 	public boolean allowsUserAccess() {
 		return this.userAccess;
 	}
 
+	@Override
 	public Collection<Integer> getAllowedGroupIDs() {
 		return this.allowedGroupIDs;
 	}
 
+	@Override
 	public Collection<Integer> getAllowedUserIDs() {
 		return this.allowedUserIDs;
 	}

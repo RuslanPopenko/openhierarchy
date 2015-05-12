@@ -4,6 +4,7 @@
 	<xsl:template name="createTextField">
 		<xsl:param name="id" select="null"/>
 		<xsl:param name="name" select="null"/>
+		<xsl:param name="type" select="'text'"/>
 		<xsl:param name="class" select="null"/>
 		<xsl:param name="disabled" select="null"/>
 		<xsl:param name="maxlength" select="null"/>
@@ -16,7 +17,7 @@
 		<xsl:param name="width" select="'99%'"/>
 		<xsl:param name="requestparameters" select="requestparameters"/>
 		
-		<input type="text">
+		<input type="{$type}">
 		
 			<xsl:if test="$id">
 				<xsl:attribute name="id">
@@ -231,6 +232,7 @@
 		<xsl:param name="title" select="''"/>
 		<xsl:param name="disabled" select="null"/>
 		<xsl:param name="valueElementName" select="null"/>
+		<xsl:param name="labelPrefix" select="null"/>
 		<xsl:param name="labelElementName" select="null"/>
 		<xsl:param name="labelElementName2" select="null"/>
 		<xsl:param name="element" />
@@ -298,6 +300,10 @@
 								</xsl:otherwise>
 							</xsl:choose>
 							
+							<xsl:if test="$labelPrefix">
+								<xsl:value-of select="$labelPrefix"/>
+							</xsl:if>
+							
 							<xsl:apply-templates select="."/>
 						</option>
 					</xsl:for-each>
@@ -305,11 +311,13 @@
 				</xsl:when>
 				<xsl:otherwise>
 				
+					<xsl:variable name="paramValue" select="$requestparameters/parameter[name=$name]/value"/>
+				
 					<xsl:for-each select="$element">
 						<option value="{*[name()=$valueElementName]}">
 							<xsl:choose>
 								<xsl:when test="$requestparameters">
-									<xsl:if test="$requestparameters/parameter[name=$name]/value = *[name()=$valueElementName]">
+									<xsl:if test="$paramValue = *[local-name()=$valueElementName]">
 										<xsl:attribute name="selected"/>
 									</xsl:if>
 								</xsl:when>
@@ -319,6 +327,11 @@
 									</xsl:if>
 								</xsl:otherwise>
 							</xsl:choose>
+							
+							<xsl:if test="$labelPrefix">
+								<xsl:value-of select="$labelPrefix"/>
+							</xsl:if>
+							
 							<xsl:value-of select="*[name()=$labelElementName]" />
 							
 							<xsl:if test="$labelElementName2">
@@ -1025,5 +1038,84 @@
 		        </xsl:otherwise>
 		    </xsl:choose>
 	</xsl:template>
-      
+     
+	<xsl:template name="replaceLineBreaksAndLinks">
+	    <xsl:param name="string"/>
+	    <xsl:choose>
+	        <xsl:when test="contains($string,'&#13;')">
+	            <xsl:call-template name="createHyperlinks">
+	            	<xsl:with-param name="string" select="substring-before($string,'&#13;')"/>
+	            </xsl:call-template>	        
+            	<br/>
+	            <xsl:call-template name="replaceLineBreaksAndLinks">
+	                <xsl:with-param name="string" select="substring-after($string,'&#13;')"/>
+	            </xsl:call-template>
+	        </xsl:when>
+	        <xsl:otherwise>
+	            <xsl:call-template name="createHyperlinks">
+	            	<xsl:with-param name="string" select="$string"/>
+	            </xsl:call-template>
+	        </xsl:otherwise>
+	    </xsl:choose>
+	</xsl:template>	
+	
+	<xsl:template name="createHyperlinks">
+		<xsl:param name="string" />
+
+		<xsl:variable name="http">
+			<xsl:choose>
+				<xsl:when test="contains($string, 'ftp://')">
+					<xsl:text>ftp://</xsl:text>
+				</xsl:when>			
+				<xsl:when test="contains($string, 'http://')">
+					<xsl:text>http://</xsl:text>
+				</xsl:when>
+				<xsl:when test="contains($string, 'https://')">
+					<xsl:text>https://</xsl:text>
+				</xsl:when>
+				<xsl:otherwise>
+					<xsl:text>false</xsl:text>
+				</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
+
+		<xsl:choose>
+			<xsl:when test="$http = 'false'">
+				<!-- No links, output string -->
+				<xsl:value-of select="$string" />
+			</xsl:when>
+			<xsl:otherwise>
+				<!-- Links detected, replace them -->
+
+				<!-- Set up variables -->
+				<xsl:variable name="before" select="substring-before($string, $http)" />
+				<xsl:variable name="after" select="substring-after($string, $http)" />
+				<xsl:variable name="url" select="concat($http, substring-before($after,' '))" />
+				<xsl:variable name="rest" select="substring-after($string, $url)" />
+
+				<!-- Output the text -->
+				<xsl:value-of select="$before" />
+
+				<xsl:choose>
+					<!-- If the url is at then end, $rest doesn't work -->
+					<xsl:when test="substring-after($url,$http) != ''">
+						<a href="{$url}" rel="nofollow">
+							<xsl:value-of select="$url" />
+						</a>
+						<!-- Check the remainder for links -->
+						<xsl:call-template name="createHyperlinks">
+							<xsl:with-param name="string" select="$rest" />
+						</xsl:call-template>
+					</xsl:when>
+					<xsl:otherwise>
+						<a href="{$url}{$after}" rel="nofollow">
+							<xsl:value-of select="$url" />
+							<xsl:value-of select="$after" />
+						</a>
+					</xsl:otherwise>
+				</xsl:choose>
+			</xsl:otherwise>
+		</xsl:choose>
+	</xsl:template>	     
+     
 </xsl:stylesheet>

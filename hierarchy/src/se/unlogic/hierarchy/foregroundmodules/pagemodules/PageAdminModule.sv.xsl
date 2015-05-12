@@ -3,6 +3,7 @@
 	<xsl:output method="html" version="4.0" encoding="ISO-8859-1" />
 
 	<xsl:include href="PageAdminModuleTemplates.xsl" />
+	<xsl:include href="classpath://se/unlogic/hierarchy/core/utils/usergrouplist/UserGroupList.sv.xsl"/>
 	
 	<!-- Naming template.mode.field.type -->
 	

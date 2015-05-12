@@ -7,6 +7,7 @@
  ******************************************************************************/
 package se.unlogic.hierarchy.core.interfaces;
 
+import java.sql.SQLException;
 import java.util.List;
 
 import org.w3c.dom.Document;
@@ -27,10 +28,13 @@ public interface SectionDescriptor extends AccessInterface{
 
 	public abstract boolean isEnabled();
 
+	@Override
 	public abstract boolean allowsAnonymousAccess();
 
+	@Override
 	public abstract boolean allowsUserAccess();
 
+	@Override
 	public abstract boolean allowsAdminAccess();
 
 	public abstract boolean isVisibleInMenu();
@@ -50,5 +54,15 @@ public interface SectionDescriptor extends AccessInterface{
 	boolean hasBreadCrumb();
 
 	public abstract HTTPProtocol getRequiredProtocol();
+
+	public MutableAttributeHandler getAttributeHandler();
+
+	/**
+	 * This method is used to persist any changes made to the {@link MutableAttributeHandler}
+	 *
+	 * @param systemInterface
+	 * @throws SQLException
+	 */
+	public void saveAttributes(SystemInterface systemInterface) throws SQLException;
 
 }

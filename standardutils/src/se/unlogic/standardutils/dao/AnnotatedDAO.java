@@ -661,7 +661,7 @@ public class AnnotatedDAO<T> {
 
 	protected String generateGetSQL(HighLevelQuery<T> query) {
 
-		if(!HighLevelQuery.hasExcludedFields(query)){
+		if(!RelationQuery.hasExcludedFields(query)){
 
 			return getSQL;
 		}
@@ -1041,7 +1041,7 @@ public class AnnotatedDAO<T> {
 
 	private void setQueryValues(T bean, PreparedStatementQuery query, RelationQuery relationQuery, IntegerCounter integerCounter, Collection<? extends Column<T, ?>> columns, boolean enableExcludedFields) throws SQLException {
 
-		boolean hasExcludedFields = enableExcludedFields && (HighLevelQuery.hasExcludedFields(relationQuery) || !dontUpdateIfNullCoulumns.isEmpty());
+		boolean hasExcludedFields = enableExcludedFields && (RelationQuery.hasExcludedFields(relationQuery) || !dontUpdateIfNullCoulumns.isEmpty());
 
 		for(Column<T, ?> column : columns){
 
@@ -1246,7 +1246,7 @@ public class AnnotatedDAO<T> {
 
 		}finally{
 
-			BooleanQuery.autoCloseQuery(query);
+			PreparedStatementQuery.autoCloseQuery(query);
 		}
 	}
 
@@ -1312,7 +1312,7 @@ public class AnnotatedDAO<T> {
 
 		}finally{
 
-			UpdateQuery.autoCloseQuery(query);
+			PreparedStatementQuery.autoCloseQuery(query);
 		}
 
 		this.updateRelations(bean, connection, relationQuery);

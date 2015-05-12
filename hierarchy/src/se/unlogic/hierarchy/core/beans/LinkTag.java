@@ -66,6 +66,7 @@ public class LinkTag implements Elementable {
 		return media;
 	}
 
+	@Override
 	public Element toXML(Document doc) {
 
 		return XMLGenerator.toXML(this, doc);

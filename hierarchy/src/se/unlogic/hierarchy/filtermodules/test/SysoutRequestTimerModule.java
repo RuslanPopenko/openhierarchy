@@ -15,6 +15,7 @@ import se.unlogic.webutils.http.URIParser;
 
 public class SysoutRequestTimerModule extends SimpleFilterModule {
 
+	@Override
 	public void doFilter(HttpServletRequest req, HttpServletResponse res, User user, URIParser uriParser, FilterChain filterChain) throws TransformerException, IOException {
 
 		long startTime = System.currentTimeMillis();

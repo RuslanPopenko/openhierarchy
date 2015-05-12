@@ -48,7 +48,7 @@
 	<xsl:variable name="i18n.viewUser">View user</xsl:variable>
 	<xsl:variable name="i18n.editUser">Update user</xsl:variable>
 	<xsl:variable name="i18n.deleteUser">Delete user</xsl:variable>
-	<xsl:variable name="i18n.passwordConfirmation">Confirm password</xsl:variable>
+	
 	
 	<xsl:variable name="i18n.requestedUserNotFound">The requsted user could not be found</xsl:variable>
 	<xsl:variable name="i18n.userCannotBeUpdated">This user cannot be updated</xsl:variable>
@@ -72,4 +72,5 @@
 	<xsl:variable name="i18n.RequestedUserTypeNotFound">Requested user type not found</xsl:variable>
 	<xsl:variable name="i18n.UpdateFailedUserNotUpdatable">The requested user is not updatable</xsl:variable>
 	<xsl:variable name="i18n.DeleteFailedException">An error occured while deleting the requested user</xsl:variable>
+	<xsl:variable name="i18n.switchToUser">Login as user</xsl:variable>
 </xsl:stylesheet>

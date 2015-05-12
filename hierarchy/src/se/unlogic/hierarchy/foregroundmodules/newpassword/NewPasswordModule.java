@@ -128,7 +128,7 @@ public class NewPasswordModule extends AnnotatedForegroundModule {
 					throw new ValidationException(validationErrors);
 				}
 
-				User requestedUser = systemInterface.getUserHandler().getUserByEmail(email, false, false);
+				User requestedUser = systemInterface.getUserHandler().getUserByEmail(email, false, true);
 
 				if(requestedUser == null || (requireUsername && !requestedUser.getUsername().equalsIgnoreCase(username))){
 

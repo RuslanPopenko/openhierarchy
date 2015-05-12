@@ -8,6 +8,7 @@
 package se.unlogic.hierarchy.core.interfaces;
 
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.List;
 
 import javax.sql.DataSource;
@@ -20,25 +21,15 @@ public interface UserProvider extends Prioritized{
 
 	public User getUser(Integer userID, boolean groups, boolean attributes) throws SQLException;
 
-	/**
-	 * Returns a list of users sorted by first name
-	 * @param order
-	 * @param sortingField
-	 * 
-	 * @param groups
-	 * @param attributes
-	 * @return
-	 * @throws SQLException
-	 */
 	public List<? extends User> getUsers(boolean groups, boolean attributes) throws SQLException;
 
-	public List<? extends User> searchUsers(String query, boolean groups, boolean attributes) throws SQLException;
+	public List<? extends User> searchUsers(String query, boolean groups, boolean attributes, Integer maxHits) throws SQLException;
 
-	public List<? extends User> getUsers(List<Integer> userIDs, boolean groups, boolean attributes) throws SQLException;
+	public List<? extends User> getUsers(Collection<Integer> userIDs, boolean groups, boolean attributes) throws SQLException;
 
 	public List<? extends User> getUsersByGroup(Integer groupID, boolean groups, boolean attributes) throws SQLException;
 
-	public List<? extends User> getUsersByGroups(List<Integer> groupIDs, boolean attributes) throws SQLException;
+	public List<? extends User> getUsersByGroups(Collection<Integer> groupIDs, boolean attributes) throws SQLException;
 
 	public List<? extends User> getUsersByAttribute(String attributeName, String attributeValue, boolean groups, boolean attributes) throws SQLException;
 
@@ -50,9 +41,15 @@ public interface UserProvider extends Prioritized{
 
 	public User getUserByEmailPassword(String email, String password, boolean groups, boolean attributes) throws SQLException;
 
+	public List<? extends User> getUserByAttribute(String attributeName, boolean groups, boolean attributes) throws SQLException;
+
 	public User getUserByAttribute(String attributeName, String attributeValue, boolean groups, boolean attributes) throws SQLException;
 
+	public List<? extends User> getUsersWithoutAttribute(String attributeName, boolean groups, boolean attributes) throws SQLException;
+
 	public int getUserCount() throws SQLException;
+
+	public int getUserCountByGroup(Integer groupID) throws SQLException;
 
 	public int getDisabledUserCount() throws SQLException;
 
@@ -65,4 +62,5 @@ public interface UserProvider extends Prioritized{
 	public DataSource getDataSource();
 
 	public List<? extends User> getUsers(UserField sortingField, Order order, boolean groups, boolean attributes) throws SQLException;
+
 }

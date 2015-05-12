@@ -13,6 +13,7 @@ import java.io.FileFilter;
 import org.apache.commons.fileupload.FileItem;
 
 public class SimpleFileFilter implements FileFilter {
+	@Override
 	public boolean accept(File file) {
 
 		return isValidFilename(file.getName());

@@ -859,5 +859,75 @@
 			]]>
 		</Query>			
 	</Script> 		
-																						
+	
+	<!-- Script for DB changes in 1.2.1 -->
+	
+	<Script version="32">
+		<Query>
+			<![CDATA[
+				CREATE TABLE `openhierarchy_background_module_attributes` (
+				  `moduleID` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+				  `name` VARCHAR(255) NOT NULL,
+				  `value` VARCHAR(255) NOT NULL,
+				  PRIMARY KEY (`moduleID`, `name`),
+				  CONSTRAINT `FK_openhierarchy_background_module_attributes_1` FOREIGN KEY `FK_openhierarchy_background_module_attributes_1` (`moduleID`)
+				    REFERENCES `openhierarchy_background_modules` (`moduleID`)
+				    ON DELETE CASCADE
+				    ON UPDATE CASCADE
+				)
+				ENGINE = InnoDB;				
+			]]>
+		</Query>
+		<Query>
+			<![CDATA[
+				CREATE TABLE `openhierarchy_foreground_module_attributes` (
+				  `moduleID` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+				  `name` VARCHAR(255) NOT NULL,
+				  `value` VARCHAR(255) NOT NULL,
+				  PRIMARY KEY (`moduleID`, `name`),
+				  CONSTRAINT `FK_openhierarchy_foreground_module_attributes_1` FOREIGN KEY `FK_openhierarchy_foreground_module_attributes_1` (`moduleID`)
+				    REFERENCES `openhierarchy_foreground_modules` (`moduleID`)
+				    ON DELETE CASCADE
+				    ON UPDATE CASCADE
+				)
+				ENGINE = InnoDB;				
+			]]>
+		</Query>
+		<Query>
+			<![CDATA[
+				CREATE TABLE `openhierarchy_filter_module_attributes` (
+				  `moduleID` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+				  `name` VARCHAR(255) NOT NULL,
+				  `value` VARCHAR(255) NOT NULL,
+				  PRIMARY KEY (`moduleID`, `name`),
+				  CONSTRAINT `FK_openhierarchy_filter_module_attributes_1` FOREIGN KEY `FK_openhierarchy_filter_module_attributes_1` (`moduleID`)
+				    REFERENCES `openhierarchy_filter_modules` (`moduleID`)
+				    ON DELETE CASCADE
+				    ON UPDATE CASCADE
+				)
+				ENGINE = InnoDB;				
+			]]>
+		</Query>					
+	</Script> 	
+	
+	<!-- Script for DB changes in 1.2.4 -->
+	
+	<Script version="33">
+		<Query>
+			<![CDATA[
+				CREATE TABLE `openhierarchy_section_attributes` (
+				  `sectionID` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+				  `name` VARCHAR(255) NOT NULL,
+				  `value` VARCHAR(255) NOT NULL,
+				  PRIMARY KEY (`sectionID`, `name`),
+				  CONSTRAINT `FK_openhierarchy_section_attributes_1` FOREIGN KEY `FK_openhierarchy_section_attributes_1` (`sectionID`)
+				    REFERENCES `openhierarchy_sections` (`sectionID`)
+				    ON DELETE CASCADE
+				    ON UPDATE CASCADE
+				)
+				ENGINE = InnoDB;
+			]]>
+		</Query>
+	</Script> 
+	
 </DBScripts>

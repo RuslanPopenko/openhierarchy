@@ -32,6 +32,7 @@ public class SystemInstanceHandler implements InstanceHandler {
 	@SuppressWarnings("rawtypes")
 	private ConcurrentHashMap<Class<?>, Set<InstanceListener>> instanceListenerMap = new ConcurrentHashMap<Class<?>, Set<InstanceListener>>();
 	
+	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public <KeyClass,InstanceType extends KeyClass> boolean addInstance(Class<KeyClass> key, InstanceType instance){
 		
@@ -77,6 +78,7 @@ public class SystemInstanceHandler implements InstanceHandler {
 		return false;
 	}
 	
+	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <KeyClass, InstanceType extends KeyClass> boolean removeInstance(Class<KeyClass> key){
 		
@@ -102,27 +104,32 @@ public class SystemInstanceHandler implements InstanceHandler {
 		return false;
 	}
 	
+	@Override
 	@SuppressWarnings("unchecked")
 	public <KeyClass,InstanceType extends KeyClass> InstanceType getInstance(Class<KeyClass> key){
 		
 		return (InstanceType) instanceMap.get(key);
 	}
 	
+	@Override
 	public <KeyClass> boolean containsInstance(Class<KeyClass> key){
 		
 		return instanceMap.contains(key);
 	}
 	
+	@Override
 	public List<Class<?>> getKeys(){
 		
 		return new ArrayList<Class<?>>(instanceMap.keySet());
 	}
 	
+	@Override
 	public void addGlobalInstanceListener(GlobalInstanceListener listener) {
 
 		globalInstanceListeners.add(listener);
 	}
 
+	@Override
 	public void removeGlobalInstanceListener(GlobalInstanceListener listener) {
 
 		globalInstanceListeners.remove(listener);
@@ -135,6 +142,7 @@ public class SystemInstanceHandler implements InstanceHandler {
 	 * @param key the class to listen for
 	 * @param listener the listener to be triggered
 	 */
+	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public <KeyClass,InstanceType extends KeyClass> void addInstanceListener(Class<KeyClass> key, InstanceListener<KeyClass> listener){
 		
@@ -159,6 +167,7 @@ public class SystemInstanceHandler implements InstanceHandler {
 		}
 	}
 	
+	@Override
 	@SuppressWarnings("rawtypes")
 	public synchronized <KeyClass> void removeInstanceListener(Class<KeyClass> key, InstanceListener<KeyClass> listener){
 		
@@ -183,7 +192,7 @@ public class SystemInstanceHandler implements InstanceHandler {
 		
 		for(Entry<Class<?>, Object> entry : instanceMap.entrySet()){
 			
-			log.warn("Instance for type " + entry.getClass() + " implemented by " + entry.getValue().getClass() + " not removed from instance handler on shutdown.");
+			log.warn("Instance for type " + entry.getKey().getName() + " implemented by " + entry.getValue().getClass() + " not removed from instance handler on shutdown.");
 		}
 		
 		instanceMap.clear();
@@ -192,7 +201,7 @@ public class SystemInstanceHandler implements InstanceHandler {
 			
 			for(InstanceListener listener : entry.getValue()){
 				
-				log.warn("Instance listener for type " + entry.getKey() + " implemented by " + listener.getClass() + " not removed from instance handler on shutdown.");
+				log.warn("Instance listener for type " + entry.getKey().getName() + " implemented by " + listener.getClass() + " not removed from instance handler on shutdown.");
 			}
 		}
 		

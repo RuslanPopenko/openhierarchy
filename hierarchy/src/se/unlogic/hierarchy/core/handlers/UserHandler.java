@@ -249,7 +249,7 @@ public class UserHandler {
 		}
 	}
 
-	public List<User> getUsers(List<Integer> userIDs, boolean groups, boolean attributes) {
+	public List<User> getUsers(Collection<Integer> userIDs, boolean groups, boolean attributes) {
 
 		r.lock();
 		try {
@@ -307,7 +307,12 @@ public class UserHandler {
 		}
 	}
 
-	public List<User> searchUsers(String query, boolean groups, boolean attributes) {
+	public List<User> searchUsers(String query, boolean groups, boolean attributes, Integer maxHits) {
+
+		if(maxHits != null && maxHits < 1){
+
+			throw new RuntimeException("maxHits has to be null or > 0 ");
+		}
 
 		r.lock();
 		try {
@@ -318,7 +323,7 @@ public class UserHandler {
 				List<? extends User> users;
 
 				try {
-					users = userProvider.searchUsers(query, groups, attributes);
+					users = userProvider.searchUsers(query, groups, attributes, maxHits);
 
 					if (users != null) {
 						userList.addAll(users);
@@ -335,6 +340,11 @@ public class UserHandler {
 				if (userProviders.size() > 1) {
 
 					Collections.sort(userList, UserField.FIRSTNAME.getComparator(Order.ASC));
+				}
+
+				if(maxHits != null && userList.size() > maxHits){
+
+					return userList.subList(0, maxHits);
 				}
 
 				return userList;
@@ -445,6 +455,92 @@ public class UserHandler {
 		}
 	}
 
+	public List<User> getUsersByAttribute(String attributeName, boolean groups, boolean attributes) {
+
+		r.lock();
+
+		try {
+			ArrayList<User> userList = new ArrayList<User>();
+
+			for (UserProvider userProvider : this.userProviders) {
+
+				List<? extends User> users;
+
+				try {
+					users = userProvider.getUserByAttribute(attributeName, groups, attributes);
+
+					if (users != null) {
+
+						if (users != null) {
+							userList.addAll(users);
+						}
+					}
+
+				} catch (Exception e) {
+
+					log.error("Error getting users by attribute name " + attributeName + " from user provider " + userProvider, e);
+				}
+			}
+
+			if (!userList.isEmpty()) {
+
+				if (userProviders.size() > 1) {
+
+					Collections.sort(userList, UserField.FIRSTNAME.getComparator(Order.ASC));
+				}
+
+				return userList;
+			}
+
+			return null;
+		} finally {
+			r.unlock();
+		}
+	}
+
+	public List<User> getUsersWithoutAttribute(String attributeName, boolean groups, boolean attributes) {
+
+		r.lock();
+
+		try {
+			ArrayList<User> userList = new ArrayList<User>();
+
+			for (UserProvider userProvider : this.userProviders) {
+
+				List<? extends User> users;
+
+				try {
+					users = userProvider.getUsersWithoutAttribute(attributeName, groups, attributes);
+
+					if (users != null) {
+
+						if (users != null) {
+							userList.addAll(users);
+						}
+					}
+
+				} catch (Exception e) {
+
+					log.error("Error getting users wtihout attribute name " + attributeName + " from user provider " + userProvider, e);
+				}
+			}
+
+			if (!userList.isEmpty()) {
+
+				if (userProviders.size() > 1) {
+
+					Collections.sort(userList, UserField.FIRSTNAME.getComparator(Order.ASC));
+				}
+
+				return userList;
+			}
+
+			return null;
+		} finally {
+			r.unlock();
+		}
+	}
+
 	public User getUserByEmailPassword(String email, String password, boolean groups, boolean attributes) {
 
 		r.lock();
@@ -490,6 +586,29 @@ public class UserHandler {
 				} catch (Exception e) {
 
 					log.error("Error getting user count from user provider " + userProvider, e);
+				}
+			}
+
+			return userCount;
+		} finally {
+			r.unlock();
+		}
+	}
+
+	public Integer getUserCountByGroup(int groupID) {
+
+		r.lock();
+		try {
+			Integer userCount = 0;
+
+			for (UserProvider userProvider : this.userProviders) {
+
+				try {
+					userCount += userProvider.getUserCountByGroup(groupID);
+
+				} catch (Exception e) {
+
+					log.error("Error getting user count for group " + groupID + " from user provider " + userProvider, e);
 				}
 			}
 

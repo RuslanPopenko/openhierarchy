@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -27,9 +28,11 @@ import se.unlogic.hierarchy.core.exceptions.ModuleNotCachedException;
 import se.unlogic.hierarchy.core.exceptions.ModuleUnloadException;
 import se.unlogic.hierarchy.core.exceptions.ModuleUpdateException;
 import se.unlogic.hierarchy.core.exceptions.ModuleUpdatedInProgressException;
+import se.unlogic.hierarchy.core.interfaces.AttributeHandler;
 import se.unlogic.hierarchy.core.interfaces.Module;
 import se.unlogic.hierarchy.core.interfaces.ModuleDescriptor;
 import se.unlogic.hierarchy.core.interfaces.SystemInterface;
+import se.unlogic.standardutils.datatypes.SimpleEntry;
 import se.unlogic.standardutils.reflection.ReflectionUtils;
 
 public abstract class BaseModuleCache<DescriptorType extends ModuleDescriptor, ModuleType extends Module<?>, ListenerType> {
@@ -274,7 +277,17 @@ public abstract class BaseModuleCache<DescriptorType extends ModuleDescriptor, M
 
 		r.lock();
 		try {
-			return new ArrayList<Entry<DescriptorType, ModuleType>>(this.instanceMap.entrySet());
+			Set<Entry<DescriptorType, ModuleType>> entrySet = this.instanceMap.entrySet();
+
+			ArrayList<Entry<DescriptorType, ModuleType>> entryList = new ArrayList<Entry<DescriptorType, ModuleType>>(entrySet.size());
+
+			for(Entry<DescriptorType, ModuleType> entry : entrySet){
+
+				entryList.add(new SimpleEntry<DescriptorType, ModuleType>(entry));
+			}
+
+			return entryList;
+
 		} finally {
 			r.unlock();
 		}
@@ -299,7 +312,8 @@ public abstract class BaseModuleCache<DescriptorType extends ModuleDescriptor, M
 				Integer currentModuleID = entry.getKey().getModuleID();
 
 				if (currentModuleID != null && currentModuleID.equals(moduleID)) {
-					return entry;
+
+					return new SimpleEntry<DescriptorType,ModuleType>(entry);
 				}
 			}
 
@@ -335,8 +349,29 @@ public abstract class BaseModuleCache<DescriptorType extends ModuleDescriptor, M
 				int currentModuleHashCode = cacheEntry.getKey().hashCode();
 
 				if (currentModuleHashCode == hashCode) {
-					return cacheEntry;
+
+					return new SimpleEntry<DescriptorType, ModuleType>(cacheEntry);
 				}
+			}
+		} finally {
+			r.unlock();
+		}
+
+		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T extends ModuleType> Entry<DescriptorType, T> getModuleEntryByClass(Class<T> clazz) {
+
+		r.lock();
+		try {
+			for (Entry<DescriptorType, ModuleType> cacheEntry : this.instanceMap.entrySet()) {
+
+				if(cacheEntry.getValue().getClass().isAssignableFrom(clazz)) {
+
+					return new SimpleEntry<DescriptorType, T>(cacheEntry.getKey(), (T) cacheEntry.getValue());
+				}
+
 			}
 		} finally {
 			r.unlock();
@@ -352,6 +387,31 @@ public abstract class BaseModuleCache<DescriptorType extends ModuleDescriptor, M
 		if(entry != null){
 
 			return entry.getKey();
+		}
+
+		return null;
+	}
+
+	public Entry<DescriptorType, ModuleType> getModuleEntryByAttribute(String name, String value) {
+
+		r.lock();
+		try {
+			for (Entry<DescriptorType, ModuleType> cacheEntry : this.instanceMap.entrySet()) {
+
+				AttributeHandler attributeHandler = cacheEntry.getKey().getAttributeHandler();
+
+				if(attributeHandler != null){
+
+					String attributeValue = attributeHandler.getString(name);
+
+					if(value.equals(attributeValue)){
+
+						return new SimpleEntry<DescriptorType, ModuleType>(cacheEntry);
+					}
+				}
+			}
+		} finally {
+			r.unlock();
 		}
 
 		return null;

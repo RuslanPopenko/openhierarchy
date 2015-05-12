@@ -19,4 +19,5 @@ import java.lang.annotation.Target;
 public @interface EventListener {
 
 	Class<?> channel();
+	int priority() default 0;
 }

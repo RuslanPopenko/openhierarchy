@@ -16,8 +16,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import se.unlogic.hierarchy.core.annotations.EnumDropDownSettingDescriptor;
 import se.unlogic.hierarchy.core.annotations.GroupMultiListSettingDescriptor;
 import se.unlogic.hierarchy.core.annotations.ModuleSetting;
+import se.unlogic.hierarchy.core.annotations.TextAreaSettingDescriptor;
 import se.unlogic.hierarchy.core.annotations.TextFieldSettingDescriptor;
 import se.unlogic.hierarchy.core.annotations.UserMultiListSettingDescriptor;
 import se.unlogic.hierarchy.core.annotations.WebPublic;
@@ -74,12 +76,15 @@ public class ModuleSettingUpdateModule extends AnnotatedForegroundModule impleme
 	protected String cssPath;
 
 	@ModuleSetting
+	@TextFieldSettingDescriptor(name="Module ID", description="The ID of the module to configure")
 	protected Integer moduleID;
 
 	@ModuleSetting
+	@EnumDropDownSettingDescriptor(name="Module type", description="The type of module to configure")
 	protected ModuleType moduleType;
 
 	@ModuleSetting
+	@TextAreaSettingDescriptor(name="Allowed settings", description="The settings to be configurable")
 	protected List<String> allowedSettings;
 
 	protected WeakReference<Entry<? extends ModuleDescriptor,? extends Module<?>>> moduleEntryReference;
@@ -193,7 +198,7 @@ public class ModuleSettingUpdateModule extends AnnotatedForegroundModule impleme
 				try {
 					if(module instanceof BackgroundModule){
 
-						SectionInterface sectionInterface = Section.getSectionInterface(((BackgroundModuleDescriptor)moduleDescriptor).getSectionID());
+						SectionInterface sectionInterface = systemInterface.getSectionInterface(((BackgroundModuleDescriptor)moduleDescriptor).getSectionID());
 
 						if(sectionInterface != null){
 
@@ -206,7 +211,7 @@ public class ModuleSettingUpdateModule extends AnnotatedForegroundModule impleme
 
 					}else if(module instanceof ForegroundModule){
 
-						SectionInterface sectionInterface = Section.getSectionInterface(((ForegroundModuleDescriptor)moduleDescriptor).getSectionID());
+						SectionInterface sectionInterface = systemInterface.getSectionInterface(((ForegroundModuleDescriptor)moduleDescriptor).getSectionID());
 
 						if(sectionInterface != null){
 
@@ -336,6 +341,8 @@ public class ModuleSettingUpdateModule extends AnnotatedForegroundModule impleme
 		Element selectSettingDescriptorsElement = doc.createElement("SelectSettingDescriptors");
 		doc.getDocumentElement().appendChild(selectSettingDescriptorsElement);
 
+		XMLUtils.append(doc, selectSettingDescriptorsElement, "SelectedSettings", "ID", allowedSettings);
+		
 		selectSettingDescriptorsElement.appendChild(moduleEntry.getKey().toXML(doc));
 		XMLUtils.appendNewElement(doc, selectSettingDescriptorsElement, "ModuleType", moduleType);
 		XMLUtils.append(doc, selectSettingDescriptorsElement, "SettingDescriptors", settings);
@@ -479,26 +486,31 @@ public class ModuleSettingUpdateModule extends AnnotatedForegroundModule impleme
 		return doc;
 	}
 
+	@Override
 	public boolean allowsAdminAccess() {
 
 		return false;
 	}
 
+	@Override
 	public boolean allowsUserAccess() {
 
 		return false;
 	}
 
+	@Override
 	public boolean allowsAnonymousAccess() {
 
 		return false;
 	}
 
+	@Override
 	public Collection<Integer> getAllowedGroupIDs() {
 
 		return adminGroupIDs;
 	}
 
+	@Override
 	public Collection<Integer> getAllowedUserIDs() {
 
 		return adminUserIDs;

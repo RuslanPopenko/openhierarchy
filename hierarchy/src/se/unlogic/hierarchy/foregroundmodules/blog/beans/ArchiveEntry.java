@@ -44,6 +44,7 @@ public class ArchiveEntry implements Elementable {
 		this.year = year;
 	}
 
+	@Override
 	public Element toXML(Document doc) {
 		Element archiveEntryElement = doc.createElement("ArchiveEntry");
 

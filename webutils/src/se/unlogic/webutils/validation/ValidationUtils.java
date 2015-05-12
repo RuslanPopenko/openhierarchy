@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import se.unlogic.standardutils.populators.BeanStringPopulator;
 import se.unlogic.standardutils.populators.StringPopulator;
 import se.unlogic.standardutils.string.StringUtils;
+import se.unlogic.standardutils.validation.TooLongContentValidationError;
 import se.unlogic.standardutils.validation.ValidationError;
 import se.unlogic.standardutils.validation.ValidationErrorType;
 
@@ -68,7 +69,7 @@ public class ValidationUtils {
 
 		if (maxLength != null && value.length() > maxLength) {
 
-			errors.add(new ValidationError(fieldName, displayName, ValidationErrorType.TooLong));
+			errors.add(new TooLongContentValidationError(fieldName, value.length(), maxLength));
 			return null;
 
 		} else if (minLength != null && value.length() < minLength) {

@@ -3,6 +3,7 @@
 	<xsl:output method="html" version="4.0" encoding="ISO-8859-1" />
 
 	<xsl:include href="PageAdminModuleTemplates.xsl" />
+	<xsl:include href="classpath://se/unlogic/hierarchy/core/utils/usergrouplist/UserGroupList.en.xsl"/>
 	
 	<!-- Naming template.mode.field.type -->
 	
@@ -35,7 +36,7 @@
 	<xsl:variable name="validationError.duplicateAlias" select="'A page with this alias already exists in this section'"/>
 	<xsl:variable name="validationError.unknownErrorOccurred" select="'An unknown error has occurred'"/>
 	<xsl:variable name="addPage" select="'Add page'"/>
-	<xsl:variable name="pagePreview" select="'Preview page'"/>
+	<xsl:variable name="pagePreview" select="'Preview of page'"/>
 	<xsl:variable name="showPageOutsideAdminView" select="'Show page outside the admin interface'"/>
 	<xsl:variable name="users" select="'Users'"/>
 	<xsl:variable name="groups" select="'Groups'"/>

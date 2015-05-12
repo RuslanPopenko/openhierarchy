@@ -145,9 +145,17 @@ public abstract class User implements Serializable, HttpSessionBindingListener, 
 	@Override
 	public String toString() {
 
-		return this.getFirstname() + " " + this.getLastname() + " (" + this.getUsername() + ")";
+		if(this.getUserID() != null){
+			
+			return this.getFirstname() + " " + this.getLastname() + " (ID: " + this.getUserID() + ")";
+			
+		}else{
+			
+			return this.getFirstname() + " " + this.getLastname() + " (" + this.getUsername() + ")";			
+		}
 	}
 
+	@Override
 	public final Element toXML(Document doc) {
 
 		// Insert the root element node
@@ -175,11 +183,6 @@ public abstract class User implements Serializable, HttpSessionBindingListener, 
 		// Add email
 		if (this.getEmail() != null) {
 			userElement.appendChild(XMLUtils.createElement("email", getEmail(), doc));
-		}
-
-		// Add password
-		if (this.getPassword() != null) {
-			userElement.appendChild(XMLUtils.createElement("password", this.getPassword(), doc));
 		}
 
 		// Add language
@@ -244,6 +247,7 @@ public abstract class User implements Serializable, HttpSessionBindingListener, 
 		return session;
 	}
 
+	@Override
 	public void valueBound(HttpSessionBindingEvent sessionBindingEvent) {
 
 		if (sessionBindingEvent.getName().equals("user")) {
@@ -252,6 +256,7 @@ public abstract class User implements Serializable, HttpSessionBindingListener, 
 		}
 	}
 
+	@Override
 	public void valueUnbound(HttpSessionBindingEvent sessionBindingEvent) {
 
 		if (LogManager.exists(CoreServlet.class.getName()) != null) {

@@ -9,9 +9,14 @@ import se.unlogic.hierarchy.core.enums.SystemStatus;
 import se.unlogic.hierarchy.core.interfaces.ForegroundModule;
 import se.unlogic.hierarchy.core.interfaces.ForegroundModuleCacheListener;
 import se.unlogic.hierarchy.core.interfaces.ForegroundModuleDescriptor;
+import se.unlogic.hierarchy.core.interfaces.SectionCacheListener;
+import se.unlogic.hierarchy.core.interfaces.SectionDescriptor;
 import se.unlogic.hierarchy.core.interfaces.SectionInterface;
 import se.unlogic.hierarchy.core.interfaces.SystemInterface;
 import se.unlogic.hierarchy.core.interfaces.SystemStartupListener;
+import se.unlogic.hierarchy.core.sections.Section;
+import se.unlogic.standardutils.collections.KeyAlreadyCachedException;
+import se.unlogic.standardutils.collections.KeyNotCachedException;
 
 /**
  * @author Robert "Unlogic" Olofsson
@@ -20,7 +25,7 @@ import se.unlogic.hierarchy.core.interfaces.SystemStartupListener;
  *
  * @param <T>
  */
-public class MultiForegroundModuleTracker<T> implements ForegroundModuleCacheListener, SystemStartupListener {
+public class MultiForegroundModuleTracker<T> implements ForegroundModuleCacheListener, SectionCacheListener, SystemStartupListener {
 
 	protected final Class<T> targetClass;
 	protected final SectionInterface baseSection;
@@ -47,15 +52,43 @@ public class MultiForegroundModuleTracker<T> implements ForegroundModuleCacheLis
 		}
 	}
 
+	@Override
 	public void systemStarted() {
 
 		//Scan all loaded foreground modules
 		ModuleUtils.findForegroundModules(targetClass, recursive, assignable, baseSection, moduleMap);
 
-		//Add global foreground module listener
-		systemInterface.addForegroundModuleCacheListener(this);
+		//Add required listener
+		if(recursive){
+			
+			if(baseSection == systemInterface.getRootSection()){
+
+				systemInterface.addForegroundModuleCacheListener(this);
+				
+			}else{
+				
+				addListeners(baseSection);
+			}
+			
+			
+		}else{
+			
+			baseSection.getForegroundModuleCache().addCacheListener(this);
+		}
 	}
 
+	private void addListeners(SectionInterface sectionInterface) {
+
+		for(Section section : sectionInterface.getSectionCache().getSections()){
+			
+			addListeners(section);
+		}
+		
+		sectionInterface.getForegroundModuleCache().addCacheListener(this);
+		sectionInterface.getSectionCache().addCacheListener(this);		
+	}
+
+	@Override
 	@SuppressWarnings("unchecked")
 	public void moduleCached(ForegroundModuleDescriptor moduleDescriptor, ForegroundModule moduleInstance) {
 
@@ -66,6 +99,7 @@ public class MultiForegroundModuleTracker<T> implements ForegroundModuleCacheLis
 
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public void moduleUpdated(ForegroundModuleDescriptor moduleDescriptor, ForegroundModule moduleInstance) {
 
@@ -77,6 +111,7 @@ public class MultiForegroundModuleTracker<T> implements ForegroundModuleCacheLis
 		}
 	}
 
+	@Override
 	public void moduleUnloaded(ForegroundModuleDescriptor moduleDescriptor, ForegroundModule moduleInstance) {
 
 		this.moduleMap.remove(moduleDescriptor);
@@ -112,4 +147,23 @@ public class MultiForegroundModuleTracker<T> implements ForegroundModuleCacheLis
 
 		return moduleMap.size();
 	}
+	
+	@Override
+	public String toString(){
+		
+		return this.getClass().getSimpleName() + " tracking " + targetClass.getSimpleName() + " in section " + baseSection.getSectionDescriptor() + " (recursive: " + recursive + ")";
+	}
+
+	@Override
+	public void sectionCached(SectionDescriptor sectionDescriptor, Section sectionInstance) throws KeyAlreadyCachedException {
+
+		sectionInstance.getForegroundModuleCache().addCacheListener(this);
+		sectionInstance.getSectionCache().addCacheListener(this);			
+	}
+
+	@Override
+	public void sectionUpdated(SectionDescriptor sectionDescriptor, Section sectionInstance) throws KeyNotCachedException {}
+
+	@Override
+	public void sectionUnloaded(SectionDescriptor sectionDescriptor, Section sectionInstance) throws KeyNotCachedException {}
 }

@@ -190,6 +190,7 @@ public class GroupAccessAdminModule extends GroupAdminModule implements GroupAcc
 		}
 	}
 
+	@Override
 	public boolean isGroupAdmin(User user, Group group) throws SQLException {
 
 		HighLevelQuery<GroupAdminMapping> query = new HighLevelQuery<GroupAdminMapping>();
@@ -200,6 +201,7 @@ public class GroupAccessAdminModule extends GroupAdminModule implements GroupAcc
 		return this.groupAdminMappingDAO.getBoolean(query);
 	}
 
+	@Override
 	public List<Group> getUserAdminGroups(User user) throws SQLException {
 
 		HighLevelQuery<GroupAdminMapping> query = new HighLevelQuery<GroupAdminMapping>();

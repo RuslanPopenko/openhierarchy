@@ -21,22 +21,27 @@ public class GalleryUploadAccessWrapper implements AccessInterface {
 		this.gallery = gallery;
 	}
 
+	@Override
 	public boolean allowsAdminAccess() {
 		return false;
 	}
 
+	@Override
 	public boolean allowsAnonymousAccess() {
 		return false;
 	}
 
+	@Override
 	public boolean allowsUserAccess() {
 		return false;
 	}
 
+	@Override
 	public Collection<Integer> getAllowedGroupIDs() {
 		return gallery.getAllowedUploadGroupIDs();
 	}
 
+	@Override
 	public Collection<Integer> getAllowedUserIDs() {
 		return gallery.getAllowedUploadUserIDs();
 	}

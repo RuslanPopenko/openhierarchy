@@ -20,6 +20,7 @@ public class DateUtils {
 	public static final PooledSimpleDateFormat DATE_TIME_FORMATTER = new PooledSimpleDateFormat("yyyy-MM-dd HH:mm");
 	public static final PooledSimpleDateFormat DATE_FORMATTER = new PooledSimpleDateFormat("yyyy-MM-dd");
 	public static final PooledSimpleDateFormat YEAR_FORMATTER = new PooledSimpleDateFormat("yyyy");
+	public static final PooledSimpleDateFormat YEAR_WEEK_FORMATTER = new PooledSimpleDateFormat("w");
 
 	public static boolean isValidDate(ThreadSafeDateFormat sdf, String date) {
 
@@ -114,6 +115,11 @@ public class DateUtils {
 
 		return Integer.parseInt(YEAR_FORMATTER.format(new Date()));
 	}
+	
+	public static int getCurrentWeek() {
+
+		return Integer.parseInt(YEAR_WEEK_FORMATTER.format(new Date()));
+	}
 
 	public static java.sql.Date getCurrentSQLDate(boolean includeTime) {
 
@@ -201,5 +207,27 @@ public class DateUtils {
 		} while (startCal.getTimeInMillis() <= endCal.getTimeInMillis());
 
 		return workDays;
+	}
+	
+	public static int getNumberOfWeeksInYear(int year){
+		Calendar cal = Calendar.getInstance();
+	    cal.set(Calendar.YEAR, year);
+	    cal.set(Calendar.MONTH, Calendar.DECEMBER);
+	    cal.set(Calendar.DAY_OF_MONTH, 31);
+	    int week = cal.get(Calendar.WEEK_OF_YEAR); //Either 1 or 53
+	    
+	    if(week == 1){
+	    	return 52;
+	    } else {
+	    	return week;
+	    }
+	}
+	
+	public static java.sql.Date getTodaysDatePlusMinusDays(int days){
+		
+		Calendar calendar = Calendar.getInstance();
+		calendar.add(Calendar.DATE, days);
+		
+		return new java.sql.Date(calendar.getTimeInMillis());
 	}
 }

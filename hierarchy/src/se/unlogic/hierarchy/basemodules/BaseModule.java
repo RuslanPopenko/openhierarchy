@@ -16,6 +16,7 @@ public abstract class BaseModule<DescriptorType> implements Module<DescriptorTyp
 	protected DescriptorType moduleDescriptor;
 	protected DataSource dataSource;
 	
+	@Override
 	public void update(DescriptorType descriptor, DataSource dataSource) throws Exception {
 
 		this.moduleDescriptor = descriptor;
@@ -26,6 +27,7 @@ public abstract class BaseModule<DescriptorType> implements Module<DescriptorTyp
 		}	
 	}
 
+	@Override
 	public void unload() throws Exception {}
 	
 	@Override
@@ -36,6 +38,7 @@ public abstract class BaseModule<DescriptorType> implements Module<DescriptorTyp
 	
 	protected void createDAOs(DataSource dataSource) throws Exception {}	
 	
+	@Override
 	public List<SettingDescriptor> getSettings() {
 
 		return null;

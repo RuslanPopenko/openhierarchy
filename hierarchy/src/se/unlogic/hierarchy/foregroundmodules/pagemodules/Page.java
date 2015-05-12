@@ -136,6 +136,7 @@ public class Page implements AccessInterface, SearchableItem {
 		this.text = text;
 	}
 
+	@Override
 	public boolean allowsAnonymousAccess() {
 
 		return anonymousAccess;
@@ -146,6 +147,7 @@ public class Page implements AccessInterface, SearchableItem {
 		this.anonymousAccess = anonymousAccess;
 	}
 
+	@Override
 	public boolean allowsUserAccess() {
 
 		return userAccess;
@@ -156,6 +158,7 @@ public class Page implements AccessInterface, SearchableItem {
 		this.userAccess = userAccess;
 	}
 
+	@Override
 	public boolean allowsAdminAccess() {
 
 		return adminAccess;
@@ -243,6 +246,7 @@ public class Page implements AccessInterface, SearchableItem {
 		return page;
 	}
 
+	@Override
 	public String getAlias() {
 
 		return alias;
@@ -253,6 +257,7 @@ public class Page implements AccessInterface, SearchableItem {
 		this.alias = alias;
 	}
 
+	@Override
 	public List<Integer> getAllowedGroupIDs() {
 
 		return allowedGroupIDs;
@@ -263,6 +268,7 @@ public class Page implements AccessInterface, SearchableItem {
 		this.allowedGroupIDs = allowedGroupIDs;
 	}
 
+	@Override
 	public List<Integer> getAllowedUserIDs() {
 
 		return allowedUserIDs;
@@ -330,31 +336,37 @@ public class Page implements AccessInterface, SearchableItem {
 		this.breadCrumb = breadCrumb;
 	}
 
+	@Override
 	public String getID() {
 
 		return pageID.toString();
 	}
 
+	@Override
 	public String getTitle() {
 
 		return name;
 	}
 
+	@Override
 	public String getContentType() {
 
 		return "text/html";
 	}
 
+	@Override
 	public InputStream getData() {
 
 		return StringUtils.getInputStream(text);
 	}
 
+	@Override
 	public long getLastModified() {
 
 		return 0;
 	}
 
+	@Override
 	public AccessInterface getAccessInterface() {
 
 		return this;

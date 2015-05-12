@@ -25,7 +25,7 @@ public class QueryParameterFactory<Bean, Type> {
 
 		if(value == null){
 
-			throw new RuntimeException("Value cannot be null, it will result in invalid SQL");
+			return getIsNotNullParameter();
 		}
 
 		return new QueryParameter<Bean, Type>(column, value);

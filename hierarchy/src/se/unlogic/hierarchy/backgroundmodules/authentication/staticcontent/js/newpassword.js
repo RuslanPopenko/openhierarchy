@@ -3,27 +3,31 @@ var newPasswordLoadingIconHTML = "<span class=\"loading-icon\" style=\"height: 1
 	
 $(document).ready(function(){
 	
-	var newPasswordAlias = "#" + newPasswordModuleURI.substring(newPasswordModuleURI.lastIndexOf("/")+1 , newPasswordModuleURI.length);
-	
-	var hash = document.location.hash;
-	
-	var hashParts = hash.split("?");
-	
-	if(hashParts[0] == newPasswordAlias) {
-		initNewPasswordDialog(hashParts);
-	}
-	
-	$(window).bind('hashchange', function () {
+	if(newPasswordModuleURI != undefined) {
+		
+		var newPasswordAlias = "#" + newPasswordModuleURI.substring(newPasswordModuleURI.lastIndexOf("/")+1 , newPasswordModuleURI.length);
 		
 		var hash = document.location.hash;
+		
 		var hashParts = hash.split("?");
+		
 		if(hashParts[0] == newPasswordAlias) {
 			initNewPasswordDialog(hashParts);
 		}
 		
-	});
-	
-	fixFlashWMode();
+		$(window).bind('hashchange', function () {
+			
+			var hash = document.location.hash;
+			var hashParts = hash.split("?");
+			if(hashParts[0] == newPasswordAlias) {
+				initNewPasswordDialog(hashParts);
+			}
+			
+		});
+		
+		fixFlashWMode();
+		
+	}
 });
 
 function initNewPasswordDialog(hashParts) {

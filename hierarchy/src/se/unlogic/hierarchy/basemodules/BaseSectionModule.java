@@ -14,6 +14,7 @@ public abstract class BaseSectionModule<DescriptorType extends VisibleModuleDesc
 	protected SystemInterface systemInterface;
 	protected DataSource dataSource;
 	
+	@Override
 	public void init(DescriptorType descriptor, SectionInterface sectionInterface, DataSource dataSource) throws Exception {
 
 		this.moduleDescriptor = descriptor;

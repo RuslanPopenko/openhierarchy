@@ -3,18 +3,18 @@ $(document).ready(function() {
 	 $(".usergroup-list").each(function(j){
 		 var $list = $(this);
 		 var prefix = getPrefix($list);
-		 var suffix = getSuffix($list);
 		 var $url = $list.find("input[name='connectorURL']").val();
+		 var template = getTemplate(prefix);
 		 
-		 var $searchInput = $( "#" + prefix + "-search-" + suffix );
+		 var $searchInput = $( "#" + prefix + "-search");
 		 
 		 $searchInput.autocomplete({
 		 	source: function(request, response) {
-		 		return searchUsersAndGroups(request, response, $url, $searchInput);
+		 		return searchUsersAndGroups(request, response, $url, $searchInput, template);
 			},
 			select: function( event, ui ) {
 				
-				addEntry(ui.item, $list, suffix);
+				addEntry(ui.item, $list, prefix);
 				
 				$(this).val("");
 				
@@ -32,7 +32,7 @@ $(document).ready(function() {
 				
 			var $entry = $(this);
 			
-			initDeleteButton($entry, $list, prefix, suffix);
+			initDeleteButton($entry, $list, prefix);
 		}); 
 		
 		$(this).bind("change", function() {
@@ -52,11 +52,11 @@ function getPrefix($list){
 	return $list.find("input[name='prefix']").val();
 }
 
-function getSuffix($list){
-	return $list.find("input[name='suffix']").val();
+function getType($list){
+	return $list.find("input[name='type']").val();
 }
 
-function searchUsersAndGroups(request, response, $searchURL, $searchInput) {
+function searchUsersAndGroups(request, response, $searchURL, $searchInput, template) {
 	
 	$searchInput.addClass("ui-autocomplete-loading");
 	
@@ -74,9 +74,12 @@ function searchUsersAndGroups(request, response, $searchURL, $searchInput) {
 				response($.map(data.hits, function(item) {
 					
 					return {
-						label : item.Name,
+						label : getLabel(template, item),
 						value : item.ID,
-						email : item.Email
+						Name  : item.Name,
+						ID : item.ID,
+						Email : item.Email,
+						Username : item.Username
 					}
 				}));
 			}
@@ -91,43 +94,68 @@ function searchUsersAndGroups(request, response, $searchURL, $searchInput) {
 	});
 }
 
-function addEntry(item, $list, suffix){
+function getTemplate(prefix){
+	return $("#" + prefix + "-template");
+}
+
+function addEntry(item, $list, prefix, template){
 	
-	var prefix = getPrefix($list);
-	
-	if($("#" + prefix + "-" + suffix + "_" + item.value).length > 0) {
+	if($("#" + prefix + "_" + item.value).length > 0) {
 		return;
 	}
 	
-	var $clone = $("#" + prefix + "-" + suffix + "-template").clone();
+	var $clone = getTemplate(prefix).clone();
 	
-	var showEmail = $clone.hasClass("show-email-true");
-	
-	var label = showEmail ? item.label + ", " + item.email : item.label;
+	var label = getLabel($clone, item);
 	
 	$clone.find("span.text").text(label);
-	$clone.find("input[name='" + prefix + "-" + suffix + "']").removeAttr("disabled").val(item.value);
-	$clone.find("input[name='" + prefix + "-" + suffix + "name']").removeAttr("disabled").attr('name', prefix + "-" + suffix + "name" + item.value).val(label);
-	$clone.attr("id", prefix + "-" + suffix + "_" + item.value);
-	$clone.attr("class", prefix + "-" + suffix + "-list-entry");
+	$clone.find("input[name='" + prefix + "']").removeAttr("disabled").val(item.value);
+	$clone.find("input[name='" + prefix + "-name']").removeAttr("disabled").attr('name', prefix + "-name" + item.value).val(label);
+	$clone.attr("id", prefix + "_" + item.value);
+	$clone.attr("class", prefix + "-list-entry");
 	
-	var $deleteButton = initDeleteButton($clone, $list, prefix, suffix);
+	var $deleteButton = initDeleteButton($clone, $list, prefix);
 	$deleteButton.attr("title", $deleteButton.attr("title") + " " + label);
 	
 	$list.find("li:last").before($clone);
 	$clone.show();
 	
 	$list.trigger("change");
-	
 }
 
-function initDeleteButton($entry, $list, prefix, suffix) {
+function getLabel($template, item){
+	var label = item.Name;
+	
+	var showUsername = $template.hasClass("show-username-true");
+	var showEmail = $template.hasClass("show-email-true");
+	
+	if(showUsername){
+		label += " (" + item.Username;
+	}
+	
+	if(showEmail){
+		if(showUsername){
+			label += ", ";
+		} else {
+			label += " (";
+		}
+		label += item.Email;
+	}
+	
+	if(showUsername || showEmail){
+		label += ")";
+	}
+	
+	return label;
+}
+
+function initDeleteButton($entry, $list, prefix) {
 	
 	var $deleteButton = $entry.find("a.delete");
 	
 	$deleteButton.click(function(e) {
 		e.preventDefault();
-		$("#" + prefix + "-" + suffix + "_" + $entry.find("input[type='hidden']").val()).removeClass("disabled").show();
+//		$("#" + prefix + "_" + $entry.find("input[type='hidden']").val()).removeClass("disabled").show();
 		$entry.remove();
 		
 		$list.trigger("change");

@@ -31,6 +31,11 @@ public class MySQLRowLimiter implements RowLimiter {
 
 	public String getLimitSQL() {
 
+		if(start == 0){
+
+			return "LIMIT " + rows;
+		}
+
 		return "LIMIT " + start + "," + rows;
 	}
 }

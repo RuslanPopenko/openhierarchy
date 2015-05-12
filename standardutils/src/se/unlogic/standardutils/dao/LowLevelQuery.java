@@ -10,6 +10,7 @@ package se.unlogic.standardutils.dao;
 import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import se.unlogic.standardutils.dao.querys.GeneratedKeyCollector;
@@ -79,7 +80,7 @@ public class LowLevelQuery<T> extends RelationQuery {
 		this.parameters.addAll(Arrays.asList(parameters));
 	}
 
-	public void addParameters(List<?> parameters) {
+	public void addParameters(Collection<?> parameters) {
 
 		checkParameterList();
 

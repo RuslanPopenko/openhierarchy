@@ -48,7 +48,7 @@ public class ModularCRUD<BeanType extends Elementable, IDType, UserType extends 
 	@Override
 	public BeanType getRequestedBean(HttpServletRequest req, HttpServletResponse res, UserType user, URIParser uriParser, String getMode) throws SQLException, AccessDeniedException {
 
-		IDType beanID = idParser.getBeanID(uriParser, req);
+		IDType beanID = idParser.getBeanID(uriParser, req, getMode);
 		
 		if(beanID != null){
 			

@@ -11,12 +11,16 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.lang.reflect.Method;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.EventListener;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -54,6 +58,7 @@ import se.unlogic.hierarchy.core.handlers.GroupHandler;
 import se.unlogic.hierarchy.core.handlers.LoginHandler;
 import se.unlogic.hierarchy.core.handlers.SystemEventHandler;
 import se.unlogic.hierarchy.core.handlers.SystemInstanceHandler;
+import se.unlogic.hierarchy.core.handlers.SystemSessionListenerHandler;
 import se.unlogic.hierarchy.core.handlers.UserHandler;
 import se.unlogic.hierarchy.core.interfaces.BackgroundModuleCacheListener;
 import se.unlogic.hierarchy.core.interfaces.BackgroundModuleResponse;
@@ -77,6 +82,7 @@ import se.unlogic.standardutils.db.DBUtils;
 import se.unlogic.standardutils.enums.EnumUtils;
 import se.unlogic.standardutils.i18n.Language;
 import se.unlogic.standardutils.io.FileUtils;
+import se.unlogic.standardutils.reflection.ReflectionUtils;
 import se.unlogic.standardutils.settings.SettingNode;
 import se.unlogic.standardutils.string.StringUtils;
 import se.unlogic.standardutils.time.TimeUtils;
@@ -89,7 +95,7 @@ import se.unlogic.webutils.http.URIParser;
 public class CoreServlet extends BaseServlet implements FullSystemInterface {
 
 	private static final long serialVersionUID = 2610603465755792663L;
-	public static final String VERSION_PREFIX = "OpenHierarchy 1.2.0";
+	public static final String VERSION_PREFIX = "OpenHierarchy 1.2.4";
 	public static final String VERSION;
 
 	static {
@@ -123,9 +129,11 @@ public class CoreServlet extends BaseServlet implements FullSystemInterface {
 	private SystemInstanceHandler systemInstanceHandler;
 	private GlobalForegroundModuleCacheListener globalForegroundModuleCacheListener;
 	private GlobalBackgroundModuleCacheListener globalBackgroundModuleCacheListener;
+	private ConcurrentHashMap<Integer, Section> sectionMap;
 	private FilterModuleCache filterModuleCache;
 	private SystemEventHandler eventHandler;
 	private ArrayList<SystemStartupListener> startupListeners;
+	private SystemSessionListenerHandler systemSessionListenerHandler;
 
 	private boolean systemXMLDebug;
 	private String systemXMLDebugFile;
@@ -233,7 +241,7 @@ public class CoreServlet extends BaseServlet implements FullSystemInterface {
 
 				if (StringUtils.isEmpty(encoding)) {
 
-					throw new RuntimeException("Not encoding found in config.xml");
+					throw new RuntimeException("No encoding found in config.xml");
 				}
 
 				String defaultLanguage = config.getString("/Config/DefaultLanguage");
@@ -259,7 +267,7 @@ public class CoreServlet extends BaseServlet implements FullSystemInterface {
 
 				if (!CoreDaoFactory.class.isAssignableFrom(coreDAOFactoryClass)) {
 
-					throw new RuntimeException("The core DAO factory class specified in config.xml is not a valid. The speicifed class it must extend se.unlogic.hierarchy.core.daos.factories.CoreDaoFactory.");
+					throw new RuntimeException("The core DAO factory class specified in config.xml is not a valid. The specified class must extend se.unlogic.hierarchy.core.daos.factories.CoreDaoFactory.");
 				}
 
 				coreDaoFactory = (CoreDaoFactory) coreDAOFactoryClass.newInstance();
@@ -278,11 +286,29 @@ public class CoreServlet extends BaseServlet implements FullSystemInterface {
 				this.globalSectionCacheListener = new GlobalSectionCacheListener();
 				this.globalForegroundModuleCacheListener = new GlobalForegroundModuleCacheListener();
 				this.globalBackgroundModuleCacheListener = new GlobalBackgroundModuleCacheListener();
+				this.sectionMap = new ConcurrentHashMap<Integer, Section>();
 				this.systemInstanceHandler = new SystemInstanceHandler();
 				this.eventHandler = new SystemEventHandler();
 				this.loginHandler = new LoginHandler();
 
 				this.startupListeners = new ArrayList<SystemStartupListener>();
+
+				Method addListenerMethod = ReflectionUtils.getMethod(ServletContext.class, "addListener", Void.TYPE, EventListener.class);
+
+				if(addListenerMethod != null){
+
+					try{
+						SystemSessionListenerHandler systemSessionListenerHandler = new SystemSessionListenerHandler();
+
+						addListenerMethod.invoke(this.getServletContext(), systemSessionListenerHandler);
+
+						this.systemSessionListenerHandler = systemSessionListenerHandler;
+
+					}catch(Exception e){
+
+						log.error("Error adding session listener handler to servlet context", e);
+					}
+				}
 
 				//Cache filter modules
 				this.filterModuleCache = new FilterModuleCache(this);
@@ -299,7 +325,9 @@ public class CoreServlet extends BaseServlet implements FullSystemInterface {
 				SimpleSectionDescriptor simpleSectionDescriptor = coreDaoFactory.getSectionDAO().getRootSection(false);
 
 				// Instantiate root section
-				new Section(simpleSectionDescriptor, null, this);
+				rootSection = new Section(simpleSectionDescriptor, null, this);
+
+				rootSection.cacheModuleAndSections();
 
 				setSystemStatus(SystemStatus.STARTED);
 
@@ -330,18 +358,18 @@ public class CoreServlet extends BaseServlet implements FullSystemInterface {
 
 	private synchronized void triggerStartupListeners() {
 
-		if (!startupListeners.isEmpty()) {
+		if (!startupListeners.isEmpty()){
 
 			log.info("Detected " + startupListeners.size() + " system startup listeners");
 
-			for (SystemStartupListener listener : startupListeners) {
+			for(SystemStartupListener listener : startupListeners){
 
-				try {
+				try{
 					log.info("Triggering system startup listener " + listener);
 
 					listener.systemStarted();
 
-				} catch (Throwable t) {
+				}catch(Throwable t){
 
 					log.error("Error in system startup listener " + listener, t);
 				}
@@ -351,24 +379,25 @@ public class CoreServlet extends BaseServlet implements FullSystemInterface {
 
 			startupListeners = null;
 
-		} else {
+		}else{
 
 			startupListeners = null;
 		}
 	}
 
-	public synchronized void addStartupListener(SystemStartupListener startupListener) {
+	@Override
+	public void addStartupListener(SystemStartupListener startupListener) {
 
 		//Trigger listener right away if the system is already started
-		if (this.getSystemStatus() == SystemStatus.STARTED) {
+		if (this.getSystemStatus() == SystemStatus.STARTED){
 
 			startupListener.systemStarted();
 			return;
 		}
 
-		synchronized (this) {
+		synchronized(this){
 
-			if (this.getSystemStatus() == SystemStatus.STARTING) {
+			if (this.getSystemStatus() == SystemStatus.STARTING){
 
 				startupListeners.add(startupListener);
 			}
@@ -427,10 +456,10 @@ public class CoreServlet extends BaseServlet implements FullSystemInterface {
 		// Check if the response has been committed
 		if (!res.isCommitted()) {
 
-			// Set request attrbiute to tell the URLFilter to ignore this reponse
+			// Set request attribute to tell the URLFilter to ignore this response
 			req.setAttribute("processed", true);
 
-			// Respone has not been committed create xml document
+			// Response has not been committed create xml document
 			Document doc = XMLUtils.createDomDocument();
 
 			// Create root element
@@ -713,18 +742,18 @@ public class CoreServlet extends BaseServlet implements FullSystemInterface {
 
 				} else {
 
-					this.log.debug("Reponse already committed");
+					this.log.debug("Response already committed");
 				}
 			}catch(IllegalStateException e){
-				
-				this.log.debug("Reponse already committed");
+
+				this.log.debug("Response already committed");
 			}
 
 		} else {
 			if (exception != null) {
 				this.log.warn("Error " + exception + " after response has been committed");
 			} else {
-				this.log.debug("Reponse already committed");
+				this.log.debug("Response already committed");
 			}
 		}
 	}
@@ -778,13 +807,10 @@ public class CoreServlet extends BaseServlet implements FullSystemInterface {
 		Object object = null;
 
 		// Get from request attribute
-		try {
-			object = req.getAttribute("preferedDesign");
-			if (object != null) {
-				preferedDesign = (String) object;
-			}
-		} catch (ClassCastException e) {
-			log.warn("Invalid class " + object.getClass() + " found in request attribute \"preferedDesign\" of user " + user, e);
+		object = req.getAttribute("preferedDesign");
+
+		if (object != null) {
+			preferedDesign = object.toString();
 		}
 
 		// Get from session attribute
@@ -794,12 +820,12 @@ public class CoreServlet extends BaseServlet implements FullSystemInterface {
 
 			try {
 				object = session.getAttribute("preferedDesign");
+
 				if (object != null) {
-					preferedDesign = (String) object;
+					preferedDesign = object.toString();
 				}
-			} catch (IllegalStateException e) {} catch (ClassCastException e) {
-				log.warn("Invalid class " + object.getClass() + " found in session attribute \"preferedDesign\" of user " + user, e);
-			}
+
+			} catch (IllegalStateException e) {}
 		}
 
 		// Get from user
@@ -969,8 +995,11 @@ public class CoreServlet extends BaseServlet implements FullSystemInterface {
 								try {
 									Element documentElement = (Element) debugDoc.importNode(moduleResponse.getDocument().getDocumentElement(), true);
 
-									documentElement.setAttribute("moduleID", moduleResponse.getModuleDescriptor().getModuleID() + "");
-									documentElement.setAttribute("name", moduleResponse.getModuleDescriptor().getName());
+									if(moduleResponse.getModuleDescriptor() != null){
+
+										documentElement.setAttribute("moduleID", moduleResponse.getModuleDescriptor().getModuleID() + "");
+										documentElement.setAttribute("name", moduleResponse.getModuleDescriptor().getName());
+									}
 
 									debugDoc.getDocumentElement().appendChild(documentElement);
 
@@ -1003,10 +1032,10 @@ public class CoreServlet extends BaseServlet implements FullSystemInterface {
 
 								this.log.debug("Result appended");
 							} catch (Exception e) {
-								this.log.error("Tranformation of background module response from module" + moduleResponse.getModuleDescriptor() + " failed while processing request from user " + user + " accesing from " + req.getRemoteAddr(), e);
+								this.log.error("Tranformation of background module response from module" + moduleResponse.getModuleDescriptor() + " failed while processing request from user " + user + " accessing from " + req.getRemoteAddr(), e);
 							}
 						} else {
-							this.log.error("Background module response for separate transformation without attached stylesheet returned by module " + moduleResponse.getModuleDescriptor() + " while processing request from user " + user + " accesing from " + req.getRemoteAddr());
+							this.log.error("Background module response for separate transformation without attached stylesheet returned by module " + moduleResponse.getModuleDescriptor() + " while processing request from user " + user + " accessing from " + req.getRemoteAddr());
 						}
 					}
 				}
@@ -1094,6 +1123,7 @@ public class CoreServlet extends BaseServlet implements FullSystemInterface {
 		return null;
 	}
 
+	@Override
 	public UserHandler getUserHandler() {
 
 		return this.userHandler;
@@ -1101,9 +1131,10 @@ public class CoreServlet extends BaseServlet implements FullSystemInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see se.unlogic.hierarchy.core.beans.SystemInterface#getRootSection()
 	 */
+	@Override
 	public Section getRootSection() {
 
 		return this.rootSection;
@@ -1111,14 +1142,16 @@ public class CoreServlet extends BaseServlet implements FullSystemInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see se.unlogic.hierarchy.core.beans.SystemInterface#getApplicationFileSystemPath()
 	 */
+	@Override
 	public String getApplicationFileSystemPath() {
 
 		return this.applicationFileSystemPath;
 	}
 
+	@Override
 	public Language getDefaultLanguage() {
 
 		return this.defaultLanguage;
@@ -1129,6 +1162,7 @@ public class CoreServlet extends BaseServlet implements FullSystemInterface {
 		this.defaultLanguage = defaultLanguage;
 	}
 
+	@Override
 	public LoginHandler getLoginHandler(){
 
 		return loginHandler;
@@ -1136,9 +1170,10 @@ public class CoreServlet extends BaseServlet implements FullSystemInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see se.unlogic.hierarchy.core.beans.SystemInterface#getDataSource()
 	 */
+	@Override
 	public DataSource getDataSource() {
 
 		return this.dataSource;
@@ -1146,9 +1181,10 @@ public class CoreServlet extends BaseServlet implements FullSystemInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see se.unlogic.hierarchy.core.beans.SystemInterface#getDataSourceCache()
 	 */
+	@Override
 	public DataSourceCache getDataSourceCache() {
 
 		return this.dataSourceCache;
@@ -1182,16 +1218,20 @@ public class CoreServlet extends BaseServlet implements FullSystemInterface {
 				log.info("Email handler stopped");
 			}
 
-			if (userHandler != null) {
-				userHandler.clear();
+			if (this.userHandler != null) {
+				this.userHandler.clear();
 			}
 
 			if (this.systemInstanceHandler != null) {
-				systemInstanceHandler.clear();
+				this.systemInstanceHandler.clear();
 			}
 
 			if (this.eventHandler != null) {
-				eventHandler.clear();
+				this.eventHandler.clear();
+			}
+
+			if(this.systemSessionListenerHandler != null){
+				this.systemSessionListenerHandler.clear();
 			}
 
 			if (this.dataSourceCache != null) {
@@ -1203,7 +1243,7 @@ public class CoreServlet extends BaseServlet implements FullSystemInterface {
 				try {
 					((BasicDataSource) this.dataSource).close();
 				} catch (SQLException e) {
-					log.error("Error closing system datasource " + dataSource);
+					log.error("Error closing system datasource " + dataSource, e);
 				}
 			}
 
@@ -1217,158 +1257,213 @@ public class CoreServlet extends BaseServlet implements FullSystemInterface {
 		}
 	}
 
+	@Override
 	public CoreDaoFactory getCoreDaoFactory() {
 
 		return this.coreDaoFactory;
 	}
 
+	@Override
 	public EmailHandler getEmailHandler() {
 
 		return this.stopableEmailHandler;
 	}
 
+	@Override
 	public boolean isModuleXMLDebug() {
 
 		return moduleXMLDebug;
 	}
 
+	@Override
 	public void setModuleXMLDebug(boolean moduleXMLDebug) {
 
 		this.moduleXMLDebug = moduleXMLDebug;
 	}
 
+	@Override
 	public String getModuleXMLDebugFile() {
 
 		return moduleXMLDebugFile;
 	}
 
+	@Override
 	public void setModuleXMLDebugFile(String moduleXMLDebugFile) {
 
 		this.moduleXMLDebugFile = moduleXMLDebugFile;
 	}
 
+	@Override
 	public boolean isSystemXMLDebug() {
 
 		return systemXMLDebug;
 	}
 
+	@Override
 	public void setSystemXMLDebug(boolean systemXMLDebug) {
 
 		this.systemXMLDebug = systemXMLDebug;
 	}
 
+	@Override
 	public String getSystemXMLDebugFile() {
 
 		return systemXMLDebugFile;
 	}
 
+	@Override
 	public void setSystemXMLDebugFile(String systemXMLDebugFile) {
 
 		this.systemXMLDebugFile = systemXMLDebugFile;
 	}
 
+	@Override
 	public String getEncoding() {
 
 		return encoding;
 	}
 
+	@Override
 	public void setEncoding(String encoding) {
 
 		this.encoding = encoding;
 	}
 
+	@Override
 	public boolean isBackgroundModuleXMLDebug() {
 
 		return backgroundModuleXMLDebug;
 	}
 
+	@Override
 	public void setBackgroundModuleXMLDebug(boolean backgroundModuleXMLDebug) {
 
 		this.backgroundModuleXMLDebug = backgroundModuleXMLDebug;
 	}
 
+	@Override
 	public boolean addBackgroundModuleCacheListener(BackgroundModuleCacheListener listener) {
 
 		return globalBackgroundModuleCacheListener.add(listener);
 	}
 
+	@Override
 	public boolean removeBackgroundModuleCacheListener(BackgroundModuleCacheListener listener) {
 
 		return globalBackgroundModuleCacheListener.remove(listener);
 	}
 
+	@Override
 	public boolean addForegroundModuleCacheListener(ForegroundModuleCacheListener listener) {
 
 		return globalForegroundModuleCacheListener.add(listener);
 	}
 
+	@Override
 	public boolean removeForegroundModuleCacheListener(ForegroundModuleCacheListener listener) {
 
 		return globalForegroundModuleCacheListener.remove(listener);
 	}
 
+	@Override
 	public boolean addSectionCacheListener(SectionCacheListener listener) {
 
 		return globalSectionCacheListener.add(listener);
 	}
 
+	@Override
 	public boolean removeSectionCacheListener(SectionCacheListener listener) {
 
 		return globalSectionCacheListener.remove(listener);
 	}
 
+	@Override
 	public GlobalSectionCacheListener getGlobalSectionCacheListener() {
 
 		return globalSectionCacheListener;
 	}
 
+	@Override
 	public GlobalForegroundModuleCacheListener getGlobalForegroundModuleCacheListener() {
 
 		return globalForegroundModuleCacheListener;
 	}
 
+	@Override
 	public GlobalBackgroundModuleCacheListener getGlobalBackgroundModuleCacheListener() {
 
 		return globalBackgroundModuleCacheListener;
 	}
 
-	public void setRootSection(Section rootSection) {
-
-		this.rootSection = rootSection;
-	}
-
+	@Override
 	public CoreXSLTCacheHandler getCoreXSLTCacheHandler() {
 
 		return this.xsltCacheHandler;
 	}
 
+	@Override
 	public FilterModuleCache getFilterModuleCache() {
 
 		return this.filterModuleCache;
 	}
 
+	@Override
 	public InstanceHandler getInstanceHandler() {
 
 		return this.systemInstanceHandler;
 	}
 
+	@Override
 	public EventHandler getEventHandler() {
 
 		return eventHandler;
 	}
 
+	@Override
 	public String getBackgroundModuleXMLDebugFile() {
 
 		return backgroundModuleXMLDebugFile;
 	}
 
+	@Override
 	public void setBackgroundModuleXMLDebugFile(String backgroundModuleXMLDebugFile) {
 
 		this.backgroundModuleXMLDebugFile = backgroundModuleXMLDebugFile;
 	}
 
+	@Override
 	public GroupHandler getGroupHandler() {
 
 		return groupHandler;
+	}
+
+	@Override
+	public Section getSectionInterface(Integer sectionID){
+
+		return sectionMap.get(sectionID);
+	}
+
+	@Override
+	public void addSection(Section section) {
+
+		if(sectionMap.putIfAbsent(section.getSectionDescriptor().getSectionID(), section) != null){
+
+			log.warn("Section " + section.getSectionDescriptor() + " is already present in section map");
+		}
+	}
+
+	@Override
+	public void removeSection(Section section){
+
+		if(!sectionMap.remove(section.getSectionDescriptor().getSectionID(), section)){
+
+			log.warn("Unable to find section " + section.getSectionDescriptor() + " in section map");
+		}
+	}
+
+	@Override
+	public SystemSessionListenerHandler getSessionListenerHandler() {
+
+		return systemSessionListenerHandler;
 	}
 }

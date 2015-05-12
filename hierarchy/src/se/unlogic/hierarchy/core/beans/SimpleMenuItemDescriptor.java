@@ -30,6 +30,7 @@ public class SimpleMenuItemDescriptor implements MenuItemDescriptor {
 	protected Collection<Integer> allowedGroupIDs;
 	protected Collection<Integer> allowedUserIDs;
 
+	@Override
 	public String getName() {
 		return name;
 	}
@@ -38,6 +39,7 @@ public class SimpleMenuItemDescriptor implements MenuItemDescriptor {
 		this.name = name;
 	}
 
+	@Override
 	public String getDescription() {
 		return description;
 	}
@@ -50,10 +52,12 @@ public class SimpleMenuItemDescriptor implements MenuItemDescriptor {
 		this.uniqueID = uniqueID;
 	}
 
+	@Override
 	public String getUniqueID() {
 		return this.uniqueID;
 	}
 
+	@Override
 	public String getUrl() {
 		return url;
 	}
@@ -62,6 +66,7 @@ public class SimpleMenuItemDescriptor implements MenuItemDescriptor {
 		this.url = url;
 	}
 
+	@Override
 	public URLType getUrlType() {
 		return urlType;
 	}
@@ -70,6 +75,7 @@ public class SimpleMenuItemDescriptor implements MenuItemDescriptor {
 		this.urlType = urlType;
 	}
 
+	@Override
 	public MenuItemType getItemType() {
 		return itemType;
 	}
@@ -82,6 +88,7 @@ public class SimpleMenuItemDescriptor implements MenuItemDescriptor {
 		this.adminAccess = adminAccess;
 	}
 
+	@Override
 	public boolean allowsAdminAccess() {
 		return adminAccess;
 	}
@@ -90,6 +97,7 @@ public class SimpleMenuItemDescriptor implements MenuItemDescriptor {
 		this.anonymousAccess = anonymousAccess;
 	}
 
+	@Override
 	public boolean allowsAnonymousAccess() {
 		return anonymousAccess;
 	}
@@ -98,6 +106,7 @@ public class SimpleMenuItemDescriptor implements MenuItemDescriptor {
 		this.userAccess = userAccess;
 	}
 
+	@Override
 	public boolean allowsUserAccess() {
 		return userAccess;
 	}
@@ -106,6 +115,7 @@ public class SimpleMenuItemDescriptor implements MenuItemDescriptor {
 		this.allowedGroupIDs = allowedGroupIDs;
 	}
 
+	@Override
 	public Collection<Integer> getAllowedGroupIDs() {
 		return allowedGroupIDs;
 	}
@@ -114,6 +124,7 @@ public class SimpleMenuItemDescriptor implements MenuItemDescriptor {
 		this.allowedUserIDs = allowedUserIDs;
 	}
 
+	@Override
 	public Collection<Integer> getAllowedUserIDs() {
 		return allowedUserIDs;
 	}
@@ -128,6 +139,7 @@ public class SimpleMenuItemDescriptor implements MenuItemDescriptor {
 	}
 
 
+	@Override
 	public Integer getModuleID() {
 		return moduleID;
 	}

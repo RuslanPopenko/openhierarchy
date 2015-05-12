@@ -20,12 +20,12 @@ import se.unlogic.webutils.http.URIParser;
 public class EventTestModule extends AnnotatedForegroundModule implements EventListener<TestEvent>{
 
 	private TestEvent lastReceivedEvent;
-	
+
 	@Override
 	public void init(ForegroundModuleDescriptor moduleDescriptor, SectionInterface sectionInterface, DataSource dataSource) throws Exception {
 
 		super.init(moduleDescriptor, sectionInterface, dataSource);
-		
+
 		systemInterface.getEventHandler().addEventListener(EventTestModule.class, TestEvent.class, this);
 	}
 
@@ -33,10 +33,10 @@ public class EventTestModule extends AnnotatedForegroundModule implements EventL
 	public void unload() throws Exception {
 
 		systemInterface.getEventHandler().removeEventListener(EventTestModule.class, TestEvent.class, this);
-		
+
 		super.unload();
 	}
-	
+
 	@Override
 	public ForegroundModuleResponse defaultMethod(HttpServletRequest req, HttpServletResponse res, User user, URIParser uriParser) throws Throwable {
 
@@ -56,12 +56,12 @@ public class EventTestModule extends AnnotatedForegroundModule implements EventL
 	public ForegroundModuleResponse sendEvent(HttpServletRequest req, HttpServletResponse res, User user, URIParser uriParser) throws Throwable {
 
 		TestEvent event = new TestEvent();
-		
+
 		event.setSent(System.currentTimeMillis());
 		event.setValue(req.getParameter("value"));
-		
+
 		systemInterface.getEventHandler().sendEvent(EventTestModule.class, event, this, EventTarget.ALL, EventSource.LOCAL);
-		
+
 		StringBuilder stringBuilder = new StringBuilder();
 
 		stringBuilder.append("<div class=\"contentitem\">");
@@ -69,13 +69,19 @@ public class EventTestModule extends AnnotatedForegroundModule implements EventL
 		stringBuilder.append("</div>");
 
 		return new SimpleForegroundModuleResponse(stringBuilder.toString(),getDefaultBreadcrumb());
-	}	
-	
+	}
+
 	@Override
 	public void processEvent(TestEvent event, EventSource source) {
 
 		log.info("Event received:" + event);
-		
+
 		this.lastReceivedEvent = event;
-	}	
+	}
+
+	@Override
+	public int getPriority() {
+
+		return 0;
+	}
 }

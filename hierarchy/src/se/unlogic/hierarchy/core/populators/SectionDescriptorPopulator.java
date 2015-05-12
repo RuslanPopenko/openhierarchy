@@ -17,6 +17,7 @@ import se.unlogic.standardutils.enums.EnumUtils;
 
 public class SectionDescriptorPopulator implements BeanResultSetPopulator<SimpleSectionDescriptor> {
 
+	@Override
 	public SimpleSectionDescriptor populate(ResultSet rs) throws SQLException {
 
 		SimpleSectionDescriptor simpleSectionDescriptor = new SimpleSectionDescriptor();

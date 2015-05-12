@@ -115,8 +115,8 @@ public abstract class BaseInvitationCRUD<I extends BaseInvitation, IT extends Ba
 	}
 
 	@Override
-	public ForegroundModuleResponse list(HttpServletRequest req, HttpServletResponse res, User user, URIParser uriParser, ValidationError validationError) throws Exception {
+	public ForegroundModuleResponse list(HttpServletRequest req, HttpServletResponse res, User user, URIParser uriParser, List<ValidationError> validationErrors) throws Exception {
 
-		return callback.list(req, res, user, uriParser, validationError);
+		return callback.list(req, res, user, uriParser, validationErrors);
 	}
 }

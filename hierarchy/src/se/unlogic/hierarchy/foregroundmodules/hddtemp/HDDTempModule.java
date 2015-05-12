@@ -273,7 +273,7 @@ public class HDDTempModule extends AnnotatedForegroundModule implements CRUDCall
 		return this.list(req, res, user, uriParser, null);
 	}
 
-	public ForegroundModuleResponse list(HttpServletRequest req, HttpServletResponse res, User user, URIParser uriParser, ValidationError validationError) throws Exception {
+	public ForegroundModuleResponse list(HttpServletRequest req, HttpServletResponse res, User user, URIParser uriParser, List<ValidationError> validationErrors) throws Exception {
 
 		log.info("User " + user + " listing servers and drive temperatures");
 
@@ -286,9 +286,9 @@ public class HDDTempModule extends AnnotatedForegroundModule implements CRUDCall
 
 		XMLUtils.append(doc, listElement, "Servers", servers);
 
-		if(validationError != null){
+		if(validationErrors != null){
 
-			listElement.appendChild(validationError.toXML(doc));
+			XMLUtils.append(doc, listElement, validationErrors);
 		}
 
 		return new SimpleForegroundModuleResponse(doc, this.getDefaultBreadcrumb());
@@ -514,11 +514,13 @@ public class HDDTempModule extends AnnotatedForegroundModule implements CRUDCall
 		return doc;
 	}
 
+	@Override
 	public Document createDocument(HttpServletRequest req, URIParser uriParser, User user) {
 
 		return this.createDocument(req, uriParser);
 	}
 
+	@Override
 	public String getTitlePrefix() {
 
 		return this.moduleDescriptor.getName();
@@ -563,6 +565,7 @@ public class HDDTempModule extends AnnotatedForegroundModule implements CRUDCall
 		return settingDescriptors;
 	}
 
+	@Override
 	public void run() {
 
 		try {

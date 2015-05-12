@@ -56,7 +56,7 @@ public class HTMLOutputFileStoreModule extends AnnotatedForegroundModule{
 
 			throw new URINotFoundException(uriParser);
 
-		}else if(!AccessUtils.checkRecursiveModuleAccess(user, moduleEntry.getKey())){
+		}else if(!AccessUtils.checkRecursiveModuleAccess(user, moduleEntry.getKey(), systemInterface)){
 
 			throw new AccessDeniedException("Access to background module " + moduleEntry.getKey() + " denied!");
 		}

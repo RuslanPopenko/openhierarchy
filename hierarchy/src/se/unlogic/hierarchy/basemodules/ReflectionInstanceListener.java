@@ -20,6 +20,7 @@ public abstract class ReflectionInstanceListener<KeyClass> implements InstanceLi
 		this.writeLock = writeLock;
 	}
 
+	@Override
 	public <InstanceType extends KeyClass> void instanceAdded(Class<KeyClass> key, InstanceType instance) {
 
 		writeLock.lock();
@@ -35,6 +36,7 @@ public abstract class ReflectionInstanceListener<KeyClass> implements InstanceLi
 
 	}
 
+	@Override
 	public <InstanceType extends KeyClass> void instanceRemoved(Class<KeyClass> key, InstanceType instance) {
 
 		writeLock.lock();

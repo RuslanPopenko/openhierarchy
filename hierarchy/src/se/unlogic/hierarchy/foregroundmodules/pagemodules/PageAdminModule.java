@@ -25,6 +25,7 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import se.unlogic.hierarchy.core.annotations.CheckboxSettingDescriptor;
 import se.unlogic.hierarchy.core.annotations.ModuleSetting;
 import se.unlogic.hierarchy.core.annotations.TextFieldSettingDescriptor;
 import se.unlogic.hierarchy.core.annotations.WebPublic;
@@ -40,6 +41,7 @@ import se.unlogic.hierarchy.core.enums.SystemStatus;
 import se.unlogic.hierarchy.core.enums.URLType;
 import se.unlogic.hierarchy.core.exceptions.URINotFoundException;
 import se.unlogic.hierarchy.core.interfaces.ForegroundModuleDescriptor;
+import se.unlogic.hierarchy.core.interfaces.ForegroundModuleResponse;
 import se.unlogic.hierarchy.core.interfaces.ModuleDescriptor;
 import se.unlogic.hierarchy.core.interfaces.RootSectionInterface;
 import se.unlogic.hierarchy.core.interfaces.SectionCacheListener;
@@ -50,6 +52,7 @@ import se.unlogic.hierarchy.core.utils.AccessUtils;
 import se.unlogic.hierarchy.core.utils.BaseFileAccessValidator;
 import se.unlogic.hierarchy.core.utils.FCKConnector;
 import se.unlogic.hierarchy.core.utils.ModuleUtils;
+import se.unlogic.hierarchy.core.utils.usergrouplist.UserGroupListConnector;
 import se.unlogic.hierarchy.foregroundmodules.AnnotatedForegroundModule;
 import se.unlogic.hierarchy.foregroundmodules.pagemodules.daos.PageDAO;
 import se.unlogic.hierarchy.foregroundmodules.pagemodules.daos.PageDAOFactory;
@@ -88,7 +91,11 @@ public class PageAdminModule extends AnnotatedForegroundModule implements Sectio
 		SETTINGDESCRIPTORS.add(SettingDescriptor.createTextFieldSetting("pageViewModuleXSLPath", "View module XSL path", "Path to the XSL stylesheet used by the page view modules created by this module", true, "PageViewModule.en.xsl", null));
 	}
 
-	private static PagePopulator populator = new PagePopulator();
+	@ModuleSetting
+	@CheckboxSettingDescriptor(name = "Disable preview", description = "Show pages in their corresponding section instead of preview if possible")
+	private boolean disablePreview = true;
+
+	private static final PagePopulator POPULATOR = new PagePopulator();
 
 	private ConcurrentHashMap<Integer, PageViewModule> viewerModuleMap = new ConcurrentHashMap<Integer, PageViewModule>();
 
@@ -106,7 +113,7 @@ public class PageAdminModule extends AnnotatedForegroundModule implements Sectio
 	protected Integer diskThreshold = 100;
 
 	@ModuleSetting
-	@TextFieldSettingDescriptor(name="RAM threshold",description="Maximum size of files in KB to be buffered in RAM during file uploads. Files exceeding the threshold are written to disk instead.",required=true,formatValidator=PositiveStringIntegerValidator.class)
+	@TextFieldSettingDescriptor(name = "RAM threshold", description = "Maximum size of files in KB to be buffered in RAM during file uploads. Files exceeding the threshold are written to disk instead.", required = true, formatValidator = PositiveStringIntegerValidator.class)
 	protected Integer ramThreshold = 500;
 
 	@ModuleSetting
@@ -120,6 +127,8 @@ public class PageAdminModule extends AnnotatedForegroundModule implements Sectio
 
 	@ModuleSetting
 	protected String pageViewModuleXSLPath = "PageViewModule.en.xsl";
+
+	private UserGroupListConnector userGroupListConnector;
 
 	private void addInstanceToMap() {
 
@@ -209,6 +218,8 @@ public class PageAdminModule extends AnnotatedForegroundModule implements Sectio
 		daoFactory.init(dataSource);
 
 		this.pageDAO = daoFactory.getPageDAO();
+
+		userGroupListConnector = new UserGroupListConnector(systemInterface);
 	}
 
 	private void createViewModules(SectionInterface sectionInterface, boolean recursive) {
@@ -379,7 +390,7 @@ public class PageAdminModule extends AnnotatedForegroundModule implements Sectio
 			if (req.getMethod().equalsIgnoreCase("POST")) {
 				try {
 					// Populate page
-					Page page = populator.populate(req);
+					Page page = POPULATOR.populate(req);
 
 					if (pageDAO.getPage(page.getAlias(), section.getSectionID()) != null) {
 						throw new ValidationException(new ValidationError("alias", ValidationErrorType.Other, "duplicatePageAlias"));
@@ -414,7 +425,7 @@ public class PageAdminModule extends AnnotatedForegroundModule implements Sectio
 			document.appendChild(addPageForm);
 			addPageForm.appendChild(section.toXML(doc));
 
-			AccessUtils.appendGroupsAndUsers(doc, addPageForm, systemInterface.getUserHandler(), systemInterface.getGroupHandler());
+			AccessUtils.appendAllowedGroupsAndUsers(doc, addPageForm, section, systemInterface.getUserHandler(), systemInterface.getGroupHandler());
 
 			if (this.csspath != null) {
 				addPageForm.appendChild(XMLUtils.createCDATAElement("cssPath", csspath, doc));
@@ -447,7 +458,7 @@ public class PageAdminModule extends AnnotatedForegroundModule implements Sectio
 		return new Breadcrumb(page.getName(), page.getDescription(), getFullAlias() + "/" + method + "/" + page.getPageID(), URLType.RELATIVE_FROM_CONTEXTPATH);
 	}
 
-	@WebPublic(alias="firstpage")
+	@WebPublic(alias = "firstpage")
 	public SimpleForegroundModuleResponse setFirstpage(HttpServletRequest req, HttpServletResponse res, User user, URIParser uriParser) throws Exception {
 
 		//This is a primitive stopgap measure until this module rewritten to be more update and with more section administration capabilities
@@ -466,10 +477,8 @@ public class PageAdminModule extends AnnotatedForegroundModule implements Sectio
 
 		sectionDAO.update(sectionDescriptor);
 
-
-
 		//Check if root section
-		if(sectionDescriptor.getParentSectionID() == null){
+		if (sectionDescriptor.getParentSectionID() == null) {
 
 			//Update root section
 			RootSectionUpdater rootSectionUpdater = new RootSectionUpdater(this.sectionInterface.getSystemInterface().getRootSection(), sectionDescriptor);
@@ -479,16 +488,16 @@ public class PageAdminModule extends AnnotatedForegroundModule implements Sectio
 			res.sendRedirect(req.getContextPath() + sectionDescriptor.getFullAlias() + pageAlias);
 			return null;
 
-		}else{
-			SectionInterface sectionInterface = Section.getSectionInterface(sectionDescriptor.getParentSectionID());
+		} else {
+			SectionInterface sectionInterface = systemInterface.getSectionInterface(sectionDescriptor.getParentSectionID());
 
-			if(sectionInterface != null && sectionInterface.getSectionCache().isCached(sectionDescriptor)){
+			if (sectionInterface != null && sectionInterface.getSectionCache().isCached(sectionDescriptor)) {
 
 				SectionUpdater sectionUpdater = new SectionUpdater(sectionInterface.getSectionCache(), sectionDescriptor, user);
 				sectionUpdater.isDaemon();
 				sectionUpdater.start();
 
-				if(AccessUtils.checkAccess(user, sectionDescriptor)){
+				if (AccessUtils.checkAccess(user, sectionDescriptor)) {
 
 					res.sendRedirect(req.getContextPath() + sectionDescriptor.getFullAlias() + pageAlias);
 					return null;
@@ -523,6 +532,14 @@ public class PageAdminModule extends AnnotatedForegroundModule implements Sectio
 		PageViewModule pageViewModule = this.viewerModuleMap.get(page.getSectionID());
 
 		if (pageViewModule != null) {
+
+			if (disablePreview && AccessUtils.checkAccess(user, page) && AccessUtils.checkRecursiveModuleAccess(user, pageViewModule.getForegroundModuleDescriptor(), systemInterface)) {
+
+				res.sendRedirect(req.getContextPath() + pageViewModule.getSectionInterface().getSectionDescriptor().getFullAlias() + "/" + pageViewModule.getForegroundModuleDescriptor().getAlias() + "/" + page.getAlias());
+
+				return null;
+			}
+
 			preview.appendChild(pageViewModule.getForegroundModuleDescriptor().toXML(doc));
 			preview.appendChild(pageViewModule.getSectionInterface().getSectionDescriptor().toXML(doc));
 		} else {
@@ -651,7 +668,7 @@ public class PageAdminModule extends AnnotatedForegroundModule implements Sectio
 				boolean wasVisibleInMenu = page.isVisibleInMenu();
 
 				// Populate page
-				page = populator.populate(page, req);
+				page = POPULATOR.populate(page, req);
 
 				Page aliasMatch = this.pageDAO.getPage(page.getAlias(), page.getSectionID());
 
@@ -684,7 +701,7 @@ public class PageAdminModule extends AnnotatedForegroundModule implements Sectio
 		Element updatePageForm = doc.createElement("updatePageForm");
 		document.appendChild(updatePageForm);
 
-		AccessUtils.appendGroupsAndUsers(doc, updatePageForm, systemInterface.getUserHandler(), systemInterface.getGroupHandler());
+		AccessUtils.appendAllowedGroupsAndUsers(doc, updatePageForm, page, systemInterface.getUserHandler(), systemInterface.getGroupHandler());
 
 		// Append any errors
 		if (validationException != null) {
@@ -720,11 +737,11 @@ public class PageAdminModule extends AnnotatedForegroundModule implements Sectio
 		this.pageRemoved(page, page.getSectionID(), page.isEnabled(), page.isVisibleInMenu());
 
 		// Redirect user
-		if(req.getParameter("returnto") != null){
+		if (req.getParameter("returnto") != null) {
 
-			SectionInterface sectionInterface = Section.getSectionInterface(page.getSectionID());
+			SectionInterface sectionInterface = systemInterface.getSectionInterface(page.getSectionID());
 
-			if(sectionInterface != null){
+			if (sectionInterface != null) {
 
 				res.sendRedirect(req.getContextPath() + sectionInterface.getSectionDescriptor().getFullAlias());
 
@@ -791,103 +808,110 @@ public class PageAdminModule extends AnnotatedForegroundModule implements Sectio
 	@Override
 	public List<SettingDescriptor> getSettings() {
 
-		return SETTINGDESCRIPTORS;
+		List<SettingDescriptor> settings = super.getSettings();
+
+		settings.addAll(SETTINGDESCRIPTORS);
+
+		return settings;
 	}
 
+	@Override
 	public synchronized void sectionCached(SectionDescriptor sectionDescriptor, Section sectionInstance) throws KeyAlreadyCachedException {
 
 		this.createViewModules(sectionInstance, false);
 	}
 
+	@Override
 	public void sectionUpdated(SectionDescriptor sectionDescriptor, Section sectionInstance) throws KeyNotCachedException {
 
 	}
 
+	@Override
 	public synchronized void sectionUnloaded(SectionDescriptor sectionDescriptor, Section sectionInstance) throws KeyNotCachedException {
 
 		this.viewerModuleMap.remove(sectionDescriptor.getSectionID());
 	}
 
-	public synchronized void pageAdded(Page page){
+	public synchronized void pageAdded(Page page) {
 
-		if(!page.isEnabled()){
+		if (!page.isEnabled()) {
 
 			return;
 		}
 
 		PageViewModule viewModule = this.viewerModuleMap.get(page.getSectionID());
 
-		if(viewModule == null){
+		if (viewModule == null) {
 
-			SectionInterface sectionInterface = Section.getSectionInterface(page.getSectionID());
+			SectionInterface sectionInterface = systemInterface.getSectionInterface(page.getSectionID());
 
-			if(sectionInterface != null){
+			if (sectionInterface != null) {
 
 				this.createViewModules(sectionInterface, false);
 			}
 
-		}else{
+		} else {
 
 			viewModule.addPage(page);
 
-			if(page.isVisibleInMenu()){
+			if (page.isVisibleInMenu()) {
 
 				viewModule.reloadMenuitems();
 			}
 		}
 	}
 
-	public synchronized void pageUpdated(Page page, boolean wasEnabled, boolean wasVisibleInMenu) throws Exception{
+	public synchronized void pageUpdated(Page page, boolean wasEnabled, boolean wasVisibleInMenu) throws Exception {
 
-		if(!page.isEnabled() && !wasEnabled){
+		if (!page.isEnabled() && !wasEnabled) {
 
 			return;
 
-		}else if(page.isEnabled() && !wasEnabled){
+		} else if (page.isEnabled() && !wasEnabled) {
 
 			this.pageAdded(page);
 
-		}else if(page.isEnabled() && wasEnabled){
+		} else if (page.isEnabled() && wasEnabled) {
 
 			PageViewModule viewModule = this.viewerModuleMap.get(page.getSectionID());
 
-			if(viewModule != null){
+			if (viewModule != null) {
 
 				viewModule.updatePage(page);
 
-				if(page.isVisibleInMenu() || wasVisibleInMenu){
+				if (page.isVisibleInMenu() || wasVisibleInMenu) {
 
 					viewModule.reloadMenuitems();
 				}
 			}
 
-		}else if(!page.isEnabled() && wasEnabled){
+		} else if (!page.isEnabled() && wasEnabled) {
 
-			this.pageRemoved(page,page.getSectionID(),wasEnabled,wasVisibleInMenu);
+			this.pageRemoved(page, page.getSectionID(), wasEnabled, wasVisibleInMenu);
 		}
 	}
 
-	public synchronized void pageRemoved(Page page, Integer sectionID, boolean wasEnabled, boolean wasVisibleInMenu) throws Exception{
+	public synchronized void pageRemoved(Page page, Integer sectionID, boolean wasEnabled, boolean wasVisibleInMenu) throws Exception {
 
-		if(!wasEnabled){
+		if (!wasEnabled) {
 
 			return;
 		}
 
 		PageViewModule viewModule = this.viewerModuleMap.get(sectionID);
 
-		if(viewModule != null){
+		if (viewModule != null) {
 
-			if(this.pageDAO.sectionHasEnabledPages(sectionID)){
+			if (this.pageDAO.sectionHasEnabledPages(sectionID)) {
 
 				viewModule.removePage(page);
 
-				if(wasVisibleInMenu){
+				if (wasVisibleInMenu) {
 
 					viewModule.reloadMenuitems();
 				}
 
-			}else{
+			} else {
 
 				log.info("Removing page view module from section " + viewModule.getSectionInterface().getSectionDescriptor());
 
@@ -899,6 +923,19 @@ public class PageAdminModule extends AnnotatedForegroundModule implements Sectio
 	}
 
 	public ModuleDescriptor getModuleDescriptor() {
+
 		return this.moduleDescriptor;
+	}
+
+	@WebPublic(alias = "users")
+	public ForegroundModuleResponse getUsers(HttpServletRequest req, HttpServletResponse res, User user, URIParser uriParser) throws Throwable {
+
+		return userGroupListConnector.getUsers(req, res, user, uriParser);
+	}
+
+	@WebPublic(alias = "groups")
+	public ForegroundModuleResponse getGroups(HttpServletRequest req, HttpServletResponse res, User user, URIParser uriParser) throws Throwable {
+
+		return userGroupListConnector.getGroups(req, res, user, uriParser);
 	}
 }

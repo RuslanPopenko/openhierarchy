@@ -55,6 +55,7 @@ public class URLRewriteModule extends AnnotatedFilterModule {
 		this.compilePatterns();
 	}
 
+	@Override
 	public void doFilter(HttpServletRequest req, HttpServletResponse res, User user, URIParser uriParser, FilterChain filterChain) throws Exception {
 
 		String rewrittenURL = null;

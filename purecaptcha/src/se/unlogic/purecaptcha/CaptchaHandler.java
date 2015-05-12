@@ -8,8 +8,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import se.unlogic.purecaptcha.handlers.CaptchaCode;
-
 public class CaptchaHandler {
 
 	protected Captcha captcha;
@@ -68,8 +66,6 @@ public class CaptchaHandler {
 
 			CaptchaCode captchaCode = (CaptchaCode)session.getAttribute(sessionAttribute);
 
-
-
 			if(captchaCode == null){
 
 				return false;
@@ -92,8 +88,6 @@ public class CaptchaHandler {
 
 				return true;
 			}
-
-			session.removeAttribute(sessionAttribute);
 
 		} catch (IllegalStateException e) {}
 

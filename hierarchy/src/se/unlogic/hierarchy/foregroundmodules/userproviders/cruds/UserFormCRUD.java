@@ -68,8 +68,8 @@ public class UserFormCRUD<UserType extends MutableUser, ModuleCallback extends A
 	protected void appendShowFormData(UserType bean, Document doc, Element showTypeElement, User user, HttpServletRequest req, URIParser uriParser, UserFormCallback formCallback) throws SQLException, IOException, Exception {
 
 		XMLUtils.append(doc, showTypeElement, "AttrbuteDescriptors", moduleCallback.getSupportedAttributes());
-	}	
-	
+	}
+
 	@Override
 	protected void validateAddPopulation(UserType bean, HttpServletRequest req, User user, URIParser uriParser, UserFormCallback formCallback) throws ValidationException, SQLException, Exception {
 
@@ -122,13 +122,13 @@ public class UserFormCRUD<UserType extends MutableUser, ModuleCallback extends A
 			}
 		}
 
-		if(bean.getPassword() != null && !bean.getPassword().equals(req.getParameter("passwordconfirmation"))){
+		if(req.getParameter("password") != null && bean.getPassword() != null && !bean.getPassword().equals(req.getParameter("passwordconfirmation"))){
 
 			validationErrors.add(new ValidationError("PasswordConfirmationMissMatch"));
 		}
 
-		setAttributes(bean, req, formCallback, validationErrors);		
-		
+		setAttributes(bean, req, formCallback, validationErrors);
+
 		if(!validationErrors.isEmpty()){
 
 			throw new ValidationException(validationErrors);
@@ -137,7 +137,7 @@ public class UserFormCRUD<UserType extends MutableUser, ModuleCallback extends A
 		if(!formCallback.allowAdminFlagAccess()){
 
 			bean.setAdmin(false);
-		}		
+		}
 	}
 
 	protected void setUserGroups(UserType bean, HttpServletRequest req, UserFormCallback formCallback) throws SQLException {

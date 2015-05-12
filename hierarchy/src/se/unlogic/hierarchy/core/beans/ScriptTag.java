@@ -45,6 +45,7 @@ public class ScriptTag implements Elementable{
 		return src;
 	}
 	
+	@Override
 	public Element toXML(Document doc) {
 
 		return XMLGenerator.toXML(this, doc);

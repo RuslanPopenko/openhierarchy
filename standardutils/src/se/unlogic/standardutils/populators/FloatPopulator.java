@@ -7,13 +7,31 @@
  ******************************************************************************/
 package se.unlogic.standardutils.populators;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import se.unlogic.standardutils.dao.BeanResultSetPopulator;
 import se.unlogic.standardutils.numbers.NumberUtils;
 import se.unlogic.standardutils.validation.StringFormatValidator;
 
-public class FloatPopulator extends BaseStringPopulator<Float> implements BeanStringPopulator<Float> {
+public class FloatPopulator extends BaseStringPopulator<Float> implements BeanResultSetPopulator<Float> {
+
+	private static final FloatPopulator POPULATOR = new FloatPopulator();
+
+	public static FloatPopulator getPopulator(){
+		return POPULATOR;
+	}
+
+	private int columnIndex = 1;
 
 	public FloatPopulator() {
 		super();
+	}
+
+	public FloatPopulator(int columnIndex) {
+		super();
+
+		this.columnIndex = columnIndex;
 	}
 
 	public FloatPopulator(String populatorID, StringFormatValidator formatValidator) {
@@ -22,6 +40,10 @@ public class FloatPopulator extends BaseStringPopulator<Float> implements BeanSt
 
 	public FloatPopulator(String populatorID) {
 		super(populatorID);
+	}
+
+	public Float populate(ResultSet rs) throws SQLException {
+		return rs.getFloat(columnIndex);
 	}
 
 	public Float getValue(String value) {

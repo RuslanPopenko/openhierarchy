@@ -13,6 +13,7 @@ import se.unlogic.hierarchy.core.beans.MenuItem;
 
 public class MenuItemComparator implements Comparator<MenuItem> {
 
+	@Override
 	public int compare(MenuItem m1, MenuItem m2) {
 		
 		return m1.getMenuIndex().compareTo(m2.getMenuIndex());

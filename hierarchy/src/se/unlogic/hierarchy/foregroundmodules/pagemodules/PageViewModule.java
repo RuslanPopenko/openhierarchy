@@ -46,7 +46,7 @@ import se.unlogic.hierarchy.core.interfaces.MenuItemDescriptor;
 import se.unlogic.hierarchy.core.interfaces.Searchable;
 import se.unlogic.hierarchy.core.interfaces.SearchableItem;
 import se.unlogic.hierarchy.core.interfaces.SectionInterface;
-import se.unlogic.hierarchy.core.sections.Section;
+import se.unlogic.hierarchy.core.interfaces.SystemInterface;
 import se.unlogic.hierarchy.core.utils.AccessUtils;
 import se.unlogic.hierarchy.core.utils.BaseFileAccessValidator;
 import se.unlogic.hierarchy.core.utils.FCKConnector;
@@ -68,6 +68,7 @@ public class PageViewModule implements ForegroundModule, Searchable {
 
 	protected ConcurrentHashMap<String, Page> pageCache = new ConcurrentHashMap<String, Page>();
 
+	private SystemInterface systemInterface;
 	private SectionInterface sectionInterface;
 	private EventHandler eventHandler;
 	private ForegroundModuleDescriptor moduleDescriptor;
@@ -79,6 +80,7 @@ public class PageViewModule implements ForegroundModule, Searchable {
 	private List<ScriptTag> scripts;
 	private List<LinkTag> links;
 
+	@Override
 	public void init(ForegroundModuleDescriptor moduleDescriptor, SectionInterface sectionInterface, DataSource dataSource) throws Exception {
 
 		this.moduleDescriptor = moduleDescriptor;
@@ -86,6 +88,7 @@ public class PageViewModule implements ForegroundModule, Searchable {
 
 		createDAO();
 
+		this.systemInterface = sectionInterface.getSystemInterface();
 		this.sectionInterface = sectionInterface;
 		this.eventHandler = sectionInterface.getSystemInterface().getEventHandler();
 
@@ -102,6 +105,7 @@ public class PageViewModule implements ForegroundModule, Searchable {
 		this.cachePages();
 	}
 
+	@Override
 	public void update(ForegroundModuleDescriptor moduleDescriptor, DataSource dataSource) throws Exception {
 
 		this.moduleDescriptor = moduleDescriptor;
@@ -163,9 +167,11 @@ public class PageViewModule implements ForegroundModule, Searchable {
 		}
 	}
 
+	@Override
 	public void unload() {}
 
 
+	@Override
 	public SimpleForegroundModuleResponse processRequest(HttpServletRequest req, HttpServletResponse res, User user, URIParser uriParser) throws Exception {
 
 		Page page = null;
@@ -211,7 +217,7 @@ public class PageViewModule implements ForegroundModule, Searchable {
 
 					SectionInterface pageAdminSectionInterface;
 
-					if (pageAdminDescriptor != null && AccessUtils.checkRecursiveModuleAccess(user, pageAdminDescriptor) && (pageAdminSectionInterface = Section.getSectionInterface(pageAdminDescriptor.getSectionID())) != null) {
+					if (pageAdminDescriptor != null && AccessUtils.checkRecursiveModuleAccess(user, pageAdminDescriptor, systemInterface) && (pageAdminSectionInterface = systemInterface.getSectionInterface(pageAdminDescriptor.getSectionID())) != null) {
 						Element pageAdminModuleElement = doc.createElement("pageAdminModule");
 						document.appendChild(pageAdminModuleElement);
 						pageAdminModuleElement.appendChild(pageAdminDescriptor.toXML(doc));
@@ -255,6 +261,7 @@ public class PageViewModule implements ForegroundModule, Searchable {
 	}
 
 
+	@Override
 	public List<MenuItemDescriptor> getAllMenuItems() {
 		try {
 			List<Page> pages = this.pageDAO.getPages(this.moduleDescriptor.getSectionID());
@@ -275,6 +282,7 @@ public class PageViewModule implements ForegroundModule, Searchable {
 	}
 
 
+	@Override
 	public List<MenuItemDescriptor> getVisibleMenuItems() {
 
 		if (!this.pageCache.isEmpty()) {
@@ -338,16 +346,19 @@ public class PageViewModule implements ForegroundModule, Searchable {
 	}
 
 
+	@Override
 	public List<SettingDescriptor> getSettings() {
 		return Collections.singletonList(SETTINGDESCRIPTOR);
 	}
 
 
+	@Override
 	public List<BundleDescriptor> getVisibleBundles() {
 		return null;
 	}
 
 
+	@Override
 	public List<BundleDescriptor> getAllBundles() {
 		return null;
 	}
@@ -478,6 +489,7 @@ public class PageViewModule implements ForegroundModule, Searchable {
 		return this.pageCache.values();
 	}
 
+	@Override
 	public List<SearchableItem> getSearchableItems() {
 
 		return new ArrayList<SearchableItem>(pageCache.values());

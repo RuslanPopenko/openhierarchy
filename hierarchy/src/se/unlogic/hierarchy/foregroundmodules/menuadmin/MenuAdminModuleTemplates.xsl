@@ -2,6 +2,21 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
 	<xsl:output method="html" version="4.0" encoding="ISO-8859-1"/>
 
+	<xsl:include href="classpath://se/unlogic/hierarchy/core/utils/xsl/Common.xsl"/>
+
+	<xsl:variable name="globalscripts">
+		/jquery/jquery.js
+		/jquery/jquery-ui.js
+	</xsl:variable>
+
+	<xsl:variable name="scripts">
+		/js/UserGroupList.js
+	</xsl:variable>
+	
+	<xsl:variable name="links">
+		/css/UserGroupList.css
+	</xsl:variable>
+
 	<xsl:template match="document">
 		<div class="contentitem">			
 			<xsl:apply-templates select="sections"/>
@@ -21,7 +36,10 @@
 					</xsl:when>
 					<xsl:when test="validationErrorType='InvalidFormat'">
 						<xsl:value-of select="$validationError.invalidFormat"/>
-					</xsl:when>							
+					</xsl:when>
+					<xsl:when test="validationErrorType='TooLong'">
+						<xsl:value-of select="$validationError.tooLong"/>
+					</xsl:when>											
 					<xsl:otherwise>
 						<xsl:value-of select="$validationError.unknown"/>
 					</xsl:otherwise>
@@ -273,9 +291,7 @@
 				</tr>
 			</table>
 			
-			<xsl:apply-templates select="groups"/>
-			
-			<xsl:apply-templates select="users"/>				
+			<xsl:call-template name="addUserGroupFields"/>				
 			
 			<div align="right">
 				<input type="submit" value="{$saveChanges}"/>
@@ -393,14 +409,44 @@
 				</tr>
 			</table>
 			
-			<xsl:apply-templates select="groups"/>
-			
-			<xsl:apply-templates select="users"/>	
+			<xsl:call-template name="addUserGroupFields"/>
 			
 			<div align="right">
 				<input type="submit" value="{$add}"/>
 			</div>
 		</form>
+	</xsl:template>
+
+	<xsl:template name="addUserGroupFields">
+	
+		<h3><xsl:value-of select="$users"/></h3>
+	
+		<xsl:call-template name="UserList">
+			<xsl:with-param name="connectorURL">
+				<xsl:value-of select="/document/requestinfo/currentURI"/>
+				<xsl:text>/</xsl:text>
+				<xsl:value-of select="/document/module/alias"/>
+				<xsl:text>/users</xsl:text>
+			</xsl:with-param>
+			<xsl:with-param name="name" select="'user'"/>
+			<xsl:with-param name="users" select="Users" />
+			<xsl:with-param name="document" select="/document" />
+		</xsl:call-template>	
+	
+		<h3><xsl:value-of select="$groups"/></h3>
+	
+		<xsl:call-template name="GroupList">
+			<xsl:with-param name="connectorURL">
+				<xsl:value-of select="/document/requestinfo/currentURI"/>
+				<xsl:text>/</xsl:text>
+				<xsl:value-of select="/document/module/alias"/>
+				<xsl:text>/groups</xsl:text>
+			</xsl:with-param>
+			<xsl:with-param name="name" select="'group'"/>
+			<xsl:with-param name="groups" select="Groups" />
+			<xsl:with-param name="document" select="/document" />
+		</xsl:call-template>	
+	
 	</xsl:template>
 
 	<xsl:template match="sortMenu">
@@ -877,110 +923,5 @@
 
 		<xsl:apply-templates select="subsections/section" mode="sectiontree"/>
 	</xsl:template>
-	
-	<xsl:template match="group">
-		<div class="floatleft full border marginbottom">
-			<div class="floatleft">
-				<xsl:choose>
-					<xsl:when test="enabled='true'">
-						<img class="alignbottom" src="{/document/requestinfo/contextpath}/static/f/{/document/module/sectionID}/{/document/module/moduleID}/pics/group.png"/>
-					</xsl:when>
-					<xsl:otherwise>
-						<img class="alignbottom" src="{/document/requestinfo/contextpath}/static/f/{/document/module/sectionID}/{/document/module/moduleID}/pics/group_disabled.png"/>
-					</xsl:otherwise>
-				</xsl:choose>
-				
-				<xsl:text>&#x20;</xsl:text>
-				
-				<xsl:value-of select="name"/>			
-			</div>
-			<div class="floatright marginright">
-				
-				<xsl:variable name="groupID" select="groupID"/>
-			
-				<input type="checkbox" name="group" value="{groupID}">
-					<xsl:choose>
-						<xsl:when test="../../requestparameters">
-							<xsl:if test="../../requestparameters/parameter[name='group'][value=$groupID]">
-								<xsl:attribute name="checked"/>
-							</xsl:if>						
-						</xsl:when>
-						<xsl:when test="../../menuitem">
-							<xsl:if test="../../menuitem/allowedGroupIDs[groupID=$groupID]">
-								<xsl:attribute name="checked"/>
-							</xsl:if>								
-						</xsl:when>					
-					</xsl:choose>
-				</input>
-			</div>				
-		</div>
-	</xsl:template>	
-	
-	<xsl:template match="user">
-		<div class="floatleft full border marginbottom">
-			<div class="floatleft">
-				<xsl:choose>
-					<xsl:when test="enabled='true'">
-						<img class="alignbottom" src="{/document/requestinfo/contextpath}/static/f/{/document/module/sectionID}/{/document/module/moduleID}/pics/user.png"/>
-					</xsl:when>
-					<xsl:otherwise>
-						<img class="alignbottom" src="{/document/requestinfo/contextpath}/static/f/{/document/module/sectionID}/{/document/module/moduleID}/pics/user_disabled.png"/>
-					</xsl:otherwise>
-				</xsl:choose>
-				
-				<xsl:text>&#x20;</xsl:text>
-				
-				<xsl:value-of select="firstname"/>
-				
-				<xsl:text>&#x20;</xsl:text>
-				
-				<xsl:value-of select="lastname"/>
-				
-				<xsl:text>&#x20;</xsl:text>
-				
-				<xsl:text>(</xsl:text>
-					<xsl:value-of select="username"/>
-				<xsl:text>)</xsl:text>			
-			</div>
-			<div class="floatright marginright">
-				
-				<xsl:variable name="userID" select="userID"/>
-			
-				<input type="checkbox" name="user" value="{userID}">
-					<xsl:choose>
-						<xsl:when test="../../requestparameters">
-							<xsl:if test="../../requestparameters/parameter[name='user'][value=$userID]">
-								<xsl:attribute name="checked"/>
-							</xsl:if>						
-						</xsl:when>						
-						<xsl:when test="../../menuitem">
-							<xsl:if test="../../menuitem/allowedUserIDs[userID=$userID]">
-								<xsl:attribute name="checked"/>
-							</xsl:if>								
-						</xsl:when>							
-					</xsl:choose>
-				</input>
-			</div>				
-		</div>
-	</xsl:template>
-	
-	<xsl:template match="groups">
-		<h3><xsl:value-of select="groups"/></h3>
-
-		<div class="scrolllist">			
-			<xsl:apply-templates select="group"/>
-		</div>
-		
-		<br/>
-	</xsl:template>	
-	
-	<xsl:template match="users">
-		<h3><xsl:value-of select="users"/></h3>
-		
-		<div class="scrolllist">			
-			<xsl:apply-templates select="user"/>
-		</div>
-		
-		<br/>
-	</xsl:template>					
+						
 </xsl:stylesheet>

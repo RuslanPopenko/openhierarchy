@@ -8,6 +8,7 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
 import org.w3c.dom.Document;
@@ -27,6 +28,7 @@ import se.unlogic.hierarchy.core.enums.CRUDAction;
 import se.unlogic.hierarchy.core.enums.EventTarget;
 import se.unlogic.hierarchy.core.enums.UserField;
 import se.unlogic.hierarchy.core.events.CRUDEvent;
+import se.unlogic.hierarchy.core.exceptions.AccessDeniedException;
 import se.unlogic.hierarchy.core.exceptions.URINotFoundException;
 import se.unlogic.hierarchy.core.exceptions.UnableToDeleteUserException;
 import se.unlogic.hierarchy.core.handlers.GroupHandler;
@@ -40,8 +42,10 @@ import se.unlogic.hierarchy.core.interfaces.UserFormProvider;
 import se.unlogic.hierarchy.core.interfaces.ViewFragment;
 import se.unlogic.hierarchy.core.utils.ViewFragmentUtils;
 import se.unlogic.hierarchy.foregroundmodules.AnnotatedForegroundModule;
+import se.unlogic.hierarchy.foregroundmodules.login.LoginEvent;
 import se.unlogic.standardutils.enums.Order;
 import se.unlogic.standardutils.numbers.NumberUtils;
+import se.unlogic.standardutils.string.StringUtils;
 import se.unlogic.standardutils.validation.ValidationError;
 import se.unlogic.standardutils.validation.ValidationException;
 import se.unlogic.standardutils.xml.XMLUtils;
@@ -71,6 +75,10 @@ public class UserAdminModule extends AnnotatedForegroundModule implements UserFo
 	@ModuleSetting
 	@CheckboxSettingDescriptor(name="Group administration",description="Allow administration of user groups")
 	private boolean allowGroupAdministration = true;
+
+	@ModuleSetting
+	@CheckboxSettingDescriptor(name="Allow user switching",description="Controls if user switching is allowed (not this may have side effects for modules that store data in the session object)")
+	private boolean allowUserSwitching = false;
 
 	protected UserHandler userHandler;
 	protected GroupHandler groupHandler;
@@ -189,13 +197,19 @@ public class UserAdminModule extends AnnotatedForegroundModule implements UserFo
 
 		addFirstLetterIndex(showLetterElement,doc);
 
-		List<User> users = userHandler.getUsers(filteringField, currentLetter, Order.ASC, false, false);
+		List<User> users = userHandler.getUsers(filteringField, currentLetter, Order.ASC, false, true);
 
 		XMLUtils.append(doc, showLetterElement, "Users", users);
 
 		XMLUtils.appendNewElement(doc, showLetterElement, "canAddUser", userHandler.hasFormAddableUserTypes());
 
 		XMLUtils.appendNewElement(doc, showLetterElement, "allowAdminAdministration", allowAdminAdministration);
+		XMLUtils.appendNewElement(doc, showLetterElement, "allowUserSwitching", allowUserSwitching);
+
+		if(allowUserSwitching){
+
+			XMLUtils.appendNewElement(doc, showLetterElement, "allowUserSwitching");
+		}
 
 		SimpleForegroundModuleResponse moduleResponse = new SimpleForegroundModuleResponse(doc, this.moduleDescriptor.getName() + " (" + currentLetter + ")");
 
@@ -261,6 +275,7 @@ public class UserAdminModule extends AnnotatedForegroundModule implements UserFo
 	}
 
 
+	@Override
 	public boolean allowGroupAdministration() {
 
 		return allowGroupAdministration;
@@ -296,6 +311,7 @@ public class UserAdminModule extends AnnotatedForegroundModule implements UserFo
 		showUserElement.appendChild(requestedUser.toXML(doc));
 
 		XMLUtils.appendNewElement(doc, showUserElement, "allowAdminAdministration", allowAdminAdministration);
+		XMLUtils.appendNewElement(doc, showUserElement, "allowUserSwitching", allowUserSwitching);
 
 		String name = getBeanName(requestedUser);
 
@@ -318,6 +334,41 @@ public class UserAdminModule extends AnnotatedForegroundModule implements UserFo
 		moduleResponse.addBreadcrumbFirst(getDefaultBreadcrumb());
 
 		return moduleResponse;
+	}
+
+	@WebPublic(alias="switch")
+	public ForegroundModuleResponse switchUser(HttpServletRequest req, HttpServletResponse res, User user, URIParser uriParser) throws Exception {
+
+		if(!allowUserSwitching){
+
+			throw new AccessDeniedException("User switching is disabled");
+		}
+
+		User requestedUser;
+
+		if (uriParser.size() != 3 || !NumberUtils.isInt(uriParser.get(2)) || (requestedUser = userHandler.getUser(NumberUtils.toInt(uriParser.get(2)),true, true)) == null) {
+
+			return list(req, res, user, uriParser, new ValidationError("RequestedUserNotFound"));
+		}
+
+		log.info("User " + user + " switching to user " + requestedUser);
+
+		HttpSession session = req.getSession(true);
+
+		session.setAttribute("user", requestedUser);
+
+		systemInterface.getEventHandler().sendEvent(User.class, new LoginEvent(requestedUser, req.getSession()), EventTarget.ALL);
+
+		if(StringUtils.isEmpty(req.getContextPath())){
+
+			res.sendRedirect("/");
+
+		}else{
+
+			res.sendRedirect(req.getContextPath());
+		}
+
+		return null;
 	}
 
 	@WebPublic(alias="listtypes")
@@ -371,7 +422,7 @@ public class UserAdminModule extends AnnotatedForegroundModule implements UserFo
 				log.info("User " + user + " adding user " + newUser);
 
 				formProvider.add(newUser, this);
-				
+
 				systemInterface.getEventHandler().sendEvent(User.class, new CRUDEvent<User>(CRUDAction.ADD, newUser), EventTarget.ALL);
 
 				redirectToCurrentLetter(newUser, req, res);
@@ -434,7 +485,7 @@ public class UserAdminModule extends AnnotatedForegroundModule implements UserFo
 				formProvider.update(requestedUser, this);
 
 				systemInterface.getEventHandler().sendEvent(User.class, new CRUDEvent<User>(CRUDAction.UPDATE, requestedUser), EventTarget.ALL);
-				
+
 				redirectToCurrentLetter(requestedUser, req, res);
 
 				return null;
@@ -490,7 +541,7 @@ public class UserAdminModule extends AnnotatedForegroundModule implements UserFo
 			userHandler.deleteUser(requestedUser);
 
 			systemInterface.getEventHandler().sendEvent(User.class, new CRUDEvent<User>(CRUDAction.DELETE, requestedUser), EventTarget.ALL);
-			
+
 			redirectToCurrentLetter(requestedUser, req, res);
 
 			return null;
@@ -503,16 +554,19 @@ public class UserAdminModule extends AnnotatedForegroundModule implements UserFo
 		}
 	}
 
+	@Override
 	public List<Group> getAvailableGroups() {
 
 		return groupHandler.getGroups(false);
 	}
 
+	@Override
 	public Group getGroup(Integer groupID) {
 
 		return groupHandler.getGroup(groupID, false);
 	}
 
+	@Override
 	public boolean allowAdminFlagAccess() {
 
 		return allowAdminAdministration;

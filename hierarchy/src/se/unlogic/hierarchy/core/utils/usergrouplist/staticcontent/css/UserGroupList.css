@@ -63,6 +63,11 @@ span.ui-helper-hidden-accessible {
 	margin-top: 5px;
 }
 
+ul.usergroup-list {
+	list-style-type: none;
+	margin: 0;
+}
+
 ul.usergroup-list li, ul.readonly-usergroup-list li {
 	padding: 3px;
 }

@@ -40,6 +40,7 @@ public final class SimpleBackgroundModuleResponse extends BaseModuleResponse imp
 		super(response, transformer);
 	}
 
+	@Override
 	public Element getElement() {
 		return element;
 	}
@@ -48,6 +49,7 @@ public final class SimpleBackgroundModuleResponse extends BaseModuleResponse imp
 		this.element = element;
 	}
 
+	@Override
 	public String getHtml() {
 		return html;
 	}
@@ -56,6 +58,7 @@ public final class SimpleBackgroundModuleResponse extends BaseModuleResponse imp
 		this.html = html;
 	}
 
+	@Override
 	public Document getDocument() {
 		return document;
 	}
@@ -64,6 +67,7 @@ public final class SimpleBackgroundModuleResponse extends BaseModuleResponse imp
 		this.document = document;
 	}
 
+	@Override
 	public ResponseType getResponseType() {
 		return responseType;
 	}
@@ -72,29 +76,35 @@ public final class SimpleBackgroundModuleResponse extends BaseModuleResponse imp
 		this.responseType = responseType;
 	}
 
+	@Override
 	public Transformer getTransformer() {
 		return transformer;
 	}
 
 
+	@Override
 	public void setTransformer(Transformer transformer) {
 		this.transformer = transformer;
 	}
 
 
+	@Override
 	public BackgroundModuleDescriptor getModuleDescriptor() {
 		return moduleDescriptor;
 	}
 
+	@Override
 	public void setModuleDescriptor(BackgroundModuleDescriptor moduleDescriptor) {
 		this.moduleDescriptor = moduleDescriptor;
 	}
 
+	@Override
 	public Collection<String> getSlots() {
 		return this.slots;
 	}
 
 
+	@Override
 	public void setSlots(Collection<String> slots) {
 		this.slots = slots;
 	}

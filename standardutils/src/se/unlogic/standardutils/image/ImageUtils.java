@@ -7,11 +7,13 @@
  ******************************************************************************/
 package se.unlogic.standardutils.image;
 
+import java.awt.AlphaComposite;
 import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
@@ -75,67 +77,67 @@ public class ImageUtils {
 
 	public static BufferedImage scaleImage(BufferedImage image, int maxHeight, int maxWidth, int quality, int imageType) {
 
-	    int original_width = image.getWidth();
-	    int original_height = image.getHeight();
-	    
-	    int new_width = original_width;
-	    int new_height = original_height;
+		int original_width = image.getWidth();
+		int original_height = image.getHeight();
 
-	    // first check if we need to scale width
-	    if (original_width > maxWidth) {
-	        //scale width to fit
-	        new_width = maxWidth;
-	        //scale height to maintain aspect ratio
-	        new_height = (new_width * original_height) / original_width;
-	    }
+		int new_width = original_width;
+		int new_height = original_height;
 
-	    // then check if we need to scale even with the new height
-	    if (new_height > maxHeight) {
-	        //scale height to fit instead
-	        new_height = maxHeight;
-	        //scale width to maintain aspect ratio
-	        new_width = (new_height * original_width) / original_height;
-	    }
-	    
-	    return scale(image, new_height, new_width, quality, imageType);
+		// first check if we need to scale width
+		if(original_width > maxWidth){
+			//scale width to fit
+			new_width = maxWidth;
+			//scale height to maintain aspect ratio
+			new_height = (new_width * original_height) / original_width;
+		}
+
+		// then check if we need to scale even with the new height
+		if(new_height > maxHeight){
+			//scale height to fit instead
+			new_height = maxHeight;
+			//scale width to maintain aspect ratio
+			new_width = (new_height * original_width) / original_height;
+		}
+
+		return scale(image, new_height, new_width, quality, imageType);
 	}
 
 	public static BufferedImage scaleImageByWidth(BufferedImage image, int maxWidth, int quality, int imageType) {
 
-	    int original_width = image.getWidth();
-	    int original_height = image.getHeight();
-	    
-	    int new_width = original_width;
-	    int new_height = original_height;
+		int original_width = image.getWidth();
+		int original_height = image.getHeight();
 
-	    // first check if we need to scale width
-	    if (original_width > maxWidth) {
-	        //scale width to fit
-	        new_width = maxWidth;
-	        //scale height to maintain aspect ratio
-	        new_height = (new_width * original_height) / original_width;
-	    }
-	    
-	    return scale(image, new_height, new_width, quality, imageType);
+		int new_width = original_width;
+		int new_height = original_height;
+
+		// first check if we need to scale width
+		if(original_width > maxWidth){
+			//scale width to fit
+			new_width = maxWidth;
+			//scale height to maintain aspect ratio
+			new_height = (new_width * original_height) / original_width;
+		}
+
+		return scale(image, new_height, new_width, quality, imageType);
 	}
 
 	public static BufferedImage scaleImageByHeight(BufferedImage image, int maxHeight, int quality, int imageType) {
 
-	    int original_width = image.getWidth();
-	    int original_height = image.getHeight();
-	    
-	    int new_width = original_width;
-	    int new_height = original_height;
+		int original_width = image.getWidth();
+		int original_height = image.getHeight();
 
-	    // then check if we need to scale even with the new height
-	    if (new_height > maxHeight) {
-	        //scale height to fit instead
-	        new_height = maxHeight;
-	        //scale width to maintain aspect ratio
-	        new_width = (new_height * original_width) / original_height;
-	    }
-	    
-	    return scale(image, new_height, new_width, quality, imageType);
+		int new_width = original_width;
+		int new_height = original_height;
+
+		// then check if we need to scale even with the new height
+		if(new_height > maxHeight){
+			//scale height to fit instead
+			new_height = maxHeight;
+			//scale width to maintain aspect ratio
+			new_width = (new_height * original_width) / original_height;
+		}
+
+		return scale(image, new_height, new_width, quality, imageType);
 	}
 
 	public static byte[] convertImage(BufferedImage image, String format) throws IOException, NullPointerException {
@@ -150,13 +152,16 @@ public class ImageUtils {
 	public static void writeImage(BufferedImage image, String path, String format) throws IOException, NullPointerException {
 
 		// write image to file
-		if (!path.endsWith("." + format)) {
+		if(!path.endsWith("." + format)){
 			path += "." + format;
 		}
 
-		File outputfile = new File(path);
+		writeImage(image, new File(path), format);
+	}
 
-		ImageIO.write(image, format, outputfile);
+	public static void writeImage(BufferedImage image, File file, String format) throws IOException, NullPointerException {
+
+		ImageIO.write(image, format, file);
 	}
 
 	public static BufferedImage scale(BufferedImage image, double xFactor, double yFactor, int imageType) {
@@ -165,10 +170,9 @@ public class ImageUtils {
 		AffineTransform scaleTransform = new AffineTransform();
 		scaleTransform.scale(xFactor, yFactor);
 
-		BufferedImage result = new BufferedImage((int) (image.getWidth() * xFactor), (int) (image.getHeight() * yFactor), imageType);
+		BufferedImage result = new BufferedImage((int)(image.getWidth() * xFactor), (int)(image.getHeight() * yFactor), imageType);
 
-		Graphics2D g2 = (Graphics2D) result.getGraphics();
-
+		Graphics2D g2 = (Graphics2D)result.getGraphics();
 
 		setBackground(g2, result, image);
 
@@ -181,7 +185,7 @@ public class ImageUtils {
 
 		BufferedImage result = new BufferedImage(width, height, imageType);
 
-		Graphics2D g2 = (Graphics2D) result.getGraphics();
+		Graphics2D g2 = (Graphics2D)result.getGraphics();
 
 		setBackground(g2, result, image);
 
@@ -194,7 +198,7 @@ public class ImageUtils {
 	}
 
 	private static void setBackground(Graphics2D g2, BufferedImage result, BufferedImage source) {
-		
+
 		int targetType = result.getType();
 		int sourceType = source.getType();
 
@@ -205,7 +209,7 @@ public class ImageUtils {
 		}
 	}
 
-	public static BufferedImage changeImageType(BufferedImage image, int desiredImagetype, Color background){
+	public static BufferedImage changeImageType(BufferedImage image, int desiredImagetype, Color background) {
 
 		if(image.getType() != desiredImagetype){
 
@@ -231,11 +235,11 @@ public class ImageUtils {
 
 		String extension = FileUtils.getFileExtension(filename);
 
-		if(extension != null) {
+		if(extension != null){
 
 			extension = extension.toLowerCase();
 
-			if (extension.equals(ImageUtils.JPG) || extension.equals(ImageUtils.JPEG) || extension.equals(ImageUtils.GIF) || extension.equals(ImageUtils.PNG) || extension.equals(ImageUtils.BMP) || extension.equals(ImageUtils.WBMP)) {
+			if(extension.equals(ImageUtils.JPG) || extension.equals(ImageUtils.JPEG) || extension.equals(ImageUtils.GIF) || extension.equals(ImageUtils.PNG) || extension.equals(ImageUtils.BMP) || extension.equals(ImageUtils.WBMP)){
 
 				return true;
 
@@ -253,25 +257,26 @@ public class ImageUtils {
 
 		Iterator<ImageReader> iter = ImageIO.getImageReadersBySuffix(suffix);
 
-		if (iter.hasNext()) {
+		if(iter.hasNext()){
 
 			ImageReader reader = iter.next();
 			ImageInputStream stream = null;
 
-			try {
+			try{
 				stream = new FileImageInputStream(new File(path));
 				reader.setInput(stream);
 				int width = reader.getWidth(reader.getMinIndex());
 				int height = reader.getHeight(reader.getMinIndex());
 				return new Dimension(width, height);
-			} finally {
+			}finally{
 				reader.dispose();
 
 				if(stream != null){
 
-					try {
+					try{
 						stream.close();
-					} catch (IOException e) {}
+					}catch(IOException e){
+					}
 				}
 			}
 		}
@@ -279,12 +284,84 @@ public class ImageUtils {
 		return null;
 	}
 
-	public static BufferedImage copyImage(BufferedImage image){
+	public static BufferedImage copyImage(BufferedImage image) {
 
 		ColorModel cm = image.getColorModel();
 		boolean isAlphaPremultiplied = cm.isAlphaPremultiplied();
 		WritableRaster raster = image.copyData(null);
 
 		return new BufferedImage(cm, raster, isAlphaPremultiplied, null);
+	}
+
+	public static BufferedImage crop(BufferedImage image, int x1, int y1, int x2, int y2) {
+
+		if(x1 < 0 || x2 <= x1 || y1 < 0 || y2 <= y1 || x2 > image.getWidth() || y2 > image.getHeight()){
+
+			throw new IllegalArgumentException("Invalid crop coordinates");
+		}
+
+		int type = image.getType() == 0 ? BufferedImage.TYPE_INT_ARGB : image.getType();
+
+		int newWidth = x2 - x1;
+
+		int newHeight = y2 - y1;
+
+		BufferedImage croppedImage = new BufferedImage(newWidth, newHeight, type);
+		Graphics2D g = croppedImage.createGraphics();
+
+		g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+		g.setComposite(AlphaComposite.Src);
+
+		g.drawImage(image, 0, 0, newWidth, newHeight, x1, y1, x2, y2, null);
+		g.dispose();
+
+		return croppedImage;
+
+	}
+
+	public static BufferedImage cropAsSquare(BufferedImage image) {
+
+		if(image.getWidth() > image.getHeight()){
+
+			int difference = image.getWidth() - image.getHeight();
+
+			int factor = difference / 2;
+
+			image = crop(image, factor, 0, image.getWidth() - factor, image.getHeight());
+
+		}else if(image.getHeight() > image.getWidth()){
+
+			int difference = image.getHeight() - image.getWidth();
+
+			int factor = difference / 2;
+
+			image = crop(image, 0, factor, image.getWidth(), image.getHeight() - factor);
+
+		}
+
+		return image;
+	}
+
+	public static boolean equals(BufferedImage img1, BufferedImage img2) {
+
+		if(img1.getWidth() == img2.getWidth() && img1.getHeight() == img2.getHeight()){
+
+			for(int x = 0; x < img1.getWidth(); x++){
+
+				for(int y = 0; y < img1.getHeight(); y++){
+
+					if(img1.getRGB(x, y) != img2.getRGB(x, y)){
+
+						return false;
+					}
+				}
+			}
+
+		}else{
+
+			return false;
+		}
+
+		return true;
 	}
 }

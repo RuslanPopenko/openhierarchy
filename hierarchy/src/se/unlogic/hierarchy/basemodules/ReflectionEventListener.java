@@ -12,14 +12,16 @@ public class ReflectionEventListener<T extends Serializable> implements EventLis
 	protected final Class<T> eventType;
 	protected final Object target;
 	protected final Method method;
+	protected final int priority;
 
-	public ReflectionEventListener(Class<?> channel, Class<T> eventType, Object target, Method method) {
+	public ReflectionEventListener(Class<?> channel, Class<T> eventType, Object target, Method method, int priority) {
 
 		super();
 		this.channel = channel;
 		this.eventType = eventType;
 		this.target = target;
 		this.method = method;
+		this.priority = priority;
 	}
 
 	@Override
@@ -48,10 +50,16 @@ public class ReflectionEventListener<T extends Serializable> implements EventLis
 
 		return eventType;
 	}
-	
+
 	@SuppressWarnings("rawtypes")
 	public Class getRawEventType() {
 
 		return eventType;
-	}	
+	}
+
+	@Override
+	public int getPriority() {
+
+		return priority;
+	}
 }

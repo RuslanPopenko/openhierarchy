@@ -36,11 +36,11 @@ public abstract class AnnotatedSectionModule<DescriptorType extends VisibleModul
 
 	protected List<ReflectionInstanceListener<?>> instanceListeners;
 	protected boolean hasRequiredDependencies;
-	
+
 	protected List<ReflectionEventListener<?>> eventListeners;
 
 	protected ReentrantReadWriteLock dependencyLock;
-	protected Lock readLock;
+	protected Lock dependencyReadLock;
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -53,7 +53,7 @@ public abstract class AnnotatedSectionModule<DescriptorType extends VisibleModul
 		parseSettings(moduleDescriptor.getMutableSettingHandler());
 
 		moduleConfigured();
-		
+
 		ReentrantReadWriteLock dependencyLock = new ReentrantReadWriteLock();
 
 		instanceListeners = getInstanceListeners(dependencyLock.writeLock());
@@ -72,17 +72,17 @@ public abstract class AnnotatedSectionModule<DescriptorType extends VisibleModul
 			}
 
 			this.dependencyLock = dependencyLock;
-			readLock = dependencyLock.readLock();
+			dependencyReadLock = dependencyLock.readLock();
 		}
-		
+
 		eventListeners = getEventListeners();
-		
+
 		if(eventListeners != null){
-			
+
 			for(ReflectionEventListener<?> eventListener : eventListeners){
-				
+
 				log.debug("Adding event listener for channel " + eventListener.getChannel() + " and event type " + eventListener.getEventType());
-				
+
 				systemInterface.getEventHandler().addEventListener(eventListener.getChannel(), eventListener.getRawEventType(), eventListener);
 			}
 		}
@@ -96,7 +96,7 @@ public abstract class AnnotatedSectionModule<DescriptorType extends VisibleModul
 		parseXSLStyleSheet();
 
 		parseSettings(descriptor.getMutableSettingHandler());
-		
+
 		moduleConfigured();
 	}
 
@@ -107,15 +107,15 @@ public abstract class AnnotatedSectionModule<DescriptorType extends VisibleModul
 	public void unload() throws Exception {
 
 		if(eventListeners != null){
-			
+
 			for(ReflectionEventListener<?> eventListener : eventListeners){
-				
+
 				log.debug("Removing event listener for channel " + eventListener.getChannel() + " and event type " + eventListener.getEventType());
-				
+
 				systemInterface.getEventHandler().removeEventListener(eventListener.getChannel(), eventListener.getRawEventType(), eventListener);
 			}
 		}
-		
+
 		if(instanceListeners != null){
 
 			for(ReflectionInstanceListener<?> instanceListener : instanceListeners){
@@ -124,7 +124,7 @@ public abstract class AnnotatedSectionModule<DescriptorType extends VisibleModul
 				systemInterface.getInstanceHandler().removeInstanceListener(instanceListener.getRawKey(), instanceListener);
 			}
 		}
-		
+
 		super.unload();
 	}
 
@@ -150,7 +150,10 @@ public abstract class AnnotatedSectionModule<DescriptorType extends VisibleModul
 
 			this.scripts = CollectionUtils.combine(globalScripts,localScripts);
 
-			this.links = ModuleUtils.getLinks(variableReader, sectionInterface, getStaticContentPrefix(), moduleDescriptor);
+			List<LinkTag> globalLinks =  ModuleUtils.getGlobalLinks(variableReader);
+			List<LinkTag> localLinks =  ModuleUtils.getLinks(variableReader, sectionInterface, getStaticContentPrefix(), moduleDescriptor);
+			
+			this.links = CollectionUtils.combine(globalLinks,localLinks);
 		}
 	}
 
@@ -199,7 +202,7 @@ public abstract class AnnotatedSectionModule<DescriptorType extends VisibleModul
 	private List<ReflectionEventListener<?>> getEventListeners() {
 
 		List<ReflectionEventListener<?>> eventListeners = new ArrayList<ReflectionEventListener<?>>();
-		
+
 		List<Method> methods = ReflectionUtils.getMethods(this.getClass());
 
 		for(Method method : methods){
@@ -211,7 +214,7 @@ public abstract class AnnotatedSectionModule<DescriptorType extends VisibleModul
 				continue;
 			}
 
-			eventListeners.add(new ReflectionEventListener(annotation.channel(), method.getParameterTypes()[0], this, method));
+			eventListeners.add(new ReflectionEventListener(annotation.channel(), method.getParameterTypes()[0], this, method, annotation.priority()));
 		}
 
 		if(eventListeners.isEmpty()){
@@ -220,8 +223,8 @@ public abstract class AnnotatedSectionModule<DescriptorType extends VisibleModul
 		}
 
 		return eventListeners;
-	}	
-	
+	}
+
 	protected abstract String getStaticContentPrefix();
 
 	@Override

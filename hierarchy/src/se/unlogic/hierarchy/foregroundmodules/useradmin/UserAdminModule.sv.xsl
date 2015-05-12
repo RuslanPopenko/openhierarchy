@@ -48,7 +48,7 @@
 	<xsl:variable name="i18n.viewUser">Visa användaren</xsl:variable>
 	<xsl:variable name="i18n.editUser">Uppdatera användaren</xsl:variable>
 	<xsl:variable name="i18n.deleteUser">Ta bort användaren</xsl:variable>
-	<xsl:variable name="i18n.passwordConfirmation">Bekräfta lösenord</xsl:variable>
+	
 	
 	<xsl:variable name="i18n.requestedUserNotFound">Den begärda användaren hittades inte</xsl:variable>
 	<xsl:variable name="i18n.userCannotBeUpdated">Den användaren kan inte uppdateras</xsl:variable>
@@ -73,4 +73,5 @@
 	<xsl:variable name="i18n.RequestedUserTypeNotFound">Den begärda användartypen gick inte att hitta</xsl:variable>
 	<xsl:variable name="i18n.UpdateFailedUserNotUpdatable">Den valda användaren går inte att uppdatera</xsl:variable>
 	<xsl:variable name="i18n.DeleteFailedException">Ett fel uppstod när användaren skulle tas bort</xsl:variable>
+	<xsl:variable name="i18n.switchToUser">Logga in som användaren</xsl:variable>
 </xsl:stylesheet>

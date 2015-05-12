@@ -19,6 +19,7 @@ public abstract class AnnotatedMutableUserProviderModule<UserType extends Mutabl
 		super(userClass);
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public void addUser(User user) throws SQLException {
 
@@ -61,6 +62,7 @@ public abstract class AnnotatedMutableUserProviderModule<UserType extends Mutabl
 		setupUser(user, true);
 	}	
 	
+	@Override
 	@SuppressWarnings("unchecked")
 	public void updateUser(User user, boolean encryptPassword, boolean updateGroups, boolean updateAttributes) throws SQLException {
 
@@ -82,12 +84,14 @@ public abstract class AnnotatedMutableUserProviderModule<UserType extends Mutabl
 	
 	protected void postUpdate(UserType user, boolean encryptPassword, boolean updateGroups, boolean updateAttributes) {}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public void deleteUser(User user) throws SQLException {
 
 		userDAO.delete((UserType) user);
 	}
 
+	@Override
 	public boolean canAddUserClass(Class<? extends User> userClass) {
 
 		return this.userClass.equals(userClass);

@@ -22,6 +22,7 @@ import se.unlogic.webutils.http.URIParser;
 
 public class XSLReload extends SimpleForegroundModule {
 
+	@Override
 	public SimpleForegroundModuleResponse processRequest(HttpServletRequest req, HttpServletResponse res, User user, URIParser uriParser) throws Exception {
 
 		ProgressMeter meter = new ProgressMeter();

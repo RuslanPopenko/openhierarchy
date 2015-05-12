@@ -10,6 +10,8 @@ package se.unlogic.hierarchy.core.daos.implementations.mysql;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import javax.sql.DataSource;
 
@@ -23,16 +25,23 @@ import se.unlogic.standardutils.dao.querys.ArrayListQuery;
 import se.unlogic.standardutils.dao.querys.IntegerKeyCollector;
 import se.unlogic.standardutils.dao.querys.ObjectQuery;
 import se.unlogic.standardutils.dao.querys.UpdateQuery;
+import se.unlogic.standardutils.db.DBUtils;
 import se.unlogic.standardutils.populators.IntegerPopulator;
+import se.unlogic.standardutils.string.StringUtils;
 
 public class MySQLSectionDAO extends BaseDAO implements SectionDAO {
 
 	private static SectionDescriptorPopulator Populator = new SectionDescriptorPopulator();
 
-	protected MySQLSectionDAO(DataSource ds) {
+	protected final MySQLSectionAttributeDAO<SimpleSectionDescriptor> sectionAttributeDAO;
+
+	protected MySQLSectionDAO(DataSource ds, MySQLSectionAttributeDAO<SimpleSectionDescriptor> sectionAttributeDAO) {
+
 		super(ds);
+		this.sectionAttributeDAO = sectionAttributeDAO;
 	}
 
+	@Override
 	public ArrayList<SimpleSectionDescriptor> getSubSections(SimpleSectionDescriptor section, boolean getSubSections) throws SQLException {
 
 		Connection connection = null;
@@ -53,6 +62,7 @@ public class MySQLSectionDAO extends BaseDAO implements SectionDAO {
 		}
 	}
 
+	@Override
 	public SimpleSectionDescriptor getRootSection(boolean getSubSections) throws SQLException {
 
 		Connection connection = null;
@@ -66,8 +76,7 @@ public class MySQLSectionDAO extends BaseDAO implements SectionDAO {
 
 			if (simpleSectionDescriptor != null) {
 
-				this.getSectionUsers(simpleSectionDescriptor, connection);
-				this.getSectionGroups(simpleSectionDescriptor, connection);
+				getRelations(Collections.singletonList(simpleSectionDescriptor), connection);
 
 				if (getSubSections) {
 					simpleSectionDescriptor.setSubSectionsList(this.getSubSections(connection, simpleSectionDescriptor, true));
@@ -96,12 +105,12 @@ public class MySQLSectionDAO extends BaseDAO implements SectionDAO {
 		ArrayList<SimpleSectionDescriptor> sectionList = query.executeQuery();
 
 		if (sectionList != null) {
+
+			getRelations(sectionList, connection);
+
 			for (SimpleSectionDescriptor subSection : sectionList) {
 
 				subSection.setFullAlias(section.getFullAlias() + "/" + subSection.getAlias());
-
-				this.getSectionUsers(subSection, connection);
-				this.getSectionGroups(subSection, connection);
 
 				if (getSubSections) {
 					subSection.setSubSectionsList(this.getSubSections(connection, subSection, true));
@@ -112,6 +121,7 @@ public class MySQLSectionDAO extends BaseDAO implements SectionDAO {
 		return sectionList;
 	}
 
+	@Override
 	public ArrayList<SimpleSectionDescriptor> getEnabledSubSections(SectionDescriptor sectionDescriptor, boolean getSubSections) throws SQLException {
 
 		Connection connection = null;
@@ -140,13 +150,13 @@ public class MySQLSectionDAO extends BaseDAO implements SectionDAO {
 		ArrayList<SimpleSectionDescriptor> sectionList = query.executeQuery();
 
 		if (sectionList != null) {
+
+			getRelations(sectionList, connection);
+
 			for (SimpleSectionDescriptor subSection : sectionList) {
 
 				// Create full alias using full alias of previous section
 				subSection.setFullAlias(sectionDescriptor.getFullAlias() + "/" + subSection.getAlias());
-
-				this.getSectionUsers(subSection, connection);
-				this.getSectionGroups(subSection, connection);
 
 				if (getSubSections) {
 					subSection.setSubSectionsList(this.getEnabledSubSections(connection, subSection, true));
@@ -176,6 +186,7 @@ public class MySQLSectionDAO extends BaseDAO implements SectionDAO {
 
 	}
 
+	@Override
 	public SimpleSectionDescriptor getSection(int sectionID, boolean fullAlias) throws SQLException {
 
 		Connection connection = null;
@@ -191,8 +202,7 @@ public class MySQLSectionDAO extends BaseDAO implements SectionDAO {
 
 			if (simpleSectionDescriptor != null) {
 
-				this.getSectionUsers(simpleSectionDescriptor, connection);
-				this.getSectionGroups(simpleSectionDescriptor, connection);
+				getRelations(Collections.singletonList(simpleSectionDescriptor), connection);
 
 				if (fullAlias && simpleSectionDescriptor.getParentSectionID() != null) {
 					this.getReverseFullAlias(simpleSectionDescriptor);
@@ -212,6 +222,7 @@ public class MySQLSectionDAO extends BaseDAO implements SectionDAO {
 
 	}
 
+	@Override
 	public void getReverseFullAlias(SimpleSectionDescriptor simpleSectionDescriptor) throws SQLException {
 
 		if (simpleSectionDescriptor.getParentSectionID() != null) {
@@ -236,6 +247,7 @@ public class MySQLSectionDAO extends BaseDAO implements SectionDAO {
 		}
 	}
 
+	@Override
 	public void update(SimpleSectionDescriptor simpleSectionDescriptor) throws SQLException {
 
 		TransactionHandler transactionHandler = null;
@@ -278,6 +290,8 @@ public class MySQLSectionDAO extends BaseDAO implements SectionDAO {
 				this.setGroups(transactionHandler, simpleSectionDescriptor);
 			}
 
+			this.sectionAttributeDAO.set(simpleSectionDescriptor, transactionHandler);
+
 			transactionHandler.commit();
 		} finally {
 			if (transactionHandler != null && !transactionHandler.isClosed()) {
@@ -305,6 +319,7 @@ public class MySQLSectionDAO extends BaseDAO implements SectionDAO {
 		query.executeUpdate();
 	}
 
+	@Override
 	public void add(SimpleSectionDescriptor simpleSectionDescriptor) throws SQLException {
 
 		TransactionHandler transactionHandler = null;
@@ -346,6 +361,8 @@ public class MySQLSectionDAO extends BaseDAO implements SectionDAO {
 				this.setGroups(transactionHandler, simpleSectionDescriptor);
 			}
 
+			this.sectionAttributeDAO.set(simpleSectionDescriptor, transactionHandler);
+
 			transactionHandler.commit();
 		} finally {
 			if (transactionHandler != null && !transactionHandler.isClosed()) {
@@ -380,6 +397,7 @@ public class MySQLSectionDAO extends BaseDAO implements SectionDAO {
 
 	}
 
+	@Override
 	public void delete(SimpleSectionDescriptor simpleSectionDescriptor) throws SQLException {
 		UpdateQuery query = new UpdateQuery(this.dataSource.getConnection(), true, "DELETE FROM openhierarchy_sections WHERE sectionID = ?");
 
@@ -388,13 +406,59 @@ public class MySQLSectionDAO extends BaseDAO implements SectionDAO {
 		query.executeUpdate();
 	}
 
-	public SimpleSectionDescriptor getSection(Integer sectionID, String alias) throws SQLException {
+	@Override
+	public SimpleSectionDescriptor getSection(Integer parentSectionID, String alias) throws SQLException {
 
 		ObjectQuery<SimpleSectionDescriptor> query = new ObjectQuery<SimpleSectionDescriptor>(this.dataSource.getConnection(), true, "SELECT * FROM openhierarchy_sections WHERE parentSectionID = ? AND alias = ?", Populator);
 
-		query.setObject(1, sectionID);
+		query.setObject(1, parentSectionID);
 		query.setString(2, alias);
 
 		return query.executeQuery();
+	}
+
+	@Override
+	public List<SimpleSectionDescriptor> getSectionsByAttribute(String name, String value) throws SQLException {
+
+		List<Integer> sectionIDs = this.sectionAttributeDAO.getSectionIDsByAttribute(name, value);
+
+		if (sectionIDs == null) {
+
+			return null;
+		}
+
+		Connection connection = null;
+
+		try {
+			connection = this.dataSource.getConnection();
+
+			ArrayListQuery<SimpleSectionDescriptor> query;
+
+			query = new ArrayListQuery<SimpleSectionDescriptor>(connection, false, "SELECT * FROM openhierarchy_sections WHERE sectionID = IN(" + StringUtils.toCommaSeparatedString(sectionIDs) + ") ORDER BY name", Populator);
+
+			ArrayList<SimpleSectionDescriptor> sectionDescriptors = query.executeQuery();
+
+			if (sectionDescriptors != null) {
+
+				getRelations(sectionDescriptors, connection);
+			}
+
+			return sectionDescriptors;
+
+		} finally {
+
+			DBUtils.closeConnection(connection);
+		}
+	}
+
+	protected void getRelations(List<SimpleSectionDescriptor> sections, Connection connection) throws SQLException {
+
+		for (SimpleSectionDescriptor sectionDescriptor : sections) {
+
+			this.getSectionUsers(sectionDescriptor, connection);
+			this.getSectionGroups(sectionDescriptor, connection);
+
+			this.sectionAttributeDAO.getAttributeHandler(sectionDescriptor, connection);
+		}
 	}
 }

@@ -137,6 +137,7 @@ public final class SimpleForegroundModuleResponse extends BaseModuleResponse imp
 		this.breadcrumbs.addAll(Arrays.asList(breadcrumbs));
 	}
 
+	@Override
 	public void addBreadcrumbFirst(Breadcrumb breadcrumb) {
 
 		this.breadcrumbs.add(0,breadcrumb);
@@ -152,6 +153,7 @@ public final class SimpleForegroundModuleResponse extends BaseModuleResponse imp
 		this.breadcrumbs.addAll(breadcrumbs);
 	}
 	
+	@Override
 	public Element getElement() {
 		return element;
 	}
@@ -160,6 +162,7 @@ public final class SimpleForegroundModuleResponse extends BaseModuleResponse imp
 		this.element = element;
 	}
 
+	@Override
 	public String getHtml() {
 		return html;
 	}
@@ -168,6 +171,7 @@ public final class SimpleForegroundModuleResponse extends BaseModuleResponse imp
 		this.html = html;
 	}
 
+	@Override
 	public Document getDocument() {
 		return document;
 	}
@@ -176,6 +180,7 @@ public final class SimpleForegroundModuleResponse extends BaseModuleResponse imp
 		this.document = document;
 	}
 
+	@Override
 	public boolean isUserChanged() {
 		return userChanged;
 	}
@@ -184,14 +189,17 @@ public final class SimpleForegroundModuleResponse extends BaseModuleResponse imp
 		this.userChanged = userChanged;
 	}
 
+	@Override
 	public void excludeSystemTransformation(boolean excludeSystemTransformation) {
 		this.excludeSystemTransformation = excludeSystemTransformation;
 	}
 
+	@Override
 	public boolean isExcludeSystemTransformation() {
 		return excludeSystemTransformation;
 	}
 	
+	@Override
 	public ResponseType getResponseType() {
 		return responseType;
 	}
@@ -200,44 +208,54 @@ public final class SimpleForegroundModuleResponse extends BaseModuleResponse imp
 		this.responseType = responseType;
 	}
 
+	@Override
 	public Transformer getTransformer() {
 		return transformer;
 	}
 
+	@Override
 	public void setMenu(SectionMenu sectionMenu){
 		
 		this.sectionMenu = sectionMenu;
 	}
 	
+	@Override
 	public SectionMenu getMenu(){
 		
 		return this.sectionMenu;
 	}
 
+	@Override
 	public void setTransformer(Transformer transformer) {
 		this.transformer = transformer;
 	}
 
+	@Override
 	public String getTitle() {
 		return title;
 	}
 
+	@Override
 	public ForegroundModuleDescriptor getModuleDescriptor() {
 		return moduleDescriptor;
 	}
 
+	@Override
 	public void setModuleDescriptor(ForegroundModuleDescriptor moduleDescriptor) {
 		this.moduleDescriptor = moduleDescriptor;
 	}
 
+	@Override
 	public final ArrayList<Breadcrumb> getBreadcrumbs() {
 		return breadcrumbs;
 	}
 
+	@Override
 	public final List<BackgroundModuleResponse> getBackgroundModuleResponses() {
 		return backgroundModuleResponses;
 	}
 
+	@Override
 	public void addBackgroundModuleResponses(List<BackgroundModuleResponse> backgroundModuleResponses) {
 
 		if(this.backgroundModuleResponses == null){
@@ -256,6 +274,7 @@ public final class SimpleForegroundModuleResponse extends BaseModuleResponse imp
 		this.title = title;
 	}
 	
+	@Override
 	public boolean isExcludeSectionBreadcrumbs() {
 		return excludeSectionBreadcrumbs;
 	}

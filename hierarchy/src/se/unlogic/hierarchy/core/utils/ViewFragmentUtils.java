@@ -6,7 +6,7 @@ import se.unlogic.hierarchy.core.interfaces.ViewFragment;
 
 public class ViewFragmentUtils {
 
-	public static void appendLinksAndScripts(SimpleForegroundModuleResponse moduleResponse, ViewFragment viewFragment) {
+	public static SimpleForegroundModuleResponse appendLinksAndScripts(SimpleForegroundModuleResponse moduleResponse, ViewFragment viewFragment) {
 
 		if(viewFragment.getLinks() != null){
 
@@ -17,5 +17,7 @@ public class ViewFragmentUtils {
 
 			moduleResponse.addScripts(viewFragment.getScripts());
 		}
+
+		return moduleResponse;
 	}
 }

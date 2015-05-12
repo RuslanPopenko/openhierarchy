@@ -33,6 +33,7 @@ public class SimpleCachedXSLTDescriptor implements CachedXSLTDescriptor {
 		this.setUseFullMenu(useFullMenu);
 	}
 
+	@Override
 	public XSLTransformer getCachedXSLT() {
 
 		return cachedXSLT;
@@ -43,6 +44,7 @@ public class SimpleCachedXSLTDescriptor implements CachedXSLTDescriptor {
 		this.cachedXSLT = cachedXSLT;
 	}
 
+	@Override
 	public Language getLanguage() {
 
 		return language;
@@ -53,6 +55,7 @@ public class SimpleCachedXSLTDescriptor implements CachedXSLTDescriptor {
 		this.language = language;
 	}
 
+	@Override
 	public String getName() {
 
 		return name;
@@ -63,6 +66,7 @@ public class SimpleCachedXSLTDescriptor implements CachedXSLTDescriptor {
 		this.name = name;
 	}
 
+	@Override
 	public boolean isDefault() {
 
 		return isDefault;
@@ -73,6 +77,7 @@ public class SimpleCachedXSLTDescriptor implements CachedXSLTDescriptor {
 		this.isDefault = isdefault;
 	}
 
+	@Override
 	public Transformer getTransformer() throws TransformerConfigurationException {
 
 		return cachedXSLT.getTransformer();
@@ -124,6 +129,7 @@ public class SimpleCachedXSLTDescriptor implements CachedXSLTDescriptor {
 		return name + " in " + language.toString() + " (wrapping " + cachedXSLT + ")";
 	}
 
+	@Override
 	public boolean usesFullMenu() {
 
 		return useFullMenu;

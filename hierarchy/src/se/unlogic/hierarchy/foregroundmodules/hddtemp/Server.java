@@ -68,6 +68,7 @@ public class Server implements Elementable {
 	@XMLElement
 	private boolean unableToConnect;
 
+	@Override
 	public Element toXML(Document doc) {
 
 		return XMLGenerator.toXML(this, doc);

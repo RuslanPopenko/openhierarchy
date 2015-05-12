@@ -10,7 +10,19 @@ package se.unlogic.hierarchy.core.enums;
 
 public enum ModuleType {
 
-	BACKGROUND,
-	FOREGROUND,
-	FILTER
+	BACKGROUND("bg"),
+	FOREGROUND("fg"),
+	FILTER("fl");
+	
+	private final String shortName;
+	
+	private ModuleType(String shortName){
+		
+		this.shortName = shortName;
+	}
+
+	public String getShortName() {
+	
+		return shortName;
+	}
 }

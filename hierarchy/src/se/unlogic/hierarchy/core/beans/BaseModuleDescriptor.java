@@ -13,6 +13,7 @@ import java.util.List;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import se.unlogic.hierarchy.core.handlers.SimpleMutableAttributeHandler;
 import se.unlogic.hierarchy.core.handlers.SimpleSettingHandler;
 import se.unlogic.hierarchy.core.interfaces.ModuleDescriptor;
 import se.unlogic.hierarchy.core.interfaces.MutableSettingHandler;
@@ -82,6 +83,9 @@ public abstract class BaseModuleDescriptor implements ModuleDescriptor, XMLParse
 
 	protected MutableSettingHandler mutableSettingHandler;
 
+	protected SimpleMutableAttributeHandler attributeHandler;
+
+	@Override
 	public MutableSettingHandler getMutableSettingHandler() {
 
 		return mutableSettingHandler;
@@ -94,9 +98,10 @@ public abstract class BaseModuleDescriptor implements ModuleDescriptor, XMLParse
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see se.unlogic.hierarchy.core.beans.ModuleDescriptor#isEnabled()
 	 */
+	@Override
 	public boolean isEnabled() {
 
 		return enabled;
@@ -109,9 +114,10 @@ public abstract class BaseModuleDescriptor implements ModuleDescriptor, XMLParse
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see se.unlogic.hierarchy.core.beans.ModuleDescriptor#getModuleID()
 	 */
+	@Override
 	public Integer getModuleID() {
 
 		return moduleID;
@@ -124,9 +130,10 @@ public abstract class BaseModuleDescriptor implements ModuleDescriptor, XMLParse
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see se.unlogic.hierarchy.core.beans.ModuleDescriptor#getDataSourceID()
 	 */
+	@Override
 	public Integer getDataSourceID() {
 
 		return dataSourceID;
@@ -137,6 +144,7 @@ public abstract class BaseModuleDescriptor implements ModuleDescriptor, XMLParse
 		this.dataSourceID = dataSourceID;
 	}
 
+	@Override
 	public List<Integer> getAllowedGroupIDs() {
 
 		return allowedGroupIDs;
@@ -147,6 +155,7 @@ public abstract class BaseModuleDescriptor implements ModuleDescriptor, XMLParse
 		this.allowedGroupIDs = allowedGroupIDs;
 	}
 
+	@Override
 	public List<Integer> getAllowedUserIDs() {
 
 		return allowedUserIDs;
@@ -159,9 +168,10 @@ public abstract class BaseModuleDescriptor implements ModuleDescriptor, XMLParse
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see se.unlogic.hierarchy.core.beans.ModuleDescriptor#getName()
 	 */
+	@Override
 	public String getName() {
 
 		return name;
@@ -174,9 +184,10 @@ public abstract class BaseModuleDescriptor implements ModuleDescriptor, XMLParse
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see se.unlogic.hierarchy.core.beans.ModuleDescriptor#isUserAccess()
 	 */
+	@Override
 	public boolean allowsUserAccess() {
 
 		return userAccess;
@@ -233,9 +244,10 @@ public abstract class BaseModuleDescriptor implements ModuleDescriptor, XMLParse
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see se.unlogic.hierarchy.core.beans.ModuleDescriptor#isAnonymousAccess()
 	 */
+	@Override
 	public boolean allowsAnonymousAccess() {
 
 		return anonymousAccess;
@@ -248,9 +260,10 @@ public abstract class BaseModuleDescriptor implements ModuleDescriptor, XMLParse
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see se.unlogic.hierarchy.core.beans.ModuleDescriptor#getClassname()
 	 */
+	@Override
 	public String getClassname() {
 
 		return classname;
@@ -263,9 +276,10 @@ public abstract class BaseModuleDescriptor implements ModuleDescriptor, XMLParse
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see se.unlogic.hierarchy.core.beans.ModuleDescriptor#isAdminAccess()
 	 */
+	@Override
 	public boolean allowsAdminAccess() {
 
 		return adminAccess;
@@ -282,6 +296,7 @@ public abstract class BaseModuleDescriptor implements ModuleDescriptor, XMLParse
 		return name + " (moduleID: " + this.moduleID + ")";
 	}
 
+	@Override
 	public Element toXML(Document doc) {
 
 		Element moduleElement = doc.createElement("module");
@@ -307,7 +322,7 @@ public abstract class BaseModuleDescriptor implements ModuleDescriptor, XMLParse
 		return moduleElement;
 	}
 
-	public Element toXML(Document doc, boolean includeSettings) {
+	public Element toXML(Document doc, boolean includeSettings, boolean includeAttributes) {
 
 		Element moduleElement = toXML(doc);
 
@@ -315,9 +330,14 @@ public abstract class BaseModuleDescriptor implements ModuleDescriptor, XMLParse
 			moduleElement.appendChild(mutableSettingHandler.toXML(doc));
 		}
 
+		if(attributeHandler != null){
+			moduleElement.appendChild(attributeHandler.toXML(doc));
+		}		
+		
 		return moduleElement;
 	}
 
+	@Override
 	public void populate(XMLParser xmlParser) throws ValidationException {
 
 		List<ValidationError> errors = new ArrayList<ValidationError>();
@@ -330,20 +350,40 @@ public abstract class BaseModuleDescriptor implements ModuleDescriptor, XMLParse
 		this.enabled = xmlParser.getBoolean("enabled");
 		this.dataSourceID = xmlParser.getInteger("dataSourceID");
 		this.moduleID = xmlParser.getInteger("moduleID");
-		
+
 		this.allowedGroupIDs = xmlParser.getIntegers("allowedGroupIDs/groupID");
 		this.allowedUserIDs = xmlParser.getIntegers("allowedUserIDs/userID");
-		
-		XMLParser settingsParser = xmlParser.getNode("settings"); 
-		
+
+		XMLParser settingsParser = xmlParser.getNode("settings");
+
 		if(settingsParser != null){
-			
+
 			this.mutableSettingHandler = new SimpleSettingHandler(settingsParser);
+		}
+
+		XMLParser attributeParser = xmlParser.getNode("Attributes");
+
+		if(attributeParser != null){
+
+			this.attributeHandler = new SimpleMutableAttributeHandler(attributeParser, 255, 255);
 		}
 
 		if(!errors.isEmpty()){
 
 			throw new ValidationException(errors);
 		}
+	}
+
+
+	@Override
+	public SimpleMutableAttributeHandler getAttributeHandler() {
+
+		return attributeHandler;
+	}
+
+
+	public void setAttributeHandler(SimpleMutableAttributeHandler attributeHandler) {
+
+		this.attributeHandler = attributeHandler;
 	}
 }

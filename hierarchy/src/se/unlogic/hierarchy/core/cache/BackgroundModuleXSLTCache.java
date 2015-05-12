@@ -24,12 +24,13 @@ import se.unlogic.hierarchy.core.exceptions.ResourceNotFoundException;
 import se.unlogic.hierarchy.core.interfaces.BackgroundModule;
 import se.unlogic.hierarchy.core.interfaces.BackgroundModuleCacheListener;
 import se.unlogic.hierarchy.core.interfaces.BackgroundModuleDescriptor;
+import se.unlogic.hierarchy.core.interfaces.ModuleTransformerCache;
 import se.unlogic.standardutils.xml.ClassPathURIResolver;
 import se.unlogic.standardutils.xsl.FileXSLTransformer;
 import se.unlogic.standardutils.xsl.URIXSLTransformer;
 import se.unlogic.standardutils.xsl.XSLTransformer;
 
-public class BackgroundModuleXSLTCache implements BackgroundModuleCacheListener {
+public class BackgroundModuleXSLTCache implements BackgroundModuleCacheListener, ModuleTransformerCache<BackgroundModuleDescriptor>{
 
 	private final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
 	private final Lock r = rwl.readLock();
@@ -52,6 +53,7 @@ public class BackgroundModuleXSLTCache implements BackgroundModuleCacheListener 
 		}
 	}
 
+	@Override
 	public void moduleCached(BackgroundModuleDescriptor mb, BackgroundModule moduleInstance) {
 		w.lock();
 		try{
@@ -74,6 +76,7 @@ public class BackgroundModuleXSLTCache implements BackgroundModuleCacheListener 
 		}
 	}
 
+	@Override
 	public void moduleUnloaded(BackgroundModuleDescriptor mb, BackgroundModule moduleInstance){
 		w.lock();
 		try{
@@ -86,6 +89,7 @@ public class BackgroundModuleXSLTCache implements BackgroundModuleCacheListener 
 		}
 	}
 
+	@Override
 	public void moduleUpdated(BackgroundModuleDescriptor mb, BackgroundModule moduleInstance){
 		w.lock();
 		try{
@@ -143,7 +147,7 @@ public class BackgroundModuleXSLTCache implements BackgroundModuleCacheListener 
 
 				}else{
 
-					return new URIXSLTransformer(Class.forName(mb.getClassname()).getResource(mb.getXslPath()).toURI(),ClassPathURIResolver.getInstance());
+					return new URIXSLTransformer(Class.forName(mb.getClassname()).getResource(mb.getXslPath()).toURI(),ClassPathURIResolver.getInstance(), true);
 				}
 			}
 		}

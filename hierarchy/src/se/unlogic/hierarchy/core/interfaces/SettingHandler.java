@@ -16,9 +16,13 @@ public interface SettingHandler extends Elementable{
 
 	public Long getLong(String id);
 
-	public Double getDouble(String id);
+	public Float getFloat(String id);
 
+	public Double getDouble(String id);
+	
 	public Boolean getBoolean(String id);
+	
+	public Short getShort(String id);
 
 	public List<String> getStrings(String id);
 
@@ -26,6 +30,8 @@ public interface SettingHandler extends Elementable{
 
 	public List<Long> getLongs(String id);
 
+	public List<Float> getFloats(String id);
+	
 	public List<Double> getDoubles(String id);
 
 	public boolean isEmpty();

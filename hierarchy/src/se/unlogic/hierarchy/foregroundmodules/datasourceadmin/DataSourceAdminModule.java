@@ -9,6 +9,7 @@ package se.unlogic.hierarchy.foregroundmodules.datasourceadmin;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -31,6 +32,7 @@ import se.unlogic.hierarchy.core.interfaces.ForegroundModuleResponse;
 import se.unlogic.hierarchy.core.interfaces.SectionInterface;
 import se.unlogic.hierarchy.core.utils.CRUDCallback;
 import se.unlogic.hierarchy.foregroundmodules.AnnotatedForegroundModule;
+import se.unlogic.standardutils.collections.CollectionUtils;
 import se.unlogic.standardutils.context.ContextUtils;
 import se.unlogic.standardutils.numbers.NumberUtils;
 import se.unlogic.standardutils.reflection.ReflectionUtils;
@@ -74,7 +76,7 @@ public class DataSourceAdminModule extends AnnotatedForegroundModule implements 
 	@Override
 	public ForegroundModuleResponse defaultMethod(HttpServletRequest req, HttpServletResponse res, User user, URIParser uriParser) throws Exception {
 
-		return this.list(req, res, user, uriParser, null);
+		return this.list(req, res, user, uriParser, (List<ValidationError>)null);
 	}
 
 	@WebPublic
@@ -166,6 +168,7 @@ public class DataSourceAdminModule extends AnnotatedForegroundModule implements 
 		return null;
 	}
 
+	@Override
 	public Document createDocument(HttpServletRequest req, URIParser uriParser, User user) {
 
 		return this.createDocument(req, uriParser);
@@ -182,21 +185,27 @@ public class DataSourceAdminModule extends AnnotatedForegroundModule implements 
 		return doc;
 	}
 
+	@Override
 	public String getTitlePrefix() {
 
 		return this.moduleDescriptor.getName();
 	}
 
 	public SimpleForegroundModuleResponse list(HttpServletRequest req, HttpServletResponse res, User user, URIParser uriParser, ValidationError validationError) throws Exception {
+		
+		return list(req, res, user, uriParser, CollectionUtils.getGenericSingletonList(validationError));
+	}
+	
+	public SimpleForegroundModuleResponse list(HttpServletRequest req, HttpServletResponse res, User user, URIParser uriParser, List<ValidationError> validationErrors) throws Exception {
 
 		Document doc = this.createDocument(req, uriParser);
 
 		Element listElement = doc.createElement("List");
 		doc.getDocumentElement().appendChild(listElement);
 
-		if(validationError != null){
+		if(validationErrors != null){
 
-			listElement.appendChild(validationError.toXML(doc));
+			XMLUtils.append(doc, listElement, validationErrors);
 		}
 
 		ArrayList<SimpleDataSourceDescriptor> dataSourceDescriptors = this.dataSourceDAO.getAll();

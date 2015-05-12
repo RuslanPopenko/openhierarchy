@@ -12,7 +12,7 @@ public class IntegerBeanIDParser implements BeanIDParser<Integer> {
 	private IntegerBeanIDParser(){}
 	
 	@Override
-	public Integer getBeanID(URIParser uriParser, HttpServletRequest req) {
+	public Integer getBeanID(URIParser uriParser, HttpServletRequest req, String getMode) {
 
 		return uriParser.getInt(2);
 	}

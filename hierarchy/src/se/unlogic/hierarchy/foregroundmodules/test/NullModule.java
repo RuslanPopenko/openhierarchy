@@ -18,6 +18,7 @@ import se.unlogic.webutils.http.URIParser;
 
 public class NullModule extends SimpleForegroundModule {
 
+	@Override
 	public SimpleForegroundModuleResponse processRequest(HttpServletRequest req, HttpServletResponse res, User user, URIParser uriParser) throws Exception {
 		
 		return null;

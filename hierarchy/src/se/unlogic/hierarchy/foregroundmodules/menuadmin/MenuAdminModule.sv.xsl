@@ -4,6 +4,8 @@
 
 	<xsl:include href="MenuAdminModuleTemplates.xsl" />
 	
+	<xsl:include href="classpath://se/unlogic/hierarchy/core/utils/usergrouplist/UserGroupList.sv.xsl"/>
+	
 	<!-- Naming template.mode.field.type -->
 	
 	 <xsl:variable name="expandAll" select="'Fäll ut alla'" />
@@ -39,7 +41,7 @@
 	 <xsl:variable name="phrase2" select="'Adressen som menyalternativet pekar till'"/>
 	 <xsl:variable name="menu" select="'Menyalternativ'"/>
 	 <xsl:variable name="phrase3" select="'Menyalternativ i bundlen'"/>
-	 <xsl:variable name="access" select="'Access'"/>
+	 <xsl:variable name="access" select="'Åtkomst'"/>
 	 <xsl:variable name="admins" select="'Administratörer'"/>
 	 <xsl:variable name="loggedInUsers" select="'Inloggade användare'"/>
 	 <xsl:variable name="nonLoggedInUsers" select="'Ej inloggade användare'"/>
@@ -47,13 +49,14 @@
 	 <xsl:variable name="validationError.requiredField" select="'Du måste fylla i fältet'"/>
 	 <xsl:variable name="validationError.invalidFormat" select="'Felaktigt format på fältet'"/>
 	 <xsl:variable name="validationError.unknown" select="'Okänt fel på fältet'"/>
+	 <xsl:variable name="validationError.tooLong">För långt värde i fältet</xsl:variable>
 	 
 	 <xsl:variable name="validationError.duplicateAlias" select="'Det finns redan ett menyalternativ med detta alias i den här sektion!'"/>
 	 <xsl:variable name="validationError.unknownErrorOccurred" select="'Ett okänt fel har inträffat'"/>
 	
 	 <xsl:variable name="add" select="'Lägg till'"/>
-	 <xsl:variable name="users" select="'Users'"/>
-	 <xsl:variable name="groups" select="'Groups'"/>
+	 <xsl:variable name="users" select="'Användare'"/>
+	 <xsl:variable name="groups" select="'Grupper'"/>
 	 <xsl:variable name="inSection" select="'in section'"/>
 	 <xsl:variable name="saveChanges" select="'Spara ändringar'"/>
 	

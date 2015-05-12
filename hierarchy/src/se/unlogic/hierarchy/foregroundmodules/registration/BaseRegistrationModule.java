@@ -260,6 +260,7 @@ public abstract class BaseRegistrationModule<UserType extends User, Confirmation
 		super.unload();
 	}
 
+	@Override
 	public void run() {
 
 		this.deleteOldConfirmations();

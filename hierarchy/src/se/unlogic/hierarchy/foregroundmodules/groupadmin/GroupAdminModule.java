@@ -2,7 +2,7 @@ package se.unlogic.hierarchy.foregroundmodules.groupadmin;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -16,6 +16,7 @@ import org.w3c.dom.Element;
 import se.unlogic.hierarchy.core.annotations.ModuleSetting;
 import se.unlogic.hierarchy.core.annotations.TextAreaSettingDescriptor;
 import se.unlogic.hierarchy.core.annotations.WebPublic;
+import se.unlogic.hierarchy.core.beans.AttributeDescriptor;
 import se.unlogic.hierarchy.core.beans.Group;
 import se.unlogic.hierarchy.core.beans.MutableGroup;
 import se.unlogic.hierarchy.core.beans.MutableUser;
@@ -28,7 +29,9 @@ import se.unlogic.hierarchy.core.interfaces.AttributeHandler;
 import se.unlogic.hierarchy.core.interfaces.ForegroundModuleDescriptor;
 import se.unlogic.hierarchy.core.interfaces.ForegroundModuleResponse;
 import se.unlogic.hierarchy.core.interfaces.SectionInterface;
+import se.unlogic.hierarchy.core.utils.AttributeDescriptorUtils;
 import se.unlogic.hierarchy.core.utils.CRUDCallback;
+import se.unlogic.hierarchy.core.utils.usergrouplist.UserGroupListConnector;
 import se.unlogic.hierarchy.foregroundmodules.AnnotatedForegroundModule;
 import se.unlogic.hierarchy.foregroundmodules.groupadmin.cruds.GroupCRUD;
 import se.unlogic.hierarchy.foregroundmodules.groupproviders.SimpleGroup;
@@ -44,12 +47,14 @@ import se.unlogic.webutils.populators.annotated.AnnotatedRequestPopulator;
 public class GroupAdminModule extends AnnotatedForegroundModule implements CRUDCallback<User> {
 
 	@ModuleSetting(allowsNull = true)
-	@TextAreaSettingDescriptor(name="Supported attributes", description="The attributes to shown in the add/update forms")
+	@TextAreaSettingDescriptor(name="Supported attributes", description="The attributes to show in the form. The format is [name][*/!]:[display name]:[max length]:[StringFormatValidator] (without brackets). Only the name is required. The * sign indicates if the attribute is required or not. The ! sign indicates that the attribute is read only")
 	protected String supportedAttributes;
 
-	protected List<String> attributes;
+	protected List<AttributeDescriptor> attributes;
 
 	protected GroupCRUD<? extends GroupAdminModule> groupCRUD;
+
+	protected UserGroupListConnector userGroupListConnector;
 
 	@Override
 	public void init(ForegroundModuleDescriptor moduleDescriptor, SectionInterface sectionInterface, DataSource dataSource) throws Exception {
@@ -57,6 +62,8 @@ public class GroupAdminModule extends AnnotatedForegroundModule implements CRUDC
 		super.init(moduleDescriptor, sectionInterface, dataSource);
 
 		this.groupCRUD = getGroupCRUD();
+
+		this.userGroupListConnector = new UserGroupListConnector(systemInterface);
 	}
 
 	@Override
@@ -64,14 +71,8 @@ public class GroupAdminModule extends AnnotatedForegroundModule implements CRUDC
 
 		super.moduleConfigured();
 
-		if(supportedAttributes == null){
+		attributes = AttributeDescriptorUtils.parseAttributes(supportedAttributes);
 
-			attributes = null;
-
-		}else{
-
-			attributes = Arrays.asList(supportedAttributes.split("\\n"));
-		}
 	}
 
 	protected GroupCRUD<? extends GroupAdminModule> getGroupCRUD() {
@@ -89,7 +90,7 @@ public class GroupAdminModule extends AnnotatedForegroundModule implements CRUDC
 		return list(req, res, user, uriParser, null);
 	}
 
-	public ForegroundModuleResponse list(HttpServletRequest req, HttpServletResponse res, User user, URIParser uriParser, ValidationError validationError) throws Exception {
+	public ForegroundModuleResponse list(HttpServletRequest req, HttpServletResponse res, User user, URIParser uriParser, List<ValidationError> validationErrors) throws Exception {
 
 		log.info("User " + user + " listing groups");
 
@@ -97,8 +98,8 @@ public class GroupAdminModule extends AnnotatedForegroundModule implements CRUDC
 		Element groupListElement = doc.createElement("Groups");
 		doc.getFirstChild().appendChild(groupListElement);
 
-		if (validationError != null) {
-			groupListElement.appendChild(validationError.toXML(doc));
+		if (validationErrors != null) {
+			XMLUtils.append(doc, groupListElement, validationErrors);
 		}
 
 		XMLUtils.append(doc, groupListElement, systemInterface.getGroupHandler().getGroups(false));
@@ -108,6 +109,7 @@ public class GroupAdminModule extends AnnotatedForegroundModule implements CRUDC
 		return new SimpleForegroundModuleResponse(doc, this.moduleDescriptor.getName(), getDefaultBreadcrumb());
 	}
 
+	@Override
 	public Document createDocument(HttpServletRequest req, URIParser uriParser, User user) {
 
 		Document doc = XMLUtils.createDomDocument();
@@ -126,7 +128,7 @@ public class GroupAdminModule extends AnnotatedForegroundModule implements CRUDC
 
 		if (uriParser.size() != 3 || !NumberUtils.isInt(uriParser.get(2)) || (group = systemInterface.getGroupHandler().getGroup(NumberUtils.toInt(uriParser.get(2)), true)) == null) {
 
-			return list(req, res, user, uriParser, new ValidationError("RequestedGroupNotFound"));
+			return list(req, res, user, uriParser, Collections.singletonList(new ValidationError("RequestedGroupNotFound")));
 		}
 
 		log.info("User " + user + " viewing group " + group);
@@ -151,6 +153,7 @@ public class GroupAdminModule extends AnnotatedForegroundModule implements CRUDC
 		XMLUtils.appendNewElement(doc, showGroupElement, "canAddGroup", canAddGroup());
 
 		XMLUtils.append(doc, showGroupElement, "GroupUsers", systemInterface.getUserHandler().getUsersByGroup(group.getGroupID(), false, false));
+		XMLUtils.append(doc, showGroupElement, "AttributeDescriptors", attributes);
 
 		SimpleForegroundModuleResponse moduleResponse = new SimpleForegroundModuleResponse(doc, getTitlePrefix());
 
@@ -168,7 +171,7 @@ public class GroupAdminModule extends AnnotatedForegroundModule implements CRUDC
 
 		if (uriParser.size() != 3 || !NumberUtils.isInt(uriParser.get(2)) || (group = systemInterface.getGroupHandler().getGroup(NumberUtils.toInt(uriParser.get(2)), false)) == null) {
 
-			return list(req, res, user, uriParser, new ValidationError("UpdateFailedGroupNotFound"));
+			return list(req, res, user, uriParser, Collections.singletonList(new ValidationError("UpdateFailedGroupNotFound")));
 		}
 
 		if(req.getMethod().equalsIgnoreCase("POST")){
@@ -317,6 +320,7 @@ public class GroupAdminModule extends AnnotatedForegroundModule implements CRUDC
 		}
 	}
 
+	@Override
 	public String getTitlePrefix() {
 
 		return moduleDescriptor.getName();
@@ -345,6 +349,12 @@ public class GroupAdminModule extends AnnotatedForegroundModule implements CRUDC
 		return groupCRUD.delete(req, res, user, uriParser);
 	}
 
+	@WebPublic(alias = "users")
+	public ForegroundModuleResponse getUsers(HttpServletRequest req, HttpServletResponse res, User user, URIParser uriParser) throws Throwable {
+
+		return userGroupListConnector.getUsers(req, res, user, uriParser);
+	}
+
 	public GroupHandler getGroupHandler() {
 
 		return systemInterface.getGroupHandler();
@@ -355,7 +365,7 @@ public class GroupAdminModule extends AnnotatedForegroundModule implements CRUDC
 		return systemInterface.getUserHandler();
 	}
 
-	public List<String> getSupportedAttributes(){
+	public List<AttributeDescriptor> getSupportedAttributes(){
 
 		return attributes;
 	}

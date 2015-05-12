@@ -28,6 +28,7 @@ import se.unlogic.webutils.http.BeanRequestPopulator;
 
 public class GalleryPopulator implements BeanResultSetPopulator<Gallery>, BeanRequestPopulator<Gallery>, BeanMultipartRequestPopulator<Gallery> {
 
+	@Override
 	public Gallery populate(ResultSet rs) throws SQLException {
 
 		Gallery gallery = new Gallery();
@@ -44,20 +45,24 @@ public class GalleryPopulator implements BeanResultSetPopulator<Gallery>, BeanRe
 		return gallery;
 	}
 
+	@Override
 	public Gallery populate(HttpServletRequest req) throws ValidationException {
 		return this.populate(new Gallery(), req);
 	}
 
+	@Override
 	public Gallery populate(MultipartRequest req) throws ValidationException {
 		return this.populate(new Gallery(), req);
 	}
 	
+	@Override
 	public Gallery populate(Gallery bean, MultipartRequest req) throws ValidationException {
 		if(bean == null)
 			return this.populate(new Gallery(), (HttpServletRequest) req);
 		return this.populate(bean, (HttpServletRequest) req);
 	}
 
+	@Override
 	public Gallery populate(Gallery gallery, HttpServletRequest req) throws ValidationException {
 
 		ArrayList<ValidationError> validationErrors = new ArrayList<ValidationError>();

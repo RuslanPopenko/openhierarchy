@@ -8,6 +8,8 @@
 package se.unlogic.hierarchy.core.utils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -22,8 +24,8 @@ import se.unlogic.hierarchy.core.handlers.GroupHandler;
 import se.unlogic.hierarchy.core.handlers.UserHandler;
 import se.unlogic.hierarchy.core.interfaces.AccessInterface;
 import se.unlogic.hierarchy.core.interfaces.SectionInterface;
+import se.unlogic.hierarchy.core.interfaces.SystemInterface;
 import se.unlogic.hierarchy.core.interfaces.VisibleModuleDescriptor;
-import se.unlogic.hierarchy.core.sections.Section;
 import se.unlogic.standardutils.collections.CollectionUtils;
 import se.unlogic.standardutils.xml.XMLUtils;
 
@@ -50,7 +52,7 @@ public class AccessUtils {
 		return false;
 	}
 
-	//TODO Deprecate this method
+	@Deprecated
 	public static void appendGroupsAndUsers(Document doc, Element targetElement, UserHandler userHandler, GroupHandler groupHandler) {
 
 		Element usersElement = doc.createElement("users");
@@ -79,6 +81,23 @@ public class AccessUtils {
 		}
 	}
 
+	public static void appendAllowedGroupsAndUsers(Document doc, Element targetElement, AccessInterface accessInterface, UserHandler userHandler, GroupHandler groupHandler) {
+
+		Collection<Integer> userIDs = accessInterface.getAllowedUserIDs();
+
+		if (userIDs != null) {
+
+			XMLUtils.append(doc, targetElement, "users", userHandler.getUsers(userIDs, false, true));
+		}
+
+		Collection<Integer> groupIDs = accessInterface.getAllowedGroupIDs();
+
+		if (groupIDs != null) {
+
+			XMLUtils.append(doc, targetElement, "groups", groupHandler.getGroups(groupIDs, false));
+		}
+	}
+
 	public static void appendAllowedGroupAndUserIDs(Document doc, Element targetElement, AccessInterface accessInterface) {
 
 		if (accessInterface.getAllowedGroupIDs() != null && !accessInterface.getAllowedGroupIDs().isEmpty()) {
@@ -104,14 +123,14 @@ public class AccessUtils {
 		}
 	}
 
-	public static boolean checkRecursiveModuleAccess(User user, VisibleModuleDescriptor moduleDescriptor) {
+	public static boolean checkRecursiveModuleAccess(User user, VisibleModuleDescriptor moduleDescriptor, SystemInterface systemInterface) {
 
 		if (!AccessUtils.checkAccess(user, moduleDescriptor)) {
 
 			return false;
 		}
 
-		SectionInterface sectionInterface = Section.getSectionInterface(moduleDescriptor.getSectionID());
+		SectionInterface sectionInterface = systemInterface.getSectionInterface(moduleDescriptor.getSectionID());
 
 		if (sectionInterface == null) {
 
@@ -119,7 +138,7 @@ public class AccessUtils {
 
 		} else {
 
-			while (sectionInterface != null) {
+			while(sectionInterface != null) {
 
 				if (!AccessUtils.checkAccess(user, sectionInterface.getSectionDescriptor())) {
 
@@ -141,7 +160,7 @@ public class AccessUtils {
 
 		} else {
 
-			while (sectionInterface != null) {
+			while(sectionInterface != null) {
 
 				if (!AccessUtils.checkAccess(user, sectionInterface.getSectionDescriptor())) {
 
@@ -155,14 +174,14 @@ public class AccessUtils {
 		return true;
 	}
 
-	public static boolean checkRecursiveModuleItemAccess(User user, VisibleModuleDescriptor moduleDescriptor, AccessInterface accessInterface) {
+	public static boolean checkRecursiveModuleItemAccess(User user, VisibleModuleDescriptor moduleDescriptor, AccessInterface accessInterface, SystemInterface systemInterface) {
 
 		if (!AccessUtils.checkAccess(user, accessInterface)) {
 
 			return false;
 		}
 
-		return checkRecursiveModuleAccess(user, moduleDescriptor);
+		return checkRecursiveModuleAccess(user, moduleDescriptor, systemInterface);
 	}
 
 	public static boolean checkAccess(User user, boolean permissive, AccessInterface... access) {
@@ -185,6 +204,11 @@ public class AccessUtils {
 	}
 
 	public static AccessInterface combine(boolean permissive, AccessInterface... accessInterfaces) {
+
+		return combine(permissive, Arrays.asList(accessInterfaces));
+	}
+
+	public static AccessInterface combine(boolean permissive, Collection<AccessInterface> accessInterfaces) {
 
 		if (permissive) {
 			Set<Integer> allowedGroupIDs = new HashSet<Integer>();
@@ -233,7 +257,7 @@ public class AccessUtils {
 					anonymousAccess = false;
 				}
 
-				if(!accessInterface.allowsUserAccess()){
+				if (!accessInterface.allowsUserAccess()) {
 					userAccess = false;
 				}
 
@@ -244,9 +268,9 @@ public class AccessUtils {
 			return new SimpleAccessInterface(adminAccess, anonymousAccess, userAccess, allowedGroupIDs, allowedUserIDs);
 		}
 	}
-	
-	public static boolean isEmpty(AccessInterface accessInterface){
-		
+
+	public static boolean isEmpty(AccessInterface accessInterface) {
+
 		return !accessInterface.allowsAnonymousAccess() && !accessInterface.allowsUserAccess() && !accessInterface.allowsAdminAccess() && CollectionUtils.isEmpty(accessInterface.getAllowedGroupIDs()) && CollectionUtils.isEmpty(accessInterface.getAllowedUserIDs());
 	}
 }

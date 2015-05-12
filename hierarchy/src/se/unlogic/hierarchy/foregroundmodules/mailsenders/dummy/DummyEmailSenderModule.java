@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
+import se.unlogic.emailutils.framework.Attachment;
 import se.unlogic.emailutils.framework.Email;
 import se.unlogic.emailutils.framework.EmailSender;
 import se.unlogic.hierarchy.core.annotations.WebPublic;
@@ -19,6 +20,7 @@ import se.unlogic.hierarchy.core.beans.User;
 import se.unlogic.hierarchy.core.interfaces.ForegroundModuleDescriptor;
 import se.unlogic.hierarchy.core.interfaces.SectionInterface;
 import se.unlogic.hierarchy.foregroundmodules.AnnotatedForegroundModule;
+import se.unlogic.standardutils.collections.CollectionUtils;
 import se.unlogic.standardutils.string.StringUtils;
 import se.unlogic.webutils.http.URIParser;
 
@@ -84,6 +86,20 @@ public class DummyEmailSenderModule extends AnnotatedForegroundModule implements
 			stringBuilder.append("<td colspan=\"2\"><pre>" + email.getMessage() + "</pre></td>");
 			stringBuilder.append("</tr>");
 
+			if(!CollectionUtils.isEmpty(email.getAttachments())){
+				
+				stringBuilder.append("<tr>");
+				stringBuilder.append("<td colspan=\"2\">Attachments:</td>");
+				stringBuilder.append("</tr>");
+				
+				for(Attachment attachment : email.getAttachments()){
+					
+					stringBuilder.append("<tr>");
+					stringBuilder.append("<td colspan=\"2\"><pre>" + attachment.toString() + "</pre></td>");
+					stringBuilder.append("</tr>");				
+				}
+			}
+			
 			stringBuilder.append("</table>");
 		}
 
@@ -125,10 +141,12 @@ public class DummyEmailSenderModule extends AnnotatedForegroundModule implements
 		return null;
 	}
 
+	@Override
 	public int getPriority() {
 		return 0;
 	}
 
+	@Override
 	public boolean send(Email email) {
 
 		log.info("Received email " + email);

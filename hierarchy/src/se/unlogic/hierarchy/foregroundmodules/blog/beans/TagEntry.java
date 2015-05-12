@@ -34,6 +34,7 @@ public class TagEntry implements Elementable {
 		this.postCount = postCount;
 	}
 
+	@Override
 	public Element toXML(Document doc) {
 		Element archiveEntryElement = doc.createElement("TagEntry");
 

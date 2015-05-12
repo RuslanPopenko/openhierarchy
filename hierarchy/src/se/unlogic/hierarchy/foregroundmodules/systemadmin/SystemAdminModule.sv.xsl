@@ -3,6 +3,7 @@
 	<xsl:output encoding="ISO-8859-1" method="html" version="4.0"/>
 
 	<xsl:include href="SystemAdminModuleTemplates.xsl"/>
+	<xsl:include href="classpath://se/unlogic/hierarchy/core/utils/usergrouplist/UserGroupList.sv.xsl"/>
 	<!-- Naming template.mode.field.type -->
 	
 	<xsl:variable name="addForegroundModuleBreadCrumbText">Lägg till förgrundsmodul</xsl:variable>
@@ -138,4 +139,5 @@
 	
 	<xsl:variable name="i18n.UnableToParseFile.part1">Den gick inte att tolka filen </xsl:variable>
 	<xsl:variable name="i18n.UnableToParseFile.part2">!</xsl:variable>
+	<xsl:variable name="i18n.preserveDataSourceIDs">Behåll ID:n för datakällor</xsl:variable>
 </xsl:stylesheet>

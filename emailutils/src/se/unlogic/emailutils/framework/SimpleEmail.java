@@ -145,13 +145,13 @@ public class SimpleEmail implements Email {
 		return ccRecipients.addAll(addresses);
 	}
 
-	public void setSenderAddress(String senderAdress) throws InvalidEmailAddressException {
+	public void setSenderAddress(String senderAddress) throws InvalidEmailAddressException {
 
-		if (!EmailUtils.isValidEmailAddress(senderAdress)) {
-			throw new InvalidEmailAddressException(senderAdress);
+		if (!EmailUtils.isValidEmailAddress(senderAddress)) {
+			throw new InvalidEmailAddressException(senderAddress);
 		}
 
-		this.senderAddress = senderAdress;
+		this.senderAddress = senderAddress;
 	}
 
 	public void setSenderName(String senderName) {

@@ -24,8 +24,10 @@ import se.unlogic.webutils.http.StatusCapturingResponse;
 
 public class URLFilter implements Filter {
 
+	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {}
 
+	@Override
 	public void doFilter(ServletRequest req, ServletResponse res, FilterChain filterChain) throws IOException, ServletException {
 
 		if (req instanceof HttpServletRequest && res instanceof HttpServletResponse && !((HttpServletRequest) req).getRequestURI().startsWith(((HttpServletRequest) req).getContextPath() + "/core") && !((HttpServletRequest) req).getRequestURI().equals(((HttpServletRequest) req).getContextPath() + "/")) {
@@ -61,6 +63,7 @@ public class URLFilter implements Filter {
 		}
 	}
 
+	@Override
 	public void destroy() {
 
 	}

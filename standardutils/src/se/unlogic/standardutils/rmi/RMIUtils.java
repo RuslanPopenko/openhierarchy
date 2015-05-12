@@ -1,7 +1,7 @@
 package se.unlogic.standardutils.rmi;
 
+import java.rmi.server.RemoteServer;
 import java.rmi.server.ServerNotActiveException;
-import java.rmi.server.UnicastRemoteObject;
 
 
 public class RMIUtils {
@@ -9,7 +9,7 @@ public class RMIUtils {
 	public static String getClientHost(){
 		
 		try {
-			return UnicastRemoteObject.getClientHost();
+			return RemoteServer.getClientHost();
 		} catch (ServerNotActiveException e) {
 			throw new RuntimeException(e);
 		}

@@ -23,6 +23,7 @@ import se.unlogic.webutils.http.URIParser;
 
 public class EmailMailTestModule extends SimpleForegroundModule {
 
+	@Override
 	public SimpleForegroundModuleResponse processRequest(HttpServletRequest req, HttpServletResponse res, User user, URIParser uriParser) throws Exception {
 
 		SimpleEmail email = new SimpleEmail();

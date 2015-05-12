@@ -25,6 +25,7 @@ public abstract class BaseFileAccessValidator implements FileAccessValidator {
 		this.fileBasePath = fileBasePath;
 	}
 
+	@Override
 	public abstract boolean checkAccess(String filePath);
 
 	public boolean checkFilePath(String text, String filePath) {

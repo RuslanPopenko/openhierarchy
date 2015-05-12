@@ -28,6 +28,7 @@ import se.unlogic.webutils.http.URIParser;
 
 public class ResolverModule extends SimpleForegroundModule{
 
+	@Override
 	public ForegroundModuleResponse processRequest(HttpServletRequest req, HttpServletResponse res, User user, URIParser uriParser) {
 
 		Document doc = XMLUtils.createDomDocument();

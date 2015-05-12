@@ -33,6 +33,7 @@ public class MySQLCommentDAO extends BaseDAO implements CommentDAO {
 		commentPopulator = new AnnotatedResultSetPopulator<Comment>(Comment.class,new UserTypePopulator(userHandler, false, false));
 	}
 
+	@Override
 	public void add(Comment comment) throws SQLException {
 
 		UpdateQuery query = new UpdateQuery(dataSource, true, "INSERT INTO blog_comments VALUES (null,?,?,?,?,?,?,?,?,?)");
@@ -65,6 +66,7 @@ public class MySQLCommentDAO extends BaseDAO implements CommentDAO {
 		comment.setCommentID(keyCollector.getKeyValue());
 	}
 
+	@Override
 	public Comment get(Integer commentID) throws SQLException {
 
 		ObjectQuery<Comment> query = new ObjectQuery<Comment>(dataSource, true, "SELECT * FROM blog_comments WHERE commentID = ?", commentPopulator);
@@ -74,6 +76,7 @@ public class MySQLCommentDAO extends BaseDAO implements CommentDAO {
 		return query.executeQuery();
 	}
 
+	@Override
 	public void update(Comment comment) throws SQLException {
 
 		UpdateQuery query = new UpdateQuery(dataSource, true, "UPDATE blog_comments SET added = ?, updated = ?, message = ?, posterID = ?, editorID = ?, posterName = ?, posterEmail = ?, posterWebsite = ?, postID = ? WHERE commentID = ?");
@@ -105,6 +108,7 @@ public class MySQLCommentDAO extends BaseDAO implements CommentDAO {
 
 	}
 
+	@Override
 	public void delete(Comment comment) throws SQLException {
 
 		UpdateQuery query = new UpdateQuery(dataSource, true, "DELETE FROM blog_comments WHERE commentID = ?");
@@ -114,6 +118,7 @@ public class MySQLCommentDAO extends BaseDAO implements CommentDAO {
 		query.executeUpdate();
 	}
 
+	@Override
 	public List<Comment> getBlogPostComments(Connection connection, Integer postID) throws SQLException {
 
 		ArrayListQuery<Comment> query = new ArrayListQuery<Comment>(connection, false, "SELECT * FROM blog_comments WHERE postID = ? ORDER BY ADDED ASC", commentPopulator);

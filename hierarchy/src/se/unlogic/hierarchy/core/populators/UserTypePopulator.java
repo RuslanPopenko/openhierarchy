@@ -35,21 +35,25 @@ public class UserTypePopulator implements BeanStringPopulator<User> {
 		this.getGroups = getGroups;
 	}
 
+	@Override
 	public String getPopulatorID() {
 
 		return null;
 	}
 
+	@Override
 	public Class<? extends User> getType() {
 
 		return User.class;
 	}
 
+	@Override
 	public User getValue(String value) {
 
 		return this.userHandler.getUser(Integer.parseInt(value), this.getGroups, this.getAttrbutes);
 	}
 
+	@Override
 	public boolean validateFormat(String value) {
 
 		return NumberUtils.isInt(value);

@@ -51,26 +51,32 @@ public class QueuedEmail implements Email{
 	private ArrayList<String> recipients;
 	private ArrayList<String> replyTo;
 
+	@Override
 	public List<Attachment> getAttachments() {
 		return this.attachments;
 	}
 
+	@Override
 	public String getCharset() {
 		return this.charset;
 	}
 
+	@Override
 	public String getMessage() {
 		return this.message;
 	}
 
+	@Override
 	public ArrayList<String> getReplyTo() {
 		return replyTo;
 	}
 
+	@Override
 	public String getMessageContentType() {
 		return this.messageContentType;
 	}
 
+	@Override
 	public List<String> getRecipients() {
 		return this.recipients;
 	}
@@ -89,14 +95,17 @@ public class QueuedEmail implements Email{
 		return recipients.addAll(addresses);
 	}
 
+	@Override
 	public String getSenderName() {
 		return this.senderName;
 	}
 
+	@Override
 	public String getSenderAddress() {
 		return this.senderAddress;
 	}
 
+	@Override
 	public String getSubject() {
 		return subject;
 	}
@@ -109,6 +118,7 @@ public class QueuedEmail implements Email{
 		return attachments.addAll(c);
 	}
 
+	@Override
 	public List<String> getBccRecipients() {
 		return this.bccRecipients;
 	}
@@ -127,6 +137,7 @@ public class QueuedEmail implements Email{
 		return bccRecipients.addAll(addresses);
 	}
 
+	@Override
 	public List<String> getCcRecipients() {
 		return this.ccRecipients;
 	}

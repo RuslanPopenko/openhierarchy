@@ -24,6 +24,7 @@ public class PagePopulator implements BeanResultSetPopulator<Page>, BeanRequestP
 
 	//TODO replace with Annotated dito...
 	
+	@Override
 	public Page populate(ResultSet rs) throws SQLException {
 
 		Page page = new Page();
@@ -48,6 +49,7 @@ public class PagePopulator implements BeanResultSetPopulator<Page>, BeanRequestP
 		return page;
 	}
 
+	@Override
 	public Page populate(Page page, HttpServletRequest req) throws ValidationException {
 
 		ArrayList<ValidationError> validationErrors = new ArrayList<ValidationError>();
@@ -94,6 +96,7 @@ public class PagePopulator implements BeanResultSetPopulator<Page>, BeanRequestP
 		}
 	}
 
+	@Override
 	public Page populate(HttpServletRequest req) throws ValidationException {
 
 		Page page = new Page();

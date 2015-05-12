@@ -1,6 +1,7 @@
 package se.unlogic.hierarchy.foregroundmodules.test;
 
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -26,11 +27,13 @@ public class ImmutableUserProvider extends SimpleForegroundModule implements Use
 	private static final ImmutableUser IMMUTABLE_USER = new ImmutableUser();
 	private static final ImmutableGroup IMMUTABLE_GROUP = new ImmutableGroup();
 
+	@Override
 	public ForegroundModuleResponse processRequest(HttpServletRequest req, HttpServletResponse res, User user, URIParser uriParser) throws Exception {
 
 		return null;
 	}
 
+	@Override
 	public User getUser(Integer userID, boolean groups, boolean attributes) throws SQLException {
 
 		log.info("Got request for userID " + userID);
@@ -46,12 +49,14 @@ public class ImmutableUserProvider extends SimpleForegroundModule implements Use
 		return null;
 	}
 
+	@Override
 	public List<? extends User> getUsers(boolean groups, boolean attributes) throws SQLException {
 
 		return Collections.singletonList(IMMUTABLE_USER);
 	}
 
-	public List<? extends User> getUsers(List<Integer> userIDs, boolean groups, boolean attributes) throws SQLException {
+	@Override
+	public List<? extends User> getUsers(Collection<Integer> userIDs, boolean groups, boolean attributes) throws SQLException {
 
 		if(userIDs.contains(IMMUTABLE_USER.getUserID())){
 
@@ -61,6 +66,7 @@ public class ImmutableUserProvider extends SimpleForegroundModule implements Use
 		return null;
 	}
 
+	@Override
 	public User getUserByUsername(String username, boolean groups, boolean attributes) throws SQLException {
 
 		if(username.equals(IMMUTABLE_USER.getUsername())){
@@ -71,39 +77,46 @@ public class ImmutableUserProvider extends SimpleForegroundModule implements Use
 		return null;
 	}
 
+	@Override
 	public User getUserByUsernamePassword(String username, String password, boolean groups, boolean attributes) throws SQLException {
 
 
 		return null;
 	}
 
+	@Override
 	public User getUserByEmail(String email, boolean groups, boolean attributes) throws SQLException {
 
 
 		return null;
 	}
 
+	@Override
 	public User getUserByEmailPassword(String email, String password, boolean groups, boolean attributes) throws SQLException {
 
 
 		return null;
 	}
 
+	@Override
 	public int getUserCount() throws SQLException {
 
 		return 1;
 	}
 
+	@Override
 	public int getDisabledUserCount() throws SQLException {
 
 		return 0;
 	}
 
+	@Override
 	public List<Character> getUserFirstLetterIndex(UserField filteringField) throws SQLException {
 
 		return Collections.singletonList("J".charAt(0));
 	}
 
+	@Override
 	public List<? extends User> getUsers(UserField filteringField, char startsWith, Order order, boolean groups, boolean attributes) throws SQLException {
 
 		if("J".equalsIgnoreCase(Character.toString(startsWith))){
@@ -114,6 +127,7 @@ public class ImmutableUserProvider extends SimpleForegroundModule implements Use
 		return null;
 	}
 
+	@Override
 	public List<? extends User> getUsers(UserField filteringField, Order order, boolean groups, boolean attributes) throws SQLException {
 
 		return Collections.singletonList(IMMUTABLE_USER);
@@ -176,11 +190,13 @@ public class ImmutableUserProvider extends SimpleForegroundModule implements Use
 		return CollectionUtils.getList(IMMUTABLE_GROUP.getName().charAt(0));
 	}
 
+	@Override
 	public int getPriority() {
 
 		return 0;
 	}
 
+	@Override
 	public boolean isProviderFor(User user) {
 
 		return user.equals(IMMUTABLE_USER);
@@ -191,6 +207,7 @@ public class ImmutableUserProvider extends SimpleForegroundModule implements Use
 		return group.equals(IMMUTABLE_GROUP);
 	}
 
+	@Override
 	public DataSource getDataSource() {
 
 
@@ -211,30 +228,52 @@ public class ImmutableUserProvider extends SimpleForegroundModule implements Use
 		systemInterface.getUserHandler().removeProvider(this);
 	}
 
+	@Override
 	public List<? extends User> getUsersByGroup(Integer groupID, boolean groups, boolean attributes) throws SQLException {
 
 		return null;
 	}
 
-	public List<? extends User> getUsersByGroups(List<Integer> groupIDs, boolean attributes) throws SQLException {
+	@Override
+	public List<? extends User> getUsersByGroups(Collection<Integer> groupIDs, boolean attributes) throws SQLException {
 
 
 		return null;
 	}
 
+	@Override
 	public List<? extends User> getUsersByAttribute(String attributeName, String attributeValue, boolean groups, boolean attributes) throws SQLException {
 
 		return null;
 	}
 
+	@Override
 	public User getUserByAttribute(String attributeName, String attributeValue, boolean groups, boolean attributes) throws SQLException {
 
 		return null;
 	}
 
-	public List<? extends User> searchUsers(String query, boolean groups, boolean attributes) throws SQLException {
+	@Override
+	public List<? extends User> searchUsers(String query, boolean groups, boolean attributes, Integer maxHits) throws SQLException {
 
-		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public List<? extends User> getUserByAttribute(String attributeName, boolean groups, boolean attributes) {
+
+		return null;
+	}
+
+	@Override
+	public List<? extends User> getUsersWithoutAttribute(String attributeName, boolean groups, boolean attributes) throws SQLException {
+
+		return null;
+	}
+
+	@Override
+	public int getUserCountByGroup(Integer groupID) throws SQLException {
+
+		return 0;
 	}
 }

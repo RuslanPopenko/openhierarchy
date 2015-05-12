@@ -63,6 +63,7 @@ public abstract class Setting implements Elementable {
 		return description;
 	}
 
+	@Override
 	public final Element toXML(Document doc) {
 
 		Element attributeElement = doc.createElement("SettingDescriptor");

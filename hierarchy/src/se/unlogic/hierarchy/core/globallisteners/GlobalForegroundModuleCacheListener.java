@@ -18,6 +18,7 @@ public class GlobalForegroundModuleCacheListener implements ForegroundModuleCach
 
 	private CopyOnWriteArrayList<ForegroundModuleCacheListener> cacheListeners = new CopyOnWriteArrayList<ForegroundModuleCacheListener>();
 
+	@Override
 	public void moduleCached(ForegroundModuleDescriptor moduleDescriptor, ForegroundModule moduleInstance)  {
 
 		for(ForegroundModuleCacheListener cacheListener : cacheListeners){
@@ -26,6 +27,7 @@ public class GlobalForegroundModuleCacheListener implements ForegroundModuleCach
 		}
 	}
 
+	@Override
 	public void moduleUpdated(ForegroundModuleDescriptor moduleDescriptor, ForegroundModule moduleInstance)  {
 
 		for(ForegroundModuleCacheListener cacheListener : cacheListeners){
@@ -34,6 +36,7 @@ public class GlobalForegroundModuleCacheListener implements ForegroundModuleCach
 		}
 	}
 
+	@Override
 	public void moduleUnloaded(ForegroundModuleDescriptor moduleDescriptor, ForegroundModule moduleInstance) {
 
 		for(ForegroundModuleCacheListener cacheListener : cacheListeners){

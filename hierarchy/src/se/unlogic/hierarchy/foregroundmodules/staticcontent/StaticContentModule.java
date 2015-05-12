@@ -40,8 +40,8 @@ import se.unlogic.hierarchy.core.interfaces.MenuItemDescriptor;
 import se.unlogic.hierarchy.core.interfaces.Module;
 import se.unlogic.hierarchy.core.interfaces.ModuleDescriptor;
 import se.unlogic.hierarchy.core.interfaces.SectionInterface;
+import se.unlogic.hierarchy.core.interfaces.SystemInterface;
 import se.unlogic.hierarchy.core.interfaces.VisibleModuleDescriptor;
-import se.unlogic.hierarchy.core.sections.Section;
 import se.unlogic.hierarchy.core.utils.AccessUtils;
 import se.unlogic.hierarchy.core.utils.ModuleUtils;
 import se.unlogic.standardutils.date.PooledSimpleDateFormat;
@@ -59,6 +59,8 @@ public class StaticContentModule implements ForegroundModule {
 	private static final PooledSimpleDateFormat RFC1123_DATE_FORMATTER = new PooledSimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US, TimeZone.getTimeZone("GMT"));
 
 	protected Logger log = Logger.getLogger(this.getClass());
+	
+	private SystemInterface systemInterface;
 	private SectionInterface sectionInterface;
 
 	@ModuleSetting
@@ -71,15 +73,18 @@ public class StaticContentModule implements ForegroundModule {
 
 	protected Properties globalContentLinks;
 
+	@Override
 	public void init(ForegroundModuleDescriptor moduleDescriptor, SectionInterface sectionInterface, DataSource dataSource) throws Exception {
 
 		this.sectionInterface = sectionInterface;
+		this.systemInterface = sectionInterface.getSystemInterface();
 
 		ModuleUtils.setModuleSettings(this, StaticContentModule.class, moduleDescriptor.getMutableSettingHandler(), sectionInterface.getSystemInterface());
 
 		loadGlobalContentLinks();
 	}
 
+	@Override
 	public void update(ForegroundModuleDescriptor moduleDescriptor, DataSource dataSource) throws Exception {
 
 		ModuleUtils.setModuleSettings(this, StaticContentModule.class, moduleDescriptor.getMutableSettingHandler(), sectionInterface.getSystemInterface());
@@ -87,6 +92,7 @@ public class StaticContentModule implements ForegroundModule {
 		loadGlobalContentLinks();
 	}
 
+	@Override
 	public void unload() throws Exception {
 
 	}
@@ -122,6 +128,7 @@ public class StaticContentModule implements ForegroundModule {
 		globalContentLinks = null;
 	}
 
+	@Override
 	public List<SettingDescriptor> getSettings() {
 
 		try{
@@ -144,6 +151,7 @@ public class StaticContentModule implements ForegroundModule {
 		}
 	}
 
+	@Override
 	public SimpleForegroundModuleResponse processRequest(HttpServletRequest req, HttpServletResponse res, User user, URIParser uriParser) throws AccessDeniedException, URINotFoundException {
 
 		//TODO add support to separate numeric foreground module aliases from moduleID's (fv prefix?)
@@ -197,7 +205,7 @@ public class StaticContentModule implements ForegroundModule {
 		}else if(uriParser.size() >= 5 && (uriParser.get(1).equals("f") || uriParser.get(1).equals("b")) && !uriParser.getFormattedURI().contains("..") && (sectionID = NumberUtils.toInt(uriParser.get(2))) != null){
 
 			//Get the requested section
-			SectionInterface sectionInterface = Section.getSectionInterface(sectionID);
+			SectionInterface sectionInterface = systemInterface.getSectionInterface(sectionID);
 
 			if(sectionInterface == null){
 
@@ -479,21 +487,25 @@ public class StaticContentModule implements ForegroundModule {
 		return null;
 	}
 
+	@Override
 	public List<BundleDescriptor> getVisibleBundles() {
 
 		return null;
 	}
 
+	@Override
 	public List<MenuItemDescriptor> getAllMenuItems() {
 
 		return null;
 	}
 
+	@Override
 	public List<MenuItemDescriptor> getVisibleMenuItems() {
 
 		return null;
 	}
 
+	@Override
 	public List<BundleDescriptor> getAllBundles() {
 
 		return null;

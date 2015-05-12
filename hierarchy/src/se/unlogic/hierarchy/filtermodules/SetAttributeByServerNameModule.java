@@ -58,6 +58,7 @@ public class SetAttributeByServerNameModule extends AnnotatedFilterModule {
 		}
 	}
 
+	@Override
 	public void doFilter(HttpServletRequest req, HttpServletResponse res, User user, URIParser uriParser, FilterChain filterChain) throws Exception {
 
 		if(!CollectionUtils.isEmpty(this.keywords) && this.attributeName != null) {

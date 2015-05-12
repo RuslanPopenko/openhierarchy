@@ -52,6 +52,7 @@ public class Gallery implements AccessInterface {
 		super();
 	}
 
+	@Override
 	public boolean allowsAdminAccess() {
 		return this.allowsAdminAccess;
 	}
@@ -60,6 +61,7 @@ public class Gallery implements AccessInterface {
 		this.allowsAdminAccess = allowsAdminAccess;
 	}
 
+	@Override
 	public boolean allowsAnonymousAccess() {
 		return this.allowsAnonymousAccess;
 	}
@@ -68,6 +70,7 @@ public class Gallery implements AccessInterface {
 		this.allowsAnonymousAccess = allowsAnonymousAccess;
 	}
 
+	@Override
 	public boolean allowsUserAccess() {
 		return this.allowsUserAccess;
 	}
@@ -76,6 +79,7 @@ public class Gallery implements AccessInterface {
 		this.allowsUserAccess = allowsUserAccess;
 	}
 
+	@Override
 	public Collection<Integer> getAllowedGroupIDs() {
 		return this.allowedGroupIDs;
 	}
@@ -84,6 +88,7 @@ public class Gallery implements AccessInterface {
 		this.allowedGroupIDs = allowedGroupIDs;
 	}
 
+	@Override
 	public Collection<Integer> getAllowedUserIDs() {
 		return this.allowedUserIDs;
 	}

@@ -4,6 +4,19 @@
 
 	<xsl:include href="classpath://se/unlogic/hierarchy/core/utils/xsl/Common.xsl"/>
 
+	<xsl:variable name="globalscripts">
+		/jquery/jquery.js
+		/jquery/jquery-ui.js
+	</xsl:variable>
+
+	<xsl:variable name="scripts">
+		/js/UserGroupList.js
+	</xsl:variable>
+	
+	<xsl:variable name="links">
+		/css/UserGroupList.css
+	</xsl:variable>
+
 	<xsl:template match="Document">
 		<div class="contentitem">			
 			<xsl:apply-templates select="Groups"/>
@@ -120,25 +133,23 @@
 				</tr>		
 			</table>
 			
-			<xsl:if test="SupportedAttributes">
-				
+			<xsl:if test="AttributeDescriptors">
+			
 				<br/>
 				
 				<h2><xsl:value-of select="$attributes"/></h2>
 				
 				<table>
-					
-					<xsl:apply-templates select="SupportedAttributes/Attribute" mode="update">
-						<xsl:with-param name="requestparameters" select="requestparameters"/>
-					</xsl:apply-templates>
+									
+					<xsl:apply-templates select="AttributeDescriptors/AttributeDescriptor" mode="update"/>
 					
 				</table>
 				
-			</xsl:if>			
-			
+			</xsl:if>
+						
 			<br/>
 			
-			<xsl:apply-templates select="Users"/>
+			<xsl:call-template name="Users"/>
 			
 			<xsl:call-template name="AddEditFormData"/>
 			
@@ -210,25 +221,23 @@
 				</tr>						
 			</table>
 			
-			<xsl:if test="SupportedAttributes">
-				
+			<xsl:if test="AttributeDescriptors">
+			
 				<br/>
 				
 				<h2><xsl:value-of select="$attributes"/></h2>
 				
 				<table>
 									
-					<xsl:apply-templates select="SupportedAttributes/Attribute" mode="update">
-						<xsl:with-param name="requestparameters" select="requestparameters"/>
-					</xsl:apply-templates>
+					<xsl:apply-templates select="AttributeDescriptors/AttributeDescriptor" mode="update"/>
 					
 				</table>
 				
-			</xsl:if>			
+			</xsl:if>		
 			
 			<br/>
 			
-			<xsl:apply-templates select="Users"/>
+			<xsl:call-template name="Users"/>
 			
 			<xsl:call-template name="AddEditFormData"/>
 			
@@ -340,7 +349,7 @@
 			</tr>						
 		</table>
 		
-		<xsl:if test="group/Attributes">
+		<xsl:if test="group/Attributes and AttributeDescriptors">
 			
 			<br/>
 			
@@ -352,12 +361,12 @@
 					<th><xsl:value-of select="$value"/></th>
 				</tr>
 				
-				<xsl:apply-templates select="group/Attributes/Attribute" mode="show"/>
+				<xsl:apply-templates select="AttributeDescriptors/AttributeDescriptor" mode="show"/>
 				
 			</table>
 			
 		</xsl:if>
-		
+				
 		<br/>
 		
 		<xsl:apply-templates select="GroupUsers"/>
@@ -377,12 +386,19 @@
 	
 	</xsl:template>
 	
-	<xsl:template match="Users">
+	<xsl:template name="Users">
 		<h2><xsl:value-of select="$members"/></h2>
 		
-		<div class="scrolllist">			
-			<xsl:apply-templates select="user"/>
-		</div>
+		<xsl:call-template name="UserList">
+			<xsl:with-param name="connectorURL">
+				<xsl:value-of select="/Document/requestinfo/currentURI"/>
+				<xsl:text>/</xsl:text>
+				<xsl:value-of select="/Document/module/alias"/>
+				<xsl:text>/users</xsl:text>
+			</xsl:with-param>
+			<xsl:with-param name="name" select="'user'"/>
+			<xsl:with-param name="users" select="GroupUsers" />
+		</xsl:call-template>
 		
 		<br/>
 	</xsl:template>
@@ -401,60 +417,6 @@
 		
 		<br/>
 	</xsl:template>
-	
-	<xsl:template match="user">
-		<div class="floatleft full border marginbottom">
-			<div class="floatleft">
-				<xsl:choose>
-					<xsl:when test="enabled='true'">
-						<img class="alignbottom" src="{/Document/requestinfo/contextpath}/static/f/{/Document/module/sectionID}/{/Document/module/moduleID}/pics/user.png"/>
-					</xsl:when>
-					<xsl:otherwise>
-						<img class="alignbottom" src="{/Document/requestinfo/contextpath}/static/f/{/Document/module/sectionID}/{/Document/module/moduleID}/pics/user_disabled.png"/>
-					</xsl:otherwise>
-				</xsl:choose>
-				
-				<xsl:text>&#x20;</xsl:text>
-				
-				<xsl:value-of select="firstname"/>
-				
-				<xsl:text>&#x20;</xsl:text>
-				
-				<xsl:value-of select="lastname"/>
-				
-				<xsl:if test="username">
-					<xsl:text>&#x20;</xsl:text>
-					
-					<xsl:text>(</xsl:text>
-						<xsl:value-of select="username"/>
-					<xsl:text>)</xsl:text>					
-				</xsl:if>		
-			</div>
-			<div class="floatright marginright">
-				
-				<xsl:variable name="userID" select="userID"/>
-			
-				<input type="checkbox" name="user" value="{userID}">
-					<xsl:choose>
-						<xsl:when test="../../requestparameters">
-							<xsl:if test="../../requestparameters/parameter[name='user'][value=$userID]">
-								<xsl:attribute name="checked"/>
-							</xsl:if>						
-						</xsl:when>
-						<xsl:when test="../../group">
-							<xsl:if test="../../GroupUsers/user[userID=$userID]">
-								<xsl:attribute name="checked"/>
-							</xsl:if>								
-						</xsl:when>
-					</xsl:choose>
-					
-					<xsl:if test="isMutable='false'">
-						<xsl:attribute name="disabled"/>
-					</xsl:if>						
-				</input>
-			</div>				
-		</div>
-	</xsl:template>	
 	
 	<xsl:template match="user" mode="show">
 		<div class="floatleft full border marginbottom">
@@ -485,7 +447,67 @@
 				</xsl:if>		
 			</div>				
 		</div>
+	</xsl:template>
+	
+	<xsl:template match="AttributeDescriptor" mode="update">
+		
+		<xsl:variable name="name" select="Name"/>
+		
+		<tr>
+			<td>
+				<xsl:choose>
+					<xsl:when test="DisplayName">
+						<xsl:value-of select="DisplayName"/>
+					</xsl:when>
+					<xsl:otherwise>
+						<xsl:value-of select="Name"/>
+					</xsl:otherwise>
+				</xsl:choose>
+				
+				<xsl:if test="AttributeMode = 'REQUIRED'">
+					<span class="required">*</span>
+				</xsl:if>
+				
+				<xsl:text>:</xsl:text>
+			</td>
+			<td>
+				<xsl:call-template name="createTextField">
+					<xsl:with-param name="name"><xsl:value-of select="'attribute-'"/><xsl:value-of select="Name"/></xsl:with-param>
+					<xsl:with-param name="requestparameters" select="../../requestparameters"/>
+					<xsl:with-param name="size" select="40"/>
+					<xsl:with-param name="value" select="../../group/Attributes/Attribute[Name = $name]/Value"/>
+					<xsl:with-param name="disabled" select="AttributeMode = 'DISABLED'"/>					
+				</xsl:call-template>				
+			</td>
+		</tr>
+		
 	</xsl:template>	
+	
+	<xsl:template match="AttributeDescriptor" mode="show">
+		
+		<xsl:variable name="name" select="Name"/>
+		
+		<xsl:variable name="value" select="../../group/Attributes/Attribute[Name = $name]/Value"/>
+		
+		<xsl:if test="$value">
+		
+			<tr>
+				<td>
+					<xsl:choose>
+						<xsl:when test="DisplayName">
+							<xsl:value-of select="DisplayName"/>
+						</xsl:when>
+						<xsl:otherwise>
+							<xsl:value-of select="Name"/>
+						</xsl:otherwise>
+					</xsl:choose>				
+				</td>
+				<td><xsl:value-of select="$value"/></td>
+			</tr>		
+		
+		</xsl:if>
+	
+	</xsl:template>
 	
 	<xsl:template match="validationError">
 		<xsl:if test="fieldName and validationErrorType and not(messageKey)">
@@ -511,6 +533,9 @@
 				<xsl:text>&#x20;</xsl:text>
 				
 				<xsl:choose>
+					<xsl:when test="displayName">
+						<xsl:value-of select="displayName"/>
+					</xsl:when>
 					<xsl:when test="fieldName = 'name'">
 						<xsl:value-of select="$name"/>
 					</xsl:when>

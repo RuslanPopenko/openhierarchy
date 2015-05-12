@@ -188,6 +188,7 @@ public class DirectMailSender extends AnnotatedForegroundModule implements Email
 		}
 	}
 
+	@Override
 	public boolean send(Email email) {
 
 		try {
@@ -220,6 +221,7 @@ public class DirectMailSender extends AnnotatedForegroundModule implements Email
 		}
 	}
 
+	@Override
 	public synchronized void incrementMailsSent() {
 		this.mailsSent++;
 	}
@@ -244,6 +246,7 @@ public class DirectMailSender extends AnnotatedForegroundModule implements Email
 		return new SimpleForegroundModuleResponse(stringBuilder.toString(), moduleDescriptor.getName(), this.getDefaultBreadcrumb());
 	}
 
+	@Override
 	public int getPriority() {
 		return this.priority;
 	}

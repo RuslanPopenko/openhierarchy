@@ -1,6 +1,7 @@
 package se.unlogic.hierarchy.foregroundmodules.groupadmin.cruds;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -17,21 +18,20 @@ import se.unlogic.hierarchy.core.exceptions.UnableToAddGroupException;
 import se.unlogic.hierarchy.core.exceptions.UnableToDeleteGroupException;
 import se.unlogic.hierarchy.core.interfaces.ForegroundModuleResponse;
 import se.unlogic.hierarchy.core.interfaces.MutableAttributeHandler;
+import se.unlogic.hierarchy.core.utils.AttributeDescriptorUtils;
 import se.unlogic.hierarchy.core.utils.IntegerBasedCRUD;
 import se.unlogic.hierarchy.foregroundmodules.groupadmin.GroupAdminModule;
-import se.unlogic.standardutils.string.StringUtils;
 import se.unlogic.standardutils.validation.ValidationError;
 import se.unlogic.standardutils.validation.ValidationException;
 import se.unlogic.standardutils.xml.XMLUtils;
 import se.unlogic.webutils.http.BeanRequestPopulator;
 import se.unlogic.webutils.http.URIParser;
 
-
-public class GroupCRUD<CallbackType extends GroupAdminModule> extends IntegerBasedCRUD<MutableGroup,CallbackType> {
+public class GroupCRUD<CallbackType extends GroupAdminModule> extends IntegerBasedCRUD<MutableGroup, CallbackType> {
 
 	public GroupCRUD(BeanRequestPopulator<MutableGroup> populator, String typeElementName, String typeLogName, CallbackType groupAdminModule) {
 
-		super(null,populator, typeElementName, typeLogName, "", groupAdminModule);
+		super(null, populator, typeElementName, typeLogName, "", groupAdminModule);
 	}
 
 	@Override
@@ -39,7 +39,7 @@ public class GroupCRUD<CallbackType extends GroupAdminModule> extends IntegerBas
 
 		Group group = callback.getGroupHandler().getGroup(beanID, true);
 
-		if(group == null || !(group instanceof MutableGroup)){
+		if (group == null || !(group instanceof MutableGroup)) {
 
 			return null;
 		}
@@ -66,7 +66,7 @@ public class GroupCRUD<CallbackType extends GroupAdminModule> extends IntegerBas
 
 		List<User> users = callback.getUserHandler().getUsersByGroup(bean.getGroupID(), true, false);
 
-		if(users != null){
+		if (users != null) {
 
 			callback.removeUsersFromGroup(users, bean);
 		}
@@ -77,10 +77,8 @@ public class GroupCRUD<CallbackType extends GroupAdminModule> extends IntegerBas
 	@Override
 	protected void appendAddFormData(Document doc, Element addTypeElement, User user, HttpServletRequest req, URIParser uriParser) throws SQLException {
 
-		XMLUtils.append(doc, addTypeElement, "Users", callback.getUserHandler().getUsers(false, false));
-		XMLUtils.append(doc, addTypeElement, "SupportedAttributes", "Attribute", callback.getSupportedAttributes());
+		XMLUtils.append(doc, addTypeElement, "AttributeDescriptors", callback.getSupportedAttributes());
 	}
-
 
 	@Override
 	protected void appendUpdateFormData(MutableGroup bean, Document doc, Element updateTypeElement, User user, HttpServletRequest req, URIParser uriParser) throws SQLException {
@@ -90,9 +88,9 @@ public class GroupCRUD<CallbackType extends GroupAdminModule> extends IntegerBas
 	}
 
 	@Override
-	public ForegroundModuleResponse list(HttpServletRequest req, HttpServletResponse res, User user, URIParser uriParser, ValidationError validationError) throws Exception {
+	public ForegroundModuleResponse list(HttpServletRequest req, HttpServletResponse res, User user, URIParser uriParser, List<ValidationError> validationErrors) throws Exception {
 
-		return callback.list(req, res, user, uriParser, validationError);
+		return callback.list(req, res, user, uriParser, validationErrors);
 	}
 
 	@Override
@@ -100,9 +98,7 @@ public class GroupCRUD<CallbackType extends GroupAdminModule> extends IntegerBas
 
 		MutableGroup group = super.populateFromAddRequest(req, user, uriParser);
 
-		setAttributes(group, req);
-
-		return group;
+		return populateRequest(group, req, user, uriParser);
 	}
 
 	@Override
@@ -110,49 +106,51 @@ public class GroupCRUD<CallbackType extends GroupAdminModule> extends IntegerBas
 
 		MutableGroup group = super.populateFromUpdateRequest(bean, req, user, uriParser);
 
-		setAttributes(group, req);
+		return populateRequest(group, req, user, uriParser);
+
+	}
+
+	protected MutableGroup populateRequest(MutableGroup group, HttpServletRequest req, User user, URIParser uriParser) throws ValidationException, Exception {
+
+		ArrayList<ValidationError> validationErrors = new ArrayList<ValidationError>();
+
+		setAttributes(group, req, validationErrors);
+
+		if (!validationErrors.isEmpty()) {
+
+			throw new ValidationException(validationErrors);
+		}
 
 		return group;
 	}
 
-	private void setAttributes(MutableGroup group, HttpServletRequest req) {
+	private void setAttributes(MutableGroup group, HttpServletRequest req, List<ValidationError> validationErrors) {
 
-		if(callback.getSupportedAttributes() == null){
+		if (callback.getSupportedAttributes() == null) {
 
 			return;
 		}
 
 		MutableAttributeHandler attributeHandler = group.getAttributeHandler();
 
-		if(attributeHandler == null){
+		if (attributeHandler == null) {
 
 			return;
 		}
 
-		for(String attribute : callback.getSupportedAttributes()){
+		AttributeDescriptorUtils.populateAttributes(attributeHandler, callback.getSupportedAttributes(), req, validationErrors);
 
-			String attributeValue = req.getParameter("attribute-" + attribute);
-
-			if(!StringUtils.isEmpty(attributeValue)){
-
-				attributeHandler.setAttribute(attribute, attributeValue.trim());
-				
-			}else{
-			
-				attributeHandler.removeAttribute(attribute);
-			}
-		}
 	}
 
 	@Override
-	public void appendBean(MutableGroup bean, Element targetElement, Document doc) {
+	public void appendBean(MutableGroup bean, Element targetElement, Document doc, User user) {
 
 		Element groupElement = bean.toXML(doc);
 		targetElement.appendChild(groupElement);
 
 		MutableAttributeHandler attributeHandler = bean.getAttributeHandler();
 
-		if(attributeHandler != null && !attributeHandler.isEmpty()){
+		if (attributeHandler != null && !attributeHandler.isEmpty()) {
 
 			groupElement.appendChild(attributeHandler.toXML(doc));
 		}

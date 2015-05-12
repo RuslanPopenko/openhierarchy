@@ -17,7 +17,7 @@ public class TagReplacer {
 	private List<TagSource> tagSources;
 
 	public TagReplacer() {
-		
+
 		tagSources = new ArrayList<TagSource>();
 	}
 
@@ -34,20 +34,20 @@ public class TagReplacer {
 	public boolean addTagSource(TagSource o) {
 
 		if(tagSources == null){
-			
+
 			tagSources = new ArrayList<TagSource>();
 		}
-		
+
 		return tagSources.add(o);
 	}
 
 	public boolean removeTagSource(TagSource o) {
 
 		if(tagSources == null){
-			
+
 			return false;
 		}
-		
+
 		return tagSources.remove(o);
 	}
 
@@ -73,16 +73,21 @@ public class TagReplacer {
 
 		return source;
 	}
-	
+
 	public List<String> getAvailableTags(){
-		
+
 		List<String> tagList = new ArrayList<String>();
-		
+
 		for(TagSource tagSource : tagSources){
-			
+
 			tagList.addAll(tagSource.getTags());
 		}
-		
+
 		return tagList;
+	}
+
+	public void addTagSources(List<TagSource> tagSources) {
+
+		this.tagSources.addAll(tagSources);
 	}
 }

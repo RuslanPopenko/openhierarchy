@@ -19,6 +19,7 @@ public abstract class BaseUserFormProviderModule<UserType extends BaseUser> exte
 		super(userClass);
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public boolean isProviderFor(User user) {
 

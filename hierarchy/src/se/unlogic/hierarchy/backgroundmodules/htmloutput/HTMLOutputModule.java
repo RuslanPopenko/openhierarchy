@@ -103,6 +103,7 @@ public class HTMLOutputModule extends AnnotatedBackgroundModule implements Acces
 		this.sectionInterface.getSystemInterface().removeForegroundModuleCacheListener(this);
 	}
 
+	@Override
 	public void systemStarted() {
 
 		Entry<ForegroundModuleDescriptor, HTMLOutputAdminModule> moduleEntry = ModuleUtils.findForegroundModule(HTMLOutputAdminModule.class, true, null, true, this.systemInterface.getRootSection());
@@ -115,6 +116,7 @@ public class HTMLOutputModule extends AnnotatedBackgroundModule implements Acces
 		this.sectionInterface.getSystemInterface().addForegroundModuleCacheListener(this);
 	}
 
+	@Override
 	public void moduleCached(ForegroundModuleDescriptor moduleDescriptor, ForegroundModule moduleInstance) throws KeyAlreadyCachedException {
 
 		if(moduleInstance instanceof HTMLOutputAdminModule){
@@ -122,8 +124,10 @@ public class HTMLOutputModule extends AnnotatedBackgroundModule implements Acces
 		}
 	}
 
+	@Override
 	public void moduleUpdated(ForegroundModuleDescriptor moduleDescriptor, ForegroundModule moduleInstance) throws KeyNotCachedException {}
 
+	@Override
 	public void moduleUnloaded(ForegroundModuleDescriptor moduleDescriptor, ForegroundModule moduleInstance) throws KeyNotCachedException {
 
 		if(moduleInstance instanceof HTMLOutputAdminModule){
@@ -193,22 +197,27 @@ public class HTMLOutputModule extends AnnotatedBackgroundModule implements Acces
 		return htmlRequired;
 	}
 
+	@Override
 	public boolean allowsAdminAccess() {
 		return false;
 	}
 
+	@Override
 	public boolean allowsUserAccess() {
 		return false;
 	}
 
+	@Override
 	public boolean allowsAnonymousAccess() {
 		return false;
 	}
 
+	@Override
 	public Collection<Integer> getAllowedGroupIDs() {
 		return this.adminGroups;
 	}
 
+	@Override
 	public Collection<Integer> getAllowedUserIDs() {
 		return this.adminUsers;
 	}

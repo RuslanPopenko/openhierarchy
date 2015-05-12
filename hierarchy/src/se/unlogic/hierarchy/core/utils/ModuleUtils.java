@@ -14,6 +14,7 @@ import java.lang.reflect.Modifier;
 import java.net.URISyntaxException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -362,6 +363,46 @@ public class ModuleUtils {
 		return null;
 	}
 
+	public static List<LinkTag> getGlobalLinks(XSLVariableReader variableReader) throws SAXException, IOException, ParserConfigurationException, ClassNotFoundException, URISyntaxException {
+
+		String linksVariable = variableReader.getValue("globallinks");
+
+		if (!StringUtils.isEmpty(linksVariable)) {
+
+			linksVariable = linksVariable.replace("\t", "");
+
+			String linkPrefix = "/static/global";
+
+			if (linksVariable.contains("\n")) {
+
+				List<String> links = StringUtils.splitOnLineBreak(linksVariable, true);
+
+				ArrayList<LinkTag> linkTags = new ArrayList<LinkTag>(links.size());
+
+				for (String link : links) {
+
+					if (!StringUtils.isEmpty(link)) {
+
+						linkTags.add(new LinkTag(linkPrefix + link));
+					}
+				}
+
+				if (linkTags.isEmpty()) {
+
+					return null;
+				}
+
+				return linkTags;
+
+			} else {
+
+				return Collections.singletonList(new LinkTag(linkPrefix + linksVariable));
+			}
+		}
+
+		return null;
+	}	
+	
 	public static void setModuleSettings(Object target, Class<?> maxDepth, MutableSettingHandler mutableSettingHandler, SystemInterface systemInterface) {
 
 		Class<?> clazz = target.getClass();
@@ -447,6 +488,22 @@ public class ModuleUtils {
 								ReflectionUtils.setFieldValue(field, value, target);
 							}
 
+						} else if (field.getType() == Short.class) {
+
+							Short value = mutableSettingHandler.getShort(id);
+
+							if (value != null || moduleSetting.allowsNull()) {
+								ReflectionUtils.setFieldValue(field, value, target);
+							}
+
+						} else if (field.getType() == short.class) {
+
+							Short value = mutableSettingHandler.getShort(id);
+
+							if (value != null) {
+								ReflectionUtils.setFieldValue(field, value, target);
+							}
+
 						} else if (field.getType() == List.class && ReflectionUtils.checkGenericTypes(field, Integer.class)) {
 
 							List<Integer> values = mutableSettingHandler.getInts(id);
@@ -498,6 +555,30 @@ public class ModuleUtils {
 						} else if (field.getType() == List.class && ReflectionUtils.checkGenericTypes(field, Double.class)) {
 
 							List<Double> values = mutableSettingHandler.getDoubles(id);
+
+							if (values != null || moduleSetting.allowsNull()) {
+								ReflectionUtils.setFieldValue(field, values, target);
+							}
+
+						} else if (field.getType() == Float.class) {
+
+							Float value = mutableSettingHandler.getFloat(id);
+
+							if (value != null || moduleSetting.allowsNull()) {
+								ReflectionUtils.setFieldValue(field, value, target);
+							}
+
+						} else if (field.getType() == float.class) {
+
+							Float value = mutableSettingHandler.getFloat(id);
+
+							if (value != null) {
+								ReflectionUtils.setFieldValue(field, value, target);
+							}
+
+						} else if (field.getType() == List.class && ReflectionUtils.checkGenericTypes(field, Float.class)) {
+
+							List<Float> values = mutableSettingHandler.getFloats(id);
 
 							if (values != null || moduleSetting.allowsNull()) {
 								ReflectionUtils.setFieldValue(field, values, target);
@@ -894,7 +975,22 @@ public class ModuleUtils {
 
 					String id = annotation.id().equals("") ? field.getName() : annotation.id();
 
-					settingDescriptors.add(SettingDescriptor.createTextAreaSetting(id, annotation.name(), annotation.description(), annotation.required(), getSettingDescriptorDefaultValue(field, moduleInstance), getSettingDescriptorStringFormatValidator(annotation.formatValidator())));
+					boolean splitOnLineBreak;
+					
+					String defaultValue;
+					
+					if(field.getType().isAssignableFrom(List.class)){
+						
+						splitOnLineBreak = true;
+						defaultValue = getSettingDescriptorDefaultValues(field, moduleInstance);
+						
+					}else{
+						
+						splitOnLineBreak = false;
+						defaultValue = getSettingDescriptorDefaultValue(field, moduleInstance);
+					}					
+					
+					settingDescriptors.add(SettingDescriptor.createTextAreaSetting(id, annotation.name(), annotation.description(), annotation.required(), defaultValue, getSettingDescriptorStringFormatValidator(annotation.formatValidator()), splitOnLineBreak));
 
 				} else if (field.isAnnotationPresent(TextFieldSettingDescriptor.class)) {
 
@@ -955,6 +1051,33 @@ public class ModuleUtils {
 		}
 	}
 
+	private static String getSettingDescriptorDefaultValues(Field field, Module<?> moduleInstance) throws IllegalArgumentException, IllegalAccessException {
+
+		Collection<?> values = (Collection<?>) field.get(moduleInstance);
+		
+		if(values != null){
+			
+			StringBuilder stringBuilder = new StringBuilder();
+			
+			for(Object value : values){
+				
+				if(value != null){
+			
+					if(stringBuilder.length() > 0){
+						
+						stringBuilder.append("\n");
+					}
+					
+					stringBuilder.append(value.toString());
+				}
+			}
+			
+			return stringBuilder.toString();
+		}
+		
+		return null;
+	}	
+	
 	private static List<ValueDescriptor> parseMultiValueSettingDescriptorAnnotation(Annotation annotation, String[] values, String[] descriptions, Field field, Class<?> clazz) {
 
 		if (values.length == 0) {

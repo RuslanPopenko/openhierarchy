@@ -73,7 +73,7 @@
 				<xsl:apply-templates select="SettingDescriptors/settingDescriptor" mode="list"/>
 			</table>
 		
-			<div class="floatright">
+			<div class="floatright margintop">
 				<input type="submit" value="{$i18n.save}" />
 			</div>	
 		</form>
@@ -114,7 +114,7 @@
 		</xsl:choose>
 	
 		<xsl:if test="/Document/IsAdmin">
-			<div class="floatright marginright clearboth">
+			<div class="floatright marginright clearboth margintop">
 				<a href="{/Document/requestinfo/currentURI}/{/Document/module/alias}/selectmodule" title="{$i18n.selectModule}">
 					<xsl:value-of select="$i18n.selectModule"/>
 					<xsl:text>&#x20;</xsl:text>
@@ -336,8 +336,18 @@
 		
 	<xsl:template match="settingDescriptor" mode="list">
 	
+		<xsl:variable name="id" select="id"/>
+	
 		<tr>
-			<td><input type="checkbox" name="id" value="{id}"/></td>
+			<td>
+				<input type="checkbox" name="id" value="{id}">
+					
+					<xsl:if test="../../SelectedSettings/ID = $id">
+						<xsl:attribute name="checked">true</xsl:attribute>
+					</xsl:if>
+				
+				</input>
+			</td>
 			<td><xsl:value-of select="id"/></td>
 			<td><xsl:value-of select="name"/></td>
 			<td><xsl:value-of select="displayType"/></td>
@@ -677,7 +687,7 @@
 			<xsl:with-param name="editorHeight">400</xsl:with-param>
 			<xsl:with-param name="contentsCss">
 				<xsl:if test="/Document/cssPath">
-					<xsl:value-of select="/Document/requestinfo/contextpath"/><xsl:value-of select="/Document/cssPath"/>
+					<xsl:value-of select="/Document/cssPath"/>
 				</xsl:if>
 			</xsl:with-param>
 		</xsl:call-template>

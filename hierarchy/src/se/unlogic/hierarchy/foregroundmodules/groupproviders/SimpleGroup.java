@@ -110,7 +110,7 @@ public class SimpleGroup extends MutableGroup implements AttributeSource{
 	@Override
 	public String toString() {
 
-		return this.name;
+		return this.name + " (" + groupID + ")";
 	}
 
 
@@ -136,6 +136,7 @@ public class SimpleGroup extends MutableGroup implements AttributeSource{
 		return attributeHandler;
 	}
 
+	@Override
 	public List<SimpleGroupAttribute> getAttributes() {
 
 		return attributes;
@@ -146,6 +147,7 @@ public class SimpleGroup extends MutableGroup implements AttributeSource{
 		this.attributes = attributes;
 	}
 
+	@Override
 	public void addAttribute(String name, String value) {
 
 		if(this.attributes == null){

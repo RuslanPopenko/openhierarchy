@@ -13,5 +13,5 @@ import java.util.List;
 
 public interface Searchable {
 
-	List<SearchableItem> getSearchableItems() throws Exception;
+	List<? extends SearchableItem> getSearchableItems() throws Exception;
 }

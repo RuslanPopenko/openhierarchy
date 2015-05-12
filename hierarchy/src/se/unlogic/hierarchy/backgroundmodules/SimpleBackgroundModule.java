@@ -17,6 +17,7 @@ import se.unlogic.hierarchy.core.interfaces.BackgroundModuleDescriptor;
 
 public abstract class SimpleBackgroundModule extends BaseSectionModule<BackgroundModuleDescriptor> implements BackgroundModule{
 
+	@Override
 	public List<SettingDescriptor> getSettings() {
 
 		return null;

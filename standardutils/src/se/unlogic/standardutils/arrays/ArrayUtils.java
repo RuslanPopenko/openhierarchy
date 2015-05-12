@@ -7,6 +7,7 @@
  ******************************************************************************/
 package se.unlogic.standardutils.arrays;
 
+
 public class ArrayUtils {
 
 	public static <T> T[] toArray(T... values) {
@@ -43,5 +44,15 @@ public class ArrayUtils {
 		}
 		
 		return false;
+	}
+
+	public static int getLength(Object[] array) {
+
+		if(array == null){
+			
+			return 0;
+		}
+		
+		return array.length;
 	}
 }

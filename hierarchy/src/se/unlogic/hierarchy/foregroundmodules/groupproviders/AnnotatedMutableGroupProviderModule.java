@@ -13,6 +13,7 @@ public abstract class AnnotatedMutableGroupProviderModule<GroupType extends Muta
 		super(groupClass);
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public void addGroup(Group group) throws SQLException {
 
@@ -21,18 +22,21 @@ public abstract class AnnotatedMutableGroupProviderModule<GroupType extends Muta
 		setGroupProviderID((GroupType)group);
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public void updateGroup(Group group, boolean updateAttributes) throws SQLException {
 
 		groupDAO.update((GroupType) group, updateAttributes);
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public void deleteGroup(Group group) throws SQLException {
 
 		groupDAO.delete((GroupType) group);
 	}
 
+	@Override
 	public boolean canAddGroupClass(Class<? extends Group> groupClass) {
 
 		return this.groupClass.equals(groupClass);

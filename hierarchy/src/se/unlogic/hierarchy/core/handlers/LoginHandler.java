@@ -15,6 +15,7 @@ import se.unlogic.hierarchy.core.beans.User;
 import se.unlogic.hierarchy.core.comparators.PriorityComparator;
 import se.unlogic.hierarchy.core.interfaces.LoginProvider;
 import se.unlogic.standardutils.enums.Order;
+import se.unlogic.standardutils.string.StringUtils;
 import se.unlogic.webutils.http.URIParser;
 
 
@@ -69,6 +70,26 @@ public class LoginHandler {
 		}
 	}
 
+	public LoginProvider getProvider(String providerID) {
+
+		r.lock();
+		try {
+			
+			for(LoginProvider loginProvider : loginProviders){
+				
+				if(loginProvider.getProviderDescriptor().getID().equals(providerID)){
+					
+					return loginProvider;
+				}
+			}
+			
+		} finally {
+			r.unlock();
+		}
+		
+		return null;
+	}	
+	
 	public boolean removeProvider(LoginProvider loginProvider) {
 
 		w.lock();
@@ -101,8 +122,19 @@ public class LoginHandler {
 				}
 
 				try {
-
-					loginProvider.handleRequest(req, res, uriParser, redirectBack);
+					
+					String redirectURI;
+					
+					if(redirectBack){
+						
+						redirectURI = getRedirectURI(req, uriParser);
+						
+					}else{
+						
+						redirectURI = null;
+					}
+					
+					loginProvider.handleRequest(req, res, uriParser, redirectURI);
 
 					return;
 
@@ -122,6 +154,23 @@ public class LoginHandler {
 		} finally {
 			r.unlock();
 		}
+	}
+
+	public String getRedirectURI(HttpServletRequest req, URIParser uriParser) {
+
+		if(!StringUtils.isEmpty(uriParser.getFormattedURI())){
+
+			String redirect = uriParser.getFormattedURI();
+
+			if(!StringUtils.isEmpty(req.getQueryString())){
+
+				redirect += "?" + req.getQueryString();
+			}
+
+			return redirect;
+		}	
+		
+		return null;
 	}
 
 	public List<LoginProvider> getSupportedLoginProviders(HttpServletRequest req, URIParser uriParser){

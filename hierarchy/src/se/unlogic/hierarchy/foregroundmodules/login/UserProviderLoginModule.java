@@ -64,6 +64,7 @@ public class UserProviderLoginModule extends BaseLoginModule<User> {
 		}
 	}
 
+	@Override
 	public boolean loginUser(HttpServletRequest req, URIParser uriParser, User user) throws Exception {
 
 		this.setLoggedIn(req, uriParser, user);

@@ -11,8 +11,10 @@ import java.util.Comparator;
 
 public class ModuleInfoBeanComparator implements Comparator<ModuleInfoBean> {
 
+	@Override
 	public int compare(ModuleInfoBean m1, ModuleInfoBean m2) {
-		return m1.getModuleBean().getName().compareTo(m2.getModuleBean().getName());
+		
+		return String.CASE_INSENSITIVE_ORDER.compare(m1.getModuleBean().getName(), m2.getModuleBean().getName());
 	}
 
 }

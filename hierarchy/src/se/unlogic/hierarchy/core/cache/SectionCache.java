@@ -10,6 +10,7 @@ package se.unlogic.hierarchy.core.cache;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.locks.Lock;
@@ -22,10 +23,12 @@ import se.unlogic.hierarchy.core.daos.interfaces.SectionDAO;
 import se.unlogic.hierarchy.core.interfaces.FullSectionInterface;
 import se.unlogic.hierarchy.core.interfaces.SectionCacheListener;
 import se.unlogic.hierarchy.core.interfaces.SectionDescriptor;
+import se.unlogic.hierarchy.core.interfaces.SectionInterface;
 import se.unlogic.hierarchy.core.sections.Section;
 import se.unlogic.standardutils.collections.KeyAlreadyCachedException;
 import se.unlogic.standardutils.collections.KeyNotCachedException;
 import se.unlogic.standardutils.collections.StrictHashMap;
+import se.unlogic.standardutils.datatypes.SimpleEntry;
 
 public class SectionCache {
 
@@ -105,7 +108,7 @@ public class SectionCache {
 		}
 	}
 
-	public void cache(SimpleSectionDescriptor simpleSectionDescriptor) {
+	public SectionInterface cache(SimpleSectionDescriptor simpleSectionDescriptor) {
 
 		w.lock();
 		try {
@@ -117,7 +120,12 @@ public class SectionCache {
 				cl.sectionCached(simpleSectionDescriptor, sectionInstance);
 			}
 
+			sectionInstance.cacheModuleAndSections();
+			
 			log.debug("Subsection" + simpleSectionDescriptor + " added to section cache of section " + this.sectionInterface.getSectionDescriptor());
+			
+			return sectionInstance;
+			
 		} catch (KeyAlreadyCachedException e) {
 			throw e;
 		} finally {
@@ -263,7 +271,7 @@ public class SectionCache {
 				
 				if (cacheEntry.getKey().getAlias().equals(alias)) {
 					
-					return cacheEntry;
+					return new SimpleEntry<SectionDescriptor, Section>(cacheEntry);
 				}
 			}
 
@@ -283,7 +291,7 @@ public class SectionCache {
 
 				if (sectionID.equals(cacheEntry.getKey().getSectionID())) {
 					
-					return cacheEntry;
+					return new SimpleEntry<SectionDescriptor, Section>(cacheEntry);
 				}
 			}
 
@@ -295,16 +303,35 @@ public class SectionCache {
 	}
 
 	/**
-	 * Return a shallow copy of the map holding all cached sections
+	 * Return a copy of the map holding all cached sections
 	 * 
 	 * @return
 	 */
 	public Map<SectionDescriptor, Section> getSectionMap() {
 
-		HashMap<SectionDescriptor, Section> map = new HashMap<SectionDescriptor, Section>();
+		r.lock();
+		try {		
+		
+			HashMap<SectionDescriptor, Section> map = new HashMap<SectionDescriptor, Section>(sectionInstanceMap.size());
 
-		map.putAll(this.sectionInstanceMap);
+			map.putAll(this.sectionInstanceMap);
 
-		return map;
+			return map;			
+			
+		} finally {
+			r.unlock();
+		}			
+	}
+
+	public List<Section> getSections() {
+
+		r.lock();
+		try {		
+		
+			return new ArrayList<Section>(sectionInstanceMap.values());
+			
+		} finally {
+			r.unlock();
+		}	
 	}
 }

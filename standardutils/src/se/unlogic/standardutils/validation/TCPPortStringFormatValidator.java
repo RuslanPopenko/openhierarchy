@@ -10,6 +10,8 @@ package se.unlogic.standardutils.validation;
 
 public class TCPPortStringFormatValidator extends StringIntegerValidator {
 
+	private static final long serialVersionUID = -235693977712812656L;
+
 	public TCPPortStringFormatValidator(){
 		super(1,65536);
 	}

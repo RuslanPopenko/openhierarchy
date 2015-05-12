@@ -2,6 +2,7 @@ package se.unlogic.hierarchy.foregroundmodules.userproviders;
 
 import java.lang.reflect.Field;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -35,7 +36,8 @@ public abstract class AnnotatedUserProviderModule<UserType extends User> extends
 	@DropDownSettingDescriptor(name="Password algorithm",description="The algorithm used for password hashing",required=true,values={"MD2", "MD5", "MySQL", "SHA-1", "SHA-256", "SHA-384", "SHA-512"},valueDescriptions={"MD2", "MD5", "MySQL", "SHA-1", "SHA-256", "SHA-384", "SHA-512"})
 	protected String passwordAlgorithm = HashAlgorithms.SHA1;
 
-	@TextFieldSettingDescriptor(name="Priority",description="The priority of this user provider compared to other providers. A higher value means a higher priority. Valid values are 0 - " + Integer.MAX_VALUE + ".",required=true,formatValidator=NonNegativeStringIntegerValidator.class)
+	@ModuleSetting
+	@TextFieldSettingDescriptor(name="Priority",description="The priority of this user provider compared to other providers. A lower value means a higher priority. Valid values are 0 - " + Integer.MAX_VALUE + ".",required=true,formatValidator=NonNegativeStringIntegerValidator.class)
 	protected int priority = 0;
 
 	protected AnnotatedUserDAO<UserType> userDAO;
@@ -89,61 +91,79 @@ public abstract class AnnotatedUserProviderModule<UserType extends User> extends
 
 	protected abstract Field getAttributesRelation();
 
+	@Override
 	public UserType getUser(Integer userID, boolean groups, boolean attributes) throws SQLException {
 
 		return setupUser(userDAO.getUser(userID,groups, attributes), attributes);
 	}
 
+	@Override
 	public List<UserType> getUsers(boolean groups, boolean attributes) throws SQLException {
 
 		return setupUsers(userDAO.getUsers(groups, attributes), attributes);
 	}
 
+	@Override
 	public UserType getUserByUsername(String username, boolean groups, boolean attributes) throws SQLException {
 
 		return setupUser(userDAO.findByUsername(username, groups, attributes), attributes);
 	}
 
+	@Override
 	public UserType getUserByUsernamePassword(String username, String password, boolean groups, boolean attributes) throws SQLException {
 
 		return setupUser(userDAO.findByUsernamePassword(username, this.getHashedPassword(password), groups, attributes), attributes);
 	}
 
+	@Override
 	public UserType getUserByEmail(String email, boolean groups, boolean attributes) throws SQLException {
 
 		return setupUser(userDAO.findByEmail(email, groups, attributes), attributes);
 	}
 
+	@Override
 	public UserType getUserByEmailPassword(String email, String password, boolean groups, boolean attributes) throws SQLException {
 
 		return setupUser(userDAO.findByEmailPassword(email, this.getHashedPassword(password), groups, attributes), attributes);
 	}
 
+	@Override
 	public int getUserCount() throws SQLException {
 
 		return userDAO.getUserCount();
 	}
 
+	@Override
+	public int getUserCountByGroup(Integer groupID) throws SQLException {
+
+		return userDAO.getUserCount(groupID);
+	}
+
+	@Override
 	public int getDisabledUserCount() throws SQLException {
 
 		return userDAO.getDisabledUserCount();
 	}
 
+	@Override
 	public List<Character> getUserFirstLetterIndex(UserField filteringField) throws SQLException {
 
 		return userDAO.getUserFirstLetterIndex(filteringField);
 	}
 
+	@Override
 	public List<? extends User> getUsers(UserField sortingField, Order order, boolean groups, boolean attributes) throws SQLException {
 
 		return setupUsers(userDAO.getUsers(sortingField, order, groups, attributes), attributes);
 	}
 
+	@Override
 	public List<? extends User> getUsers(UserField filteringField, char startsWith, Order order, boolean groups, boolean attributes) throws SQLException {
 
 		return setupUsers(userDAO.getUsers(filteringField, order, startsWith, groups, attributes), attributes);
 	}
 
+	@Override
 	public int getPriority() {
 
 		return priority;
@@ -161,7 +181,8 @@ public abstract class AnnotatedUserProviderModule<UserType extends User> extends
 		}
 	}
 
-	public List<? extends User> getUsers(List<Integer> userIDs, boolean groups, boolean attributes) throws SQLException {
+	@Override
+	public List<? extends User> getUsers(Collection<Integer> userIDs, boolean groups, boolean attributes) throws SQLException {
 
 		return setupUsers(userDAO.getUsers(userIDs, groups, attributes), attributes);
 	}
@@ -176,33 +197,51 @@ public abstract class AnnotatedUserProviderModule<UserType extends User> extends
 		return users;
 	}
 
+	@Override
 	public DataSource getDataSource(){
 
 		return this.dataSource;
 	}
 
+	@Override
 	public List<? extends UserType> getUsersByGroup(Integer groupID, boolean groups, boolean attributes) throws SQLException {
 
 		return setupUsers(this.userDAO.getUsersByGroup(groupID, groups, attributes), attributes);
 	}
 
-	public List<? extends UserType> getUsersByGroups(List<Integer> groupIDs, boolean attributes) throws SQLException {
+	@Override
+	public List<? extends UserType> getUsersByGroups(Collection<Integer> groupIDs, boolean attributes) throws SQLException {
 
 		return setupUsers(this.userDAO.getUsersByGroups(groupIDs, attributes), attributes);
 	}
 
+	@Override
+	public List<? extends UserType> getUserByAttribute(String attributeName, boolean groups, boolean attributes) throws SQLException {
+
+		return setupUsers(this.userDAO.getUsersByAttribute(attributeName, groups, attributes), attributes);
+	}
+
+	@Override
 	public List<? extends UserType> getUsersByAttribute(String attributeName, String attributeValue, boolean groups, boolean attributes) throws SQLException {
 
 		return setupUsers(this.userDAO.getUsersByAttribute(attributeName, attributeValue, groups, attributes), attributes);
 	}
 
+	@Override
 	public UserType getUserByAttribute(String attributeName, String attributeValue, boolean groups, boolean attributes) throws SQLException {
 
 		return setupUser(this.userDAO.getUserByAttribute(attributeName, attributeValue, groups, attributes), attributes);
 	}
 
-	public List<? extends User> searchUsers(String query, boolean groups, boolean attributes) throws SQLException {
+	@Override
+	public List<? extends User> searchUsers(String query, boolean groups, boolean attributes, Integer maxHits) throws SQLException {
 
-		return userDAO.searchUsers(query, groups, attributes);
+		return userDAO.searchUsers(query, groups, attributes, maxHits);
+	}
+
+	@Override
+	public List<? extends User> getUsersWithoutAttribute(String attributeName, boolean groups, boolean attributes) throws SQLException {
+
+		return setupUsers(this.userDAO.getUsersWithoutAttribute(attributeName, groups, attributes), attributes);
 	}
 }

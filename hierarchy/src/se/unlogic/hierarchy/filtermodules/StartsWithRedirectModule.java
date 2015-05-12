@@ -19,6 +19,7 @@ public class StartsWithRedirectModule extends AnnotatedFilterModule {
 	@TextFieldSettingDescriptor(name="Prefix",description="The prefix to remove from the URL by redirecting")
 	protected String prefix;
 	
+	@Override
 	public void doFilter(HttpServletRequest req, HttpServletResponse res, User user, URIParser uriParser, FilterChain filterChain) throws TransformerException, IOException {
 
 		if(prefix == null){

@@ -11,7 +11,7 @@ import se.unlogic.standardutils.db.tableversionhandler.XMLDBScriptProvider;
 public class SimpleUserProviderModule extends BaseUserFormProviderModule<SimpleUser> {
 
 	public SimpleUserProviderModule() {
-
+ 
 		super(SimpleUser.class);
 	}
 
@@ -55,7 +55,6 @@ public class SimpleUserProviderModule extends BaseUserFormProviderModule<SimpleU
 
 	@Override
 	protected String getDefaultFormStyleSheet() {
-
 		return "SimpleUserProviderForm.en.xsl";
 	}
 }

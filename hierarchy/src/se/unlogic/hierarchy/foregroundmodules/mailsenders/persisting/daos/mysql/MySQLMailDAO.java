@@ -50,6 +50,7 @@ public class MySQLMailDAO extends BaseDAO implements MailDAO {
 		super(dataSource);
 	}
 
+	@Override
 	public void add(Email email) throws SQLException {
 
 		TransactionHandler transactionHandler = null;
@@ -155,6 +156,7 @@ public class MySQLMailDAO extends BaseDAO implements MailDAO {
 		query.executeUpdate();
 	}
 
+	@Override
 	public void delete(QueuedEmail email) throws SQLException {
 
 		UpdateQuery query = new UpdateQuery(dataSource, true, "DELETE FROM emails WHERE emailID = ?");
@@ -164,6 +166,7 @@ public class MySQLMailDAO extends BaseDAO implements MailDAO {
 		query.executeUpdate();
 	}
 
+	@Override
 	public QueuedEmail get(long resendIntervall, int databaseID) throws SQLException {
 
 		TransactionHandler transactionHandler = null;
@@ -251,11 +254,13 @@ public class MySQLMailDAO extends BaseDAO implements MailDAO {
 		return query.executeQuery();
 	}
 
+	@Override
 	public long getMailCount() throws SQLException {
 
 		return new ObjectQuery<Integer>(dataSource, true, "SELECT COUNT(emailID) FROM emails", IntegerPopulator.getPopulator()).executeQuery();
 	}
 
+	@Override
 	public void updateAndRelease(QueuedEmail email) throws SQLException {
 
 		UpdateQuery query = new UpdateQuery(dataSource, true, "UPDATE emails SET owner = NULL, resendCount = ?, lastSent = ? WHERE emailID = ?");
@@ -267,6 +272,7 @@ public class MySQLMailDAO extends BaseDAO implements MailDAO {
 		query.executeUpdate();
 	}
 
+	@Override
 	public void releaseAll(int databaseID) throws SQLException {
 
 		UpdateQuery query = new UpdateQuery(dataSource, true, "UPDATE emails SET owner = NULL WHERE owner = ?");

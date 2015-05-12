@@ -9,7 +9,7 @@ package se.unlogic.hierarchy.core.sections;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.locks.Lock;
@@ -32,8 +32,10 @@ import se.unlogic.hierarchy.core.cache.ForegroundModuleCache;
 import se.unlogic.hierarchy.core.cache.ForegroundModuleXSLTCache;
 import se.unlogic.hierarchy.core.cache.MenuItemCache;
 import se.unlogic.hierarchy.core.cache.SectionCache;
+import se.unlogic.hierarchy.core.comparators.PriorityComparator;
 import se.unlogic.hierarchy.core.enums.HTTPProtocol;
 import se.unlogic.hierarchy.core.enums.ResponseType;
+import se.unlogic.hierarchy.core.enums.SectionStatus;
 import se.unlogic.hierarchy.core.exceptions.AccessDeniedException;
 import se.unlogic.hierarchy.core.exceptions.ForegroundNullResponseException;
 import se.unlogic.hierarchy.core.exceptions.ProtocolRedirectException;
@@ -50,21 +52,21 @@ import se.unlogic.hierarchy.core.interfaces.ForegroundModuleDescriptor;
 import se.unlogic.hierarchy.core.interfaces.ForegroundModuleResponse;
 import se.unlogic.hierarchy.core.interfaces.FullSectionInterface;
 import se.unlogic.hierarchy.core.interfaces.FullSystemInterface;
+import se.unlogic.hierarchy.core.interfaces.ModuleAccessDeniedHandler;
 import se.unlogic.hierarchy.core.interfaces.RootSectionInterface;
+import se.unlogic.hierarchy.core.interfaces.SectionAccessDeniedHandler;
 import se.unlogic.hierarchy.core.interfaces.SectionDescriptor;
 import se.unlogic.hierarchy.core.interfaces.SectionInterface;
 import se.unlogic.hierarchy.core.utils.AccessUtils;
 import se.unlogic.standardutils.collections.CollectionUtils;
+import se.unlogic.standardutils.enums.Order;
 import se.unlogic.standardutils.string.StringUtils;
 import se.unlogic.webutils.http.URIParser;
 
 public class Section implements RootSectionInterface, FullSectionInterface {
 
-	private static HashMap<Integer, SectionInterface> sectionInterfaceMap = new HashMap<Integer, SectionInterface>();
-	private static final ReentrantReadWriteLock mapLock = new ReentrantReadWriteLock();
-	private static final Lock mapReadLock = mapLock.readLock();
-	private static final Lock mapWriteLock = mapLock.writeLock();
-
+	private static final PriorityComparator PRIORITY_COMPARATOR = new PriorityComparator(Order.ASC);
+	
 	protected Logger log = Logger.getLogger(this.getClass());
 
 	private ForegroundModuleCache foregroundModuleCache;
@@ -76,40 +78,22 @@ public class Section implements RootSectionInterface, FullSectionInterface {
 	private FullSystemInterface systemInterface;
 	private SectionDescriptor sectionDescriptor;
 	private SectionInterface parentSectionInterface;
+	private SectionStatus sectionStatus;
 
+	private ArrayList<SectionAccessDeniedHandler> sectionAccessDeniedHandlers;
+	private ArrayList<ModuleAccessDeniedHandler> moduleAccessDeniedHandlers;
+	
 	protected final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
 	protected final Lock r = rwl.readLock();
 	protected final Lock w = rwl.writeLock();
-
-	private void addSectionInterface() {
-
-		mapWriteLock.lock();
-		try {
-			sectionInterfaceMap.put(this.sectionDescriptor.getSectionID(), this);
-		} finally {
-			mapWriteLock.unlock();
-		}
-	}
-
-	private void removeSectionInterface() {
-
-		mapWriteLock.lock();
-		try {
-			sectionInterfaceMap.remove(this.sectionDescriptor.getSectionID());
-		} finally {
-			mapWriteLock.unlock();
-		}
-	}
-
-	public static SectionInterface getSectionInterface(Integer sectionID) {
-
-		mapReadLock.lock();
-		try {
-			return sectionInterfaceMap.get(sectionID);
-		} finally {
-			mapReadLock.unlock();
-		}
-	}
+	
+	private final ReentrantReadWriteLock sectionAccessDeniedHandlerLock = new ReentrantReadWriteLock();
+	private final Lock sectionAccessDeniedHandlerReadLock = sectionAccessDeniedHandlerLock.readLock();
+	private final Lock sectionAccessDeniedHandlerWriteLock = sectionAccessDeniedHandlerLock.writeLock();
+	
+	private final ReentrantReadWriteLock moduleAccessDeniedHandlerLock = new ReentrantReadWriteLock();
+	private final Lock moduleAccessDeniedHandlerReadLock = moduleAccessDeniedHandlerLock.readLock();
+	private final Lock moduleAccessDeniedHandlerWriteLock = moduleAccessDeniedHandlerLock.writeLock();		
 
 	public Section(SectionDescriptor sectionDescriptor, SectionInterface parentSectionInterface, FullSystemInterface systemInterface) {
 
@@ -117,16 +101,11 @@ public class Section implements RootSectionInterface, FullSectionInterface {
 		try {
 			log.info("Section " + sectionDescriptor + " starting...");
 
+			sectionStatus = SectionStatus.STARTING;
+			
 			this.sectionDescriptor = sectionDescriptor;
 
-			if (parentSectionInterface == null) {
-
-				systemInterface.setRootSection(this);
-
-			} else {
-
-				this.parentSectionInterface = parentSectionInterface;
-			}
+			this.parentSectionInterface = parentSectionInterface;
 
 			this.systemInterface = systemInterface;
 
@@ -146,24 +125,9 @@ public class Section implements RootSectionInterface, FullSectionInterface {
 			sectionCache.addCacheListener(menuCache);
 			sectionCache.addCacheListener(systemInterface.getGlobalSectionCacheListener());
 
-			log.info("Caching modules...");
-
-			try {
-				this.foregroundModuleCache.cacheModules(false);
-				this.backgroundModuleCache.cacheModules(false);
-			} catch (Exception e) {
-				log.error("Error caching modules for section " + this.sectionDescriptor, e);
-			}
-
-			log.info("Caching subsections...");
-
-			try {
-				this.sectionCache.cacheSections();
-			} catch (Exception e) {
-				log.error("Error caching subsections for section " + this.sectionDescriptor, e);
-			}
-
-			this.addSectionInterface();
+			sectionStatus = SectionStatus.STARTED;
+			
+			systemInterface.addSection(this);
 
 			log.info("Section " + this.sectionDescriptor + " started");
 		} finally {
@@ -171,6 +135,34 @@ public class Section implements RootSectionInterface, FullSectionInterface {
 		}
 	}
 
+	public void cacheModuleAndSections(){
+		
+		w.lock();
+		try {		
+		
+			log.info("Section " + this.sectionDescriptor + " caching modules...");
+	
+			try {
+				this.foregroundModuleCache.cacheModules(false);
+				this.backgroundModuleCache.cacheModules(false);
+			} catch (Exception e) {
+				log.error("Error caching modules for section " + this.sectionDescriptor, e);
+			}
+	
+			log.info("Section " + this.sectionDescriptor + " caching subscections...");
+	
+			try {
+				this.sectionCache.cacheSections();
+			} catch (Exception e) {
+				log.error("Error caching subsections for section " + this.sectionDescriptor, e);
+			}
+		
+		} finally {
+			w.unlock();
+		}		
+	}
+	
+	@Override
 	public void update(SectionDescriptor sectionDescriptor) {
 
 		w.lock();
@@ -191,12 +183,16 @@ public class Section implements RootSectionInterface, FullSectionInterface {
 		try {
 			log.info("Unloading section " + this.sectionDescriptor);
 
+			sectionStatus = SectionStatus.STOPPING;
+			
 			this.foregroundModuleCache.unload();
 			this.backgroundModuleCache.unload();
 			this.sectionCache.unload();
 
-			this.removeSectionInterface();
+			systemInterface.removeSection(this);
 
+			sectionStatus = SectionStatus.STOPPED;
+			
 			log.info("Section " + this.sectionDescriptor + " unloaded");
 		} finally {
 			w.unlock();
@@ -271,6 +267,41 @@ public class Section implements RootSectionInterface, FullSectionInterface {
 					return moduleResponse;
 
 				} else {
+					
+					sectionAccessDeniedHandlerReadLock.lock();
+					
+					try{
+
+						if(sectionAccessDeniedHandlers != null){
+							
+							for(SectionAccessDeniedHandler handler : sectionAccessDeniedHandlers){
+								
+								try {
+									
+									if(handler.supportsRequest(req, user, uriParser, sectionCacheEntry.getKey())) {
+
+										handler.handleRequest(req, res, user, uriParser, sectionCacheEntry.getKey());
+										
+										break;
+									}
+									
+								} catch (Throwable e) {
+									
+									log.error("Error in section access denied handler " + handler, e);
+								}
+							}
+							
+							if(res.isCommitted()){
+								
+								return null;
+							}
+						}						
+						
+					}finally{
+						
+						sectionAccessDeniedHandlerReadLock.unlock();
+					}
+					
 					throw new AccessDeniedException(sectionCacheEntry.getKey());
 				}
 			}
@@ -359,6 +390,39 @@ public class Section implements RootSectionInterface, FullSectionInterface {
 					}
 				} else {
 
+					moduleAccessDeniedHandlerReadLock.lock();
+					
+					try{
+						if(moduleAccessDeniedHandlers != null){
+							
+							for(ModuleAccessDeniedHandler handler : moduleAccessDeniedHandlers){
+								
+								try {
+									
+									if(handler.supportsRequest(req, user, uriParser, moduleCacheEntry.getKey())) {
+
+										handler.handleRequest(req, res, user, uriParser, moduleCacheEntry.getKey());
+										
+										break;
+									}
+									
+								} catch (Throwable e) {
+									
+									log.error("Error in module access denied handler " + handler, e);
+								}
+							}
+							
+							if(res.isCommitted()){
+								
+								return null;
+							}
+						}					
+						
+					}finally{
+						
+						moduleAccessDeniedHandlerReadLock.unlock();
+					}				
+					
 					throw new AccessDeniedException(this.sectionDescriptor, moduleCacheEntry.getKey());
 				}
 			}
@@ -388,6 +452,7 @@ public class Section implements RootSectionInterface, FullSectionInterface {
 		}
 	}
 
+	@Override
 	public Breadcrumb getBreadcrumb() {
 		return new Breadcrumb(this.sectionDescriptor);
 	}
@@ -441,51 +506,65 @@ public class Section implements RootSectionInterface, FullSectionInterface {
 		return bgResponses;
 	}
 
+	@Override
 	public int getReadLockCount() {
 
 		return rwl.getReadLockCount();
 	}
 
+	public int getSectionAccessDeniedHandlerLockCount(){
+		
+		return sectionAccessDeniedHandlerLock.getReadLockCount();
+	}
+	
+	public int getModuleAccessDeniedHandlerLockCount(){
+		
+		return moduleAccessDeniedHandlerLock.getReadLockCount();
+	}	
+	
+	@Override
 	public ForegroundModuleCache getForegroundModuleCache() {
 
 		return foregroundModuleCache;
 	}
 
+	@Override
 	public BackgroundModuleCache getBackgroundModuleCache() {
 
 		return backgroundModuleCache;
 	}
 
+	@Override
 	public MenuItemCache getMenuCache() {
 
 		return menuCache;
 	}
 
+	@Override
 	public ForegroundModuleXSLTCache getModuleXSLTCache() {
 
 		return foregroundModuleXSLTCache;
 	}
 
+	@Override
 	public SectionCache getSectionCache() {
 
 		return sectionCache;
 	}
 
+	@Override
 	public FullSystemInterface getSystemInterface() {
 
 		return systemInterface;
 	}
 
+	@Override
 	public SectionDescriptor getSectionDescriptor() {
 
-		try {
-			r.lock();
-			return sectionDescriptor;
-		} finally {
-			r.unlock();
-		}
+		return sectionDescriptor;
 	}
 
+	@Override
 	public SectionInterface getParentSectionInterface() {
 
 		return parentSectionInterface;
@@ -553,4 +632,135 @@ public class Section implements RootSectionInterface, FullSectionInterface {
 		}
 	}
 
+	@Override
+	public SectionStatus getSectionStatus() {
+
+		return sectionStatus;
+	}
+
+	@Override
+	public boolean addSectionAccessDeniedHandler(SectionAccessDeniedHandler handler){
+		
+		if(handler == null){
+			
+			return false;
+		}
+		
+		sectionAccessDeniedHandlerWriteLock.lock();
+		
+		try {
+
+			if(sectionAccessDeniedHandlers == null){
+				
+				sectionAccessDeniedHandlers = new ArrayList<SectionAccessDeniedHandler>();
+				return sectionAccessDeniedHandlers.add(handler);
+			
+			}else{
+			
+				if (!sectionAccessDeniedHandlers.contains(handler)) {
+
+					sectionAccessDeniedHandlers.add(handler);
+
+					Collections.sort(sectionAccessDeniedHandlers, PRIORITY_COMPARATOR);
+
+					return true;
+				}
+
+				return false;
+			}
+			
+		} finally {
+			sectionAccessDeniedHandlerWriteLock.unlock();
+		}
+	}
+	
+	@Override
+	public boolean removeSectionAccessDeniedHandler(SectionAccessDeniedHandler handler){
+		
+		sectionAccessDeniedHandlerWriteLock.lock();
+		
+		try {
+
+			if(sectionAccessDeniedHandlers == null){
+				
+				return false;
+				
+			}else {
+				
+				return sectionAccessDeniedHandlers.remove(handler);
+			}
+			
+		} finally {
+			
+			if(sectionAccessDeniedHandlers != null && sectionAccessDeniedHandlers.isEmpty()){
+				
+				sectionAccessDeniedHandlers = null;
+			}
+			
+			sectionAccessDeniedHandlerWriteLock.unlock();
+		}
+	}
+	
+	@Override
+	public boolean addModuleAccessDeniedHandler(ModuleAccessDeniedHandler handler){
+		
+		if(handler == null){
+			
+			return false;
+		}
+		
+		moduleAccessDeniedHandlerWriteLock.lock();
+		
+		try {
+
+			if(moduleAccessDeniedHandlers == null){
+				
+				moduleAccessDeniedHandlers = new ArrayList<ModuleAccessDeniedHandler>();
+				return moduleAccessDeniedHandlers.add(handler);
+			
+			}else{
+			
+				if (!moduleAccessDeniedHandlers.contains(handler)) {
+
+					moduleAccessDeniedHandlers.add(handler);
+
+					Collections.sort(moduleAccessDeniedHandlers, PRIORITY_COMPARATOR);
+
+					return true;
+				}
+
+				return false;
+			}
+			
+		} finally {
+			moduleAccessDeniedHandlerWriteLock.unlock();
+		}
+	}
+	
+	@Override
+	public boolean removeModuleAccessDeniedHandler(ModuleAccessDeniedHandler handler){
+		
+		moduleAccessDeniedHandlerWriteLock.lock();
+		
+		try {
+
+			if(moduleAccessDeniedHandlers == null){
+				
+				return false;
+				
+			}else {
+				
+				return moduleAccessDeniedHandlers.remove(handler);
+			}
+			
+		} finally {
+			
+			if(moduleAccessDeniedHandlers != null && moduleAccessDeniedHandlers.isEmpty()){
+				
+				moduleAccessDeniedHandlers = null;
+			}
+			
+			moduleAccessDeniedHandlerWriteLock.unlock();
+		}
+	}	
 }

@@ -10,35 +10,40 @@ package se.unlogic.hierarchy.core.interfaces;
 import java.io.Serializable;
 import java.sql.SQLException;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
 import se.unlogic.hierarchy.core.enums.ModuleType;
 import se.unlogic.standardutils.xml.Elementable;
 
 public interface ModuleDescriptor extends AccessInterface, Elementable, Serializable{
-	
-	boolean isEnabled();
-	
-	String getClassname();
 
-	String getName();
+	public boolean isEnabled();
 
-	Element toXML(Document doc);
+	public String getClassname();
 
-	Integer getModuleID();
+	public String getName();
 
-	Integer getDataSourceID();
+	public Integer getModuleID();
 
-	MutableSettingHandler getMutableSettingHandler();
-	
+	public Integer getDataSourceID();
+
+	public MutableSettingHandler getMutableSettingHandler();
+
 	/**
 	 * This method is used to persist any changes made to the {@link MutableSettingHandler}
-	 * 
+	 *
 	 * @param systemInterface
-	 * @throws SQLException 
+	 * @throws SQLException
 	 */
 	public void saveSettings(SystemInterface systemInterface) throws SQLException;
-	
+
 	public ModuleType getType();
+
+	public MutableAttributeHandler getAttributeHandler();
+
+	/**
+	 * This method is used to persist any changes made to the {@link MutableAttributeHandler}
+	 *
+	 * @param systemInterface
+	 * @throws SQLException
+	 */
+	public void saveAttributes(SystemInterface systemInterface) throws SQLException;
 }

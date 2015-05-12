@@ -34,49 +34,47 @@ import se.unlogic.standardutils.xml.XMLParser;
 import se.unlogic.standardutils.xml.XMLUtils;
 import se.unlogic.standardutils.xml.XMLValidationUtils;
 
-@Table(name="openhierarchy_background_modules")
+@Table(name = "openhierarchy_background_modules")
 public class SimpleBackgroundModuleDescriptor extends BaseVisibleModuleDescriptor implements BackgroundModuleDescriptor {
 
 	private static final long serialVersionUID = -2949709405791503907L;
 
 	@DAOManaged
-	@OneToMany(autoAdd=true,autoUpdate=true,autoGet=true)
-	@SimplifiedRelation(table="openhierarchy_background_module_aliases",remoteKeyColumnName="moduleID",remoteValueColumnName="alias",preserveListOrder=true,indexColumn="listIndex")
-	@WebPopulate(required=true,paramName="alias")
+	@OneToMany(autoAdd = true, autoUpdate = true, autoGet = true)
+	@SimplifiedRelation(table = "openhierarchy_background_module_aliases", remoteKeyColumnName = "moduleID", remoteValueColumnName = "alias", preserveListOrder = true, indexColumn = "listIndex")
+	@WebPopulate(required = true, paramName = "alias")
 	@SplitOnLineBreak
 	@NoDuplicates
 	private List<String> aliases;
 
 	@DAOManaged
-	@OneToMany(autoAdd=true,autoUpdate=true,autoGet=true)
-	@SimplifiedRelation(table="openhierarchy_background_module_slots",remoteKeyColumnName="moduleID",remoteValueColumnName="slot")
-	@WebPopulate(paramName="slots")
+	@OneToMany(autoAdd = true, autoUpdate = true, autoGet = true)
+	@SimplifiedRelation(table = "openhierarchy_background_module_slots", remoteKeyColumnName = "moduleID", remoteValueColumnName = "slot")
+	@WebPopulate(paramName = "slots")
 	@SplitOnLineBreak
 	@NoDuplicates
 	private List<String> slots;
 
 	@DAOManaged
-	@WebPopulate(required=true,populator=NonNegativeStringIntegerPopulator.class)
+	@WebPopulate(required = true, populator = NonNegativeStringIntegerPopulator.class)
 	private int priority;
 
-
+	@Override
 	public List<String> getAliases() {
 
 		return aliases;
 	}
-
 
 	public void setAliases(List<String> aliases) {
 
 		this.aliases = aliases;
 	}
 
-
+	@Override
 	public List<String> getSlots() {
 
 		return slots;
 	}
-
 
 	public void setSlots(List<String> slots) {
 
@@ -112,25 +110,28 @@ public class SimpleBackgroundModuleDescriptor extends BaseVisibleModuleDescripto
 		return moduleElement;
 	}
 
-	public void saveSettings(SystemInterface systemInterface) throws SQLException{
+	@Override
+	public void saveSettings(SystemInterface systemInterface) throws SQLException {
 
 		systemInterface.getCoreDaoFactory().getBackgroundModuleSettingDAO().set(this);
 	}
 
+	@Override
+	public void saveAttributes(SystemInterface systemInterface) throws SQLException {
 
+		systemInterface.getCoreDaoFactory().getBackgroundModuleAttributeDAO().set(this);
+	}
 
+	@Override
 	public int getPriority() {
 
 		return priority;
 	}
 
-
-
 	public void setPriority(int priority) {
 
 		this.priority = priority;
 	}
-
 
 	@Override
 	public void populate(XMLParser xmlParser) throws ValidationException {
@@ -160,7 +161,7 @@ public class SimpleBackgroundModuleDescriptor extends BaseVisibleModuleDescripto
 		}
 	}
 
-
+	@Override
 	public ModuleType getType() {
 
 		return ModuleType.BACKGROUND;

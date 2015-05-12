@@ -33,7 +33,7 @@ public class EnumUtils {
 		}
 		
 		try {
-			return Type.valueOf(e, s);
+			return Enum.valueOf(e, s);
 		} catch (IllegalArgumentException ex) {
 			return null;
 		}

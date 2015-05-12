@@ -5,27 +5,29 @@ var redirectURI = null;
 
 $(document).ready(function(){
 	
-	var registrationAlias = "#" + registrationModuleURI.substring(registrationModuleURI.lastIndexOf("/")+1 , registrationModuleURI.length);
-	
-	var hash = document.location.hash;
-	
-	var hashParts = hash.split("?");
-	
-	if(hashParts[0] == registrationAlias) {
-		initRegistrationDialog(getRequestParameters()["requesteduri"]);
-	}
-	
-	$(window).bind('hashchange', function () {
+	if(registrationModuleURI != undefined) {
+		var registrationAlias = "#" + registrationModuleURI.substring(registrationModuleURI.lastIndexOf("/")+1 , registrationModuleURI.length);
 		
 		var hash = document.location.hash;
+		
 		var hashParts = hash.split("?");
+		
 		if(hashParts[0] == registrationAlias) {
 			initRegistrationDialog(getRequestParameters()["requesteduri"]);
 		}
 		
-	});
-	
-	fixFlashWMode();
+		$(window).bind('hashchange', function () {
+			
+			var hash = document.location.hash;
+			var hashParts = hash.split("?");
+			if(hashParts[0] == registrationAlias) {
+				initRegistrationDialog(getRequestParameters()["requesteduri"]);
+			}
+			
+		});
+		
+		fixFlashWMode();
+	}
 });
 
 function initRegistrationDialog(redirectValue) {

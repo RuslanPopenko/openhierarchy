@@ -11,6 +11,7 @@ public abstract class BaseGroupProviderModule<GroupType extends SimpleGroup> ext
 		super(groupClass);
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public boolean isProviderFor(Group group) {
 
@@ -46,4 +47,5 @@ public abstract class BaseGroupProviderModule<GroupType extends SimpleGroup> ext
 
 		return groups;
 	}
+	
 }

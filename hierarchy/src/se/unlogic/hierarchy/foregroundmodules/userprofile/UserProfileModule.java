@@ -201,7 +201,7 @@ public class UserProfileModule extends AnnotatedForegroundModule {
 
 				log.info("User " + user + " updating user profile, new values " + requestedUser);
 				req.getSession(true).setAttribute("user", requestedUser);
-				this.systemInterface.getUserHandler().updateUser(mutableUser, passwordChanged, false, attributeHandler != null && attributes != null);
+				this.systemInterface.getUserHandler().updateUser(mutableUser, passwordChanged, false, true);
 
 				userUpdated = true;
 			}

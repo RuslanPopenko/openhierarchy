@@ -24,12 +24,13 @@ import se.unlogic.hierarchy.core.exceptions.ResourceNotFoundException;
 import se.unlogic.hierarchy.core.interfaces.ForegroundModule;
 import se.unlogic.hierarchy.core.interfaces.ForegroundModuleCacheListener;
 import se.unlogic.hierarchy.core.interfaces.ForegroundModuleDescriptor;
+import se.unlogic.hierarchy.core.interfaces.ModuleTransformerCache;
 import se.unlogic.standardutils.xml.ClassPathURIResolver;
 import se.unlogic.standardutils.xsl.FileXSLTransformer;
 import se.unlogic.standardutils.xsl.URIXSLTransformer;
 import se.unlogic.standardutils.xsl.XSLTransformer;
 
-public class ForegroundModuleXSLTCache implements ForegroundModuleCacheListener {
+public class ForegroundModuleXSLTCache implements ForegroundModuleCacheListener, ModuleTransformerCache<ForegroundModuleDescriptor> {
 
 	private final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
 	private final Lock r = rwl.readLock();
@@ -52,6 +53,7 @@ public class ForegroundModuleXSLTCache implements ForegroundModuleCacheListener 
 		}
 	}
 
+	@Override
 	public void moduleCached(ForegroundModuleDescriptor mb, ForegroundModule moduleInstance) {
 		w.lock();
 		try{
@@ -74,6 +76,7 @@ public class ForegroundModuleXSLTCache implements ForegroundModuleCacheListener 
 		}
 	}
 
+	@Override
 	public void moduleUnloaded(ForegroundModuleDescriptor mb, ForegroundModule moduleInstance){
 		w.lock();
 		try{
@@ -86,6 +89,7 @@ public class ForegroundModuleXSLTCache implements ForegroundModuleCacheListener 
 		}
 	}
 
+	@Override
 	public void moduleUpdated(ForegroundModuleDescriptor mb, ForegroundModule moduleInstance){
 		w.lock();
 		try{
@@ -143,7 +147,7 @@ public class ForegroundModuleXSLTCache implements ForegroundModuleCacheListener 
 
 				}else{
 
-					return new URIXSLTransformer(styleSheetURL.toURI(),ClassPathURIResolver.getInstance());
+					return new URIXSLTransformer(styleSheetURL.toURI(),ClassPathURIResolver.getInstance(), true);
 				}
 			}
 		}

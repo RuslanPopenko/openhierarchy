@@ -9,5 +9,6 @@ package se.unlogic.hierarchy.core.interfaces;
 
 
 public interface FullSectionInterface extends SectionInterface {
+	@Override
 	public FullSystemInterface getSystemInterface();
 }

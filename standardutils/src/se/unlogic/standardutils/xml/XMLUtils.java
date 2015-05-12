@@ -116,10 +116,10 @@ public class XMLUtils {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 
 		factory.setNamespaceAware(namespaceAware);
-		factory.setValidating(validating);		
-		
+		factory.setValidating(validating);
+
 		setFactoryParam(factory, validating, namespaceAware);
-		
+
 		Document doc = factory.newDocumentBuilder().parse(file);
 
 		return doc;
@@ -133,7 +133,7 @@ public class XMLUtils {
 		factory.setValidating(validating);
 
 		setFactoryParam(factory, validating, namespaceAware);
-		
+
 		Document doc = factory.newDocumentBuilder().parse(uri.toString());
 
 		return doc;
@@ -146,8 +146,8 @@ public class XMLUtils {
 		factory.setNamespaceAware(namespaceAware);
 		factory.setValidating(validating);
 
-		setFactoryParam(factory, validating, namespaceAware);	
-		
+		setFactoryParam(factory, validating, namespaceAware);
+
 		Document doc = factory.newDocumentBuilder().parse(inputSource);
 
 		return doc;
@@ -161,7 +161,7 @@ public class XMLUtils {
 		factory.setValidating(validating);
 
 		setFactoryParam(factory, validating, namespaceAware);
-		
+
 		Document doc = factory.newDocumentBuilder().parse(stream);
 
 		return doc;
@@ -204,14 +204,14 @@ public class XMLUtils {
 	public static void writeXMLFile(Node node, File file, boolean indent, String encoding) throws TransformerFactoryConfigurationError, TransformerException, FileNotFoundException {
 
 		FileOutputStream outputStream = null;
-		
+
 		try{
 			outputStream = new FileOutputStream(file);
-			
+
 			writeXML(node, outputStream, indent, encoding);
-			
+
 		}finally{
-			
+
 			StreamUtils.closeStream(outputStream);
 		}
 	}
@@ -249,7 +249,7 @@ public class XMLUtils {
 
 			return (Element) targetElement.appendChild(elementable.toXML(doc));
 		}
-		
+
 		return null;
 	}
 
@@ -279,7 +279,7 @@ public class XMLUtils {
 
 	public static void append(Document doc, Element targetElement, String elementName, String subElementsName, List<? extends Object> values) {
 
-		if(values != null){
+		if(!CollectionUtils.isEmpty(values)){
 
 			Element subElement = doc.createElement(elementName);
 			targetElement.appendChild(subElement);
@@ -320,14 +320,14 @@ public class XMLUtils {
 
 	public static void appendNewCDATAElement(Document doc, Element targetElement, String elementName, String value) {
 
-		if(value != null){
+		if(!StringUtils.isEmpty(value)){
 			targetElement.appendChild(createCDATAElement(elementName, value, doc));
 		}
 	}
 
 	public static void appendNewElement(Document doc, Element targetElement, String elementName, String value) {
 
-		if(value != null){
+		if(!StringUtils.isEmpty(value)){
 			targetElement.appendChild(createElement(elementName, value, doc));
 		}
 	}
@@ -358,7 +358,7 @@ public class XMLUtils {
 
 	/**
 	 * Adds or replaces node in parent.
-	 * 
+	 *
 	 * @param parent
 	 * @param node
 	 * @throws Exception - Node cannot exist more than once, i.e. multiple nodes with the same name cannot exist in parent.
@@ -443,7 +443,11 @@ public class XMLUtils {
 			string = "_" + string.substring(1);
 		}
 
+		string = string.replaceAll("[åä]", "a");
+		string = string.replaceAll("[ÅÄ]", "A");
+		string = string.replace("ö", "o");
+		string = string.replace("Ö", "O");
 
-		return string.replaceAll("[^åäöÅÄÖ0-9a-zA-Z-.]", "_");
+		return string.replaceAll("[^0-9a-zA-Z-.]", "_");
 	}
 }

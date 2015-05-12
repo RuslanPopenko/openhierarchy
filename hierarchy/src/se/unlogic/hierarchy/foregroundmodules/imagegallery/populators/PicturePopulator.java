@@ -15,6 +15,7 @@ import se.unlogic.standardutils.dao.BeanResultSetPopulator;
 
 public class PicturePopulator implements BeanResultSetPopulator<Picture> {
 		
+	@Override
 	public Picture populate(ResultSet rs) throws SQLException {
 	
 		Picture picture = new Picture();	

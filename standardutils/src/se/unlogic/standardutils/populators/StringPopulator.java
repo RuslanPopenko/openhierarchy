@@ -24,6 +24,11 @@ public class StringPopulator extends BaseStringPopulator<String> implements Bean
 		super(null, validator);
 	}
 
+	public StringPopulator(String populatorID, StringFormatValidator validator) {
+
+		super(populatorID, validator);
+	}
+
 	private static final StringPopulator POPULATOR = new StringPopulator();
 
 	public String populate(ResultSet rs) throws SQLException {

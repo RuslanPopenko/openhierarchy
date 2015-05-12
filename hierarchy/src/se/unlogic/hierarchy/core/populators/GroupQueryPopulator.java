@@ -18,11 +18,13 @@ public class GroupQueryPopulator implements QueryParameterPopulator<Group> {
 
 	public static final GroupQueryPopulator POPULATOR = new GroupQueryPopulator();
 
+	@Override
 	public Class<Group> getType() {
 
 		return Group.class;
 	}
 
+	@Override
 	public void populate(PreparedStatementQuery query, int paramIndex, Object bean) throws SQLException {
 
 		if(bean == null){

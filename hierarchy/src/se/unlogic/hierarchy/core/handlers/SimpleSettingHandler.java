@@ -71,6 +71,7 @@ public class SimpleSettingHandler implements MutableSettingHandler {
 	 *
 	 * @see se.unlogic.hierarchy.core.handlers.SettingHandler#isSet(java.lang.String)
 	 */
+	@Override
 	public boolean isSet(String id) {
 		return settingsMap.containsKey(id);
 	}
@@ -80,6 +81,7 @@ public class SimpleSettingHandler implements MutableSettingHandler {
 	 *
 	 * @see se.unlogic.hierarchy.core.handlers.SettingHandler#getString(java.lang.String)
 	 */
+	@Override
 	public String getString(String id) {
 
 		List<String> values = this.settingsMap.get(id);
@@ -96,6 +98,7 @@ public class SimpleSettingHandler implements MutableSettingHandler {
 	 *
 	 * @see se.unlogic.hierarchy.core.handlers.SettingHandler#getInt(java.lang.String)
 	 */
+	@Override
 	public Integer getInt(String id) {
 		return NumberUtils.toInt(this.getString(id));
 	}
@@ -105,6 +108,7 @@ public class SimpleSettingHandler implements MutableSettingHandler {
 	 *
 	 * @see se.unlogic.hierarchy.core.handlers.SettingHandler#getLong(java.lang.String)
 	 */
+	@Override
 	public Long getLong(String id) {
 		return NumberUtils.toLong(this.getString(id));
 	}
@@ -114,6 +118,7 @@ public class SimpleSettingHandler implements MutableSettingHandler {
 	 *
 	 * @see se.unlogic.hierarchy.core.handlers.SettingHandler#getDouble(java.lang.String)
 	 */
+	@Override
 	public Double getDouble(String id) {
 		return NumberUtils.toDouble(this.getString(id));
 	}
@@ -123,6 +128,7 @@ public class SimpleSettingHandler implements MutableSettingHandler {
 	 *
 	 * @see se.unlogic.hierarchy.core.handlers.SettingHandler#getBoolean(java.lang.String)
 	 */
+	@Override
 	public Boolean getBoolean(String id) {
 
 		String value = this.getString(id);
@@ -148,14 +154,17 @@ public class SimpleSettingHandler implements MutableSettingHandler {
 		}
 	}
 
+	@Override
 	public boolean isEmpty() {
 		return settingsMap.isEmpty();
 	}
 
+	@Override
 	public Set<String> getIDs() {
 		return new TreeSet<String>(settingsMap.keySet());
 	}
 
+	@Override
 	public int size() {
 		return settingsMap.size();
 	}
@@ -164,23 +173,28 @@ public class SimpleSettingHandler implements MutableSettingHandler {
 		return settingsMap.entrySet();
 	}
 
+	@Override
 	public List<Double> getDoubles(String id) {
 
 		return NumberUtils.toDouble(this.settingsMap.get(id));
 	}
 
+	@Override
 	public List<Integer> getInts(String id) {
 		return NumberUtils.toInt(this.settingsMap.get(id));
 	}
 
+	@Override
 	public List<Long> getLongs(String id) {
 		return NumberUtils.toLong(this.settingsMap.get(id));
 	}
 
+	@Override
 	public List<String> getStrings(String id) {
 		return this.settingsMap.get(id);
 	}
 
+	@Override
 	public boolean getPrimitiveBoolean(String id) {
 
 		String value = this.getString(id);
@@ -192,16 +206,19 @@ public class SimpleSettingHandler implements MutableSettingHandler {
 		return Boolean.parseBoolean(value);
 	}
 
+	@Override
 	public Map<String, List<String>> getMap() {
 
 		return new HashMap<String, List<String>>(this.settingsMap);
 	}
 
+	@Override
 	public void removeSetting(String id) {
 
 		this.settingsMap.remove(id);
 	}
 
+	@Override
 	public void setSetting(String id, Object value) {
 
 		if(value != null){
@@ -213,6 +230,7 @@ public class SimpleSettingHandler implements MutableSettingHandler {
 		}
 	}
 
+	@Override
 	public void setSetting(String id, List<?> values) {
 
 		if(values != null && !values.isEmpty()) {
@@ -235,11 +253,13 @@ public class SimpleSettingHandler implements MutableSettingHandler {
 		}
 	}
 
+	@Override
 	public void clear() {
 
 		this.settingsMap.clear();
 	}
 
+	@Override
 	public Element toXML(Document doc) {
 
 		Element settingsElement = doc.createElement("settings");
@@ -262,11 +282,13 @@ public class SimpleSettingHandler implements MutableSettingHandler {
 		return settingsElement;
 	}
 
+	@Override
 	public void setSettings(Map<String, List<String>> settings) {
 
 		this.settingsMap = new ConcurrentHashMap<String, List<String>>(settings);
 	}
 
+	@Override
 	public void replaceSettings(HashMap<String, List<String>> settingValues) {
 
 		this.settingsMap.putAll(settingValues);
@@ -302,5 +324,23 @@ public class SimpleSettingHandler implements MutableSettingHandler {
 			return false;
 		}
 		return true;
+	}
+
+	@Override
+	public Short getShort(String id) {
+
+		return NumberUtils.toShort(this.getString(id));
+	}
+
+	@Override
+	public Float getFloat(String id) {
+
+		return NumberUtils.toFloat(this.getString(id));
+	}
+
+	@Override
+	public List<Float> getFloats(String id) {
+
+		return NumberUtils.toFloat(this.settingsMap.get(id));
 	}
 }

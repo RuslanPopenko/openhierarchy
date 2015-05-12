@@ -2,6 +2,7 @@ package se.unlogic.hierarchy.foregroundmodules.userproviders.daos;
 
 import java.lang.reflect.Field;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.List;
 
 import javax.sql.DataSource;
@@ -12,9 +13,11 @@ import se.unlogic.standardutils.dao.AnnotatedDAO;
 import se.unlogic.standardutils.dao.AnnotatedDAOFactory;
 import se.unlogic.standardutils.dao.HighLevelQuery;
 import se.unlogic.standardutils.dao.LowLevelQuery;
+import se.unlogic.standardutils.dao.MySQLRowLimiter;
 import se.unlogic.standardutils.dao.QueryOperators;
 import se.unlogic.standardutils.dao.QueryParameterFactory;
 import se.unlogic.standardutils.dao.RelationQuery;
+import se.unlogic.standardutils.dao.RowLimiter;
 import se.unlogic.standardutils.dao.querys.ArrayListQuery;
 import se.unlogic.standardutils.dao.querys.ObjectQuery;
 import se.unlogic.standardutils.enums.Order;
@@ -42,6 +45,8 @@ public class AnnotatedUserDAO<UserType extends User> extends AnnotatedDAO<UserTy
 
 	private final String searchSQL;
 
+	private final RowLimiter singleRowLimiter;
+
 	public AnnotatedUserDAO(DataSource dataSource, Class<UserType> beanClass, AnnotatedDAOFactory daoFactory, List<QueryParameterPopulator<?>> queryParameterPopulators, List<BeanStringPopulator<?>> typePopulators, String usergroupTableName, Field groupsRelation, String userAttributesTableName, Field attributesRelation) {
 
 		super(dataSource,beanClass,daoFactory,queryParameterPopulators,typePopulators);
@@ -63,11 +68,18 @@ public class AnnotatedUserDAO<UserType extends User> extends AnnotatedDAO<UserTy
 		this.usergroupTableName = usergroupTableName;
 		this.userAttributesTableName = userAttributesTableName;
 		this.searchSQL = getSearchSQL();
+
+		singleRowLimiter = getSingleRowLimiter();
+	}
+
+	protected RowLimiter getSingleRowLimiter() {
+
+		return new MySQLRowLimiter(1);
 	}
 
 	private String getSearchSQL() {
 
-		return "SELECT * FROM " + this.getTableName() + " WHERE " + this.firstnameParamFactory.getColumnName() + " LIKE ? OR " + this.lastnameParamFactory.getColumnName() + " LIKE ? ORDER BY " + this.firstnameParamFactory.getColumnName() + ", " + this.lastnameParamFactory.getColumnName();
+		return "SELECT * FROM " + this.getTableName() + " WHERE CONCAT(" + this.firstnameParamFactory.getColumnName() + ",' '," + this.lastnameParamFactory.getColumnName() + ") LIKE ? ORDER BY " + this.firstnameParamFactory.getColumnName() + ", " + this.lastnameParamFactory.getColumnName();
 	}
 
 	public UserType getUser(int userID, boolean groups, boolean attributes) throws SQLException {
@@ -75,6 +87,8 @@ public class AnnotatedUserDAO<UserType extends User> extends AnnotatedDAO<UserTy
 		HighLevelQuery<UserType> query = new HighLevelQuery<UserType>();
 
 		query.addParameter(userIDParamFactory.getParameter(userID));
+
+		query.setRowLimiter(singleRowLimiter);
 
 		setQueryRelations(query, groups, attributes);
 
@@ -96,6 +110,8 @@ public class AnnotatedUserDAO<UserType extends User> extends AnnotatedDAO<UserTy
 
 		query.addParameter(usernameParamFactory.getParameter(username));
 
+		query.setRowLimiter(singleRowLimiter);
+
 		setQueryRelations(query, groups, attributes);
 
 		return this.get(query);
@@ -108,6 +124,8 @@ public class AnnotatedUserDAO<UserType extends User> extends AnnotatedDAO<UserTy
 		query.addParameter(usernameParamFactory.getParameter(username));
 		query.addParameter(passwordParamFactory.getParameter(password));
 
+		query.setRowLimiter(singleRowLimiter);
+
 		setQueryRelations(query, groups, attributes);
 
 		return this.get(query);
@@ -119,6 +137,8 @@ public class AnnotatedUserDAO<UserType extends User> extends AnnotatedDAO<UserTy
 
 		query.addParameter(emailParamFactory.getParameter(email));
 
+		query.setRowLimiter(singleRowLimiter);
+
 		setQueryRelations(query, groups, attributes);
 
 		return this.get(query);
@@ -129,6 +149,8 @@ public class AnnotatedUserDAO<UserType extends User> extends AnnotatedDAO<UserTy
 		HighLevelQuery<UserType> query = new HighLevelQuery<UserType>();
 
 		query.addParameter(userIDParamFactory.getParameter(userID));
+
+		query.setRowLimiter(singleRowLimiter);
 
 		setQueryRelations(query, groups, attributes);
 
@@ -144,7 +166,7 @@ public class AnnotatedUserDAO<UserType extends User> extends AnnotatedDAO<UserTy
 		this.update(user, query);
 	}
 
-	public List<UserType> getUsers(List<Integer> userIDList, boolean groups, boolean attributes) throws SQLException {
+	public List<UserType> getUsers(Collection<Integer> userIDList, boolean groups, boolean attributes) throws SQLException {
 
 		HighLevelQuery<UserType> query = new HighLevelQuery<UserType>();
 
@@ -162,6 +184,8 @@ public class AnnotatedUserDAO<UserType extends User> extends AnnotatedDAO<UserTy
 		query.addParameter(emailParamFactory.getParameter(email));
 		query.addParameter(passwordParamFactory.getParameter(password));
 
+		query.setRowLimiter(singleRowLimiter);
+
 		setQueryRelations(query, groups, attributes);
 
 		return this.get(query);
@@ -175,6 +199,15 @@ public class AnnotatedUserDAO<UserType extends User> extends AnnotatedDAO<UserTy
 	public Integer getUserCount() throws SQLException {
 
 		return new ObjectQuery<Integer>(dataSource, true, "SELECT COUNT(userID) FROM " + this.getTableName(), IntegerPopulator.getPopulator()).executeQuery();
+	}
+
+	public int getUserCount(Integer groupID) throws SQLException {
+
+		ObjectQuery<Integer> query = new ObjectQuery<Integer>(dataSource, true, "SELECT COUNT(userID) FROM " + usergroupTableName +" WHERE groupID = ?", IntegerPopulator.getPopulator());
+
+		query.setInt(1, groupID);
+
+		return query.executeQuery();
 	}
 
 	public List<Character> getUserFirstLetterIndex(UserField filteringField) throws SQLException {
@@ -221,11 +254,21 @@ public class AnnotatedUserDAO<UserType extends User> extends AnnotatedDAO<UserTy
 		return getAll(query);
 	}
 
-	public List<UserType> searchUsers(String queryTerm, boolean groups, boolean attributes) throws SQLException{
+	public List<UserType> searchUsers(String queryTerm, boolean groups, boolean attributes, Integer maxHits) throws SQLException{
+
+		String searchSQL;
+
+		if(maxHits != null){
+
+			searchSQL = this.searchSQL + " LIMIT " + maxHits;
+
+		}else{
+
+			searchSQL = this.searchSQL;
+		}
 
 		LowLevelQuery<UserType> query = new LowLevelQuery<UserType>(searchSQL);
 
-		query.addParameter("%" + queryTerm + "%");
 		query.addParameter("%" + queryTerm + "%");
 
 		setQueryRelations(query, groups, attributes);
@@ -237,7 +280,7 @@ public class AnnotatedUserDAO<UserType extends User> extends AnnotatedDAO<UserTy
 
 		LowLevelQuery<UserType> query = new LowLevelQuery<UserType>();
 
-		query.setSql("SELECT " + this.getTableName() + ".* FROM " + this.getTableName() + " INNER JOIN " + usergroupTableName + " ON (" + this.getTableName() + ".userID=" + usergroupTableName + ".userID) WHERE " + usergroupTableName + ".groupID = ?");
+		query.setSql("SELECT " + this.getTableName() + ".* FROM " + this.getTableName() + " INNER JOIN " + usergroupTableName + " ON (" + this.getTableName() + ".userID=" + usergroupTableName + ".userID) WHERE " + usergroupTableName + ".groupID = ? ORDER BY " + this.firstnameParamFactory.getColumnName() + ", " + this.lastnameParamFactory.getColumnName());
 
 		query.addParameter(groupID);
 
@@ -246,11 +289,11 @@ public class AnnotatedUserDAO<UserType extends User> extends AnnotatedDAO<UserTy
 		return getAll(query);
 	}
 
-	public List<UserType> getUsersByGroups(List<Integer> groupIDs, boolean attributes) throws SQLException {
+	public List<UserType> getUsersByGroups(Collection<Integer> groupIDs, boolean attributes) throws SQLException {
 
 		LowLevelQuery<UserType> query = new LowLevelQuery<UserType>();
 
-		query.setSql("SELECT " + this.getTableName() + ".* FROM " + this.getTableName() + " INNER JOIN " + usergroupTableName + " ON (" + this.getTableName() + ".userID=" + usergroupTableName + ".userID) WHERE " + usergroupTableName + ".groupID IN (?" + StringUtils.repeatString(",?", groupIDs.size() - 1) + ")");
+		query.setSql("SELECT " + this.getTableName() + ".* FROM " + this.getTableName() + " INNER JOIN " + usergroupTableName + " ON (" + this.getTableName() + ".userID=" + usergroupTableName + ".userID) WHERE " + usergroupTableName + ".groupID IN (?" + StringUtils.repeatString(",?", groupIDs.size() - 1) + ") ORDER BY " + this.firstnameParamFactory.getColumnName() + ", " + this.lastnameParamFactory.getColumnName());
 
 		query.addParameters(groupIDs);
 
@@ -290,7 +333,7 @@ public class AnnotatedUserDAO<UserType extends User> extends AnnotatedDAO<UserTy
 			return null;
 		}
 
-		return getAll(getUserByAttributeQuery(attributeName, attributeValue, "=", groups, attributes));
+		return getAll(getUserByAttributeQuery(attributeName, attributeValue, "=", groups, attributes, false));
 	}
 
 	public UserType getUserByAttribute(String attributeName, String attributeValue, boolean groups, boolean attributes) throws SQLException {
@@ -300,7 +343,7 @@ public class AnnotatedUserDAO<UserType extends User> extends AnnotatedDAO<UserTy
 			return null;
 		}
 
-		return get(getUserByAttributeQuery(attributeName, attributeValue, "=", groups, attributes));
+		return get(getUserByAttributeQuery(attributeName, attributeValue, "=", groups, attributes, true));
 	}
 
 
@@ -311,7 +354,7 @@ public class AnnotatedUserDAO<UserType extends User> extends AnnotatedDAO<UserTy
 			return null;
 		}
 
-		return getAll(getUserByAttributeQuery(attributeName, attributeValue + "%", "LIKE", groups, attributes));
+		return getAll(getUserByAttributeQuery(attributeName, attributeValue + "%", "LIKE", groups, attributes, false));
 	}
 
 	public List<UserType> getUsersByAttribute(String attributeName, boolean groups, boolean attributes) throws SQLException {
@@ -321,14 +364,23 @@ public class AnnotatedUserDAO<UserType extends User> extends AnnotatedDAO<UserTy
 			return null;
 		}
 
-		return getAll(getUserByAttributeQuery(attributeName, groups, attributes));
+		return getAll(getUsersByAttributeQuery(attributeName, groups, attributes));
 	}
 
-	protected LowLevelQuery<UserType> getUserByAttributeQuery(String attributeName, String attributeValue, String valueOperator, boolean groups, boolean attributes) {
+	protected LowLevelQuery<UserType> getUserByAttributeQuery(String attributeName, String attributeValue, String valueOperator, boolean groups, boolean attributes, boolean limit) {
 
 		LowLevelQuery<UserType> query = new LowLevelQuery<UserType>();
 
 		query.setSql("SELECT " + this.getTableName() + ".* FROM " + this.getTableName() + " INNER JOIN " + userAttributesTableName + " ON (" + this.getTableName() + ".userID=" + userAttributesTableName + ".userID) WHERE " + userAttributesTableName + ".name = ? AND " + userAttributesTableName + ".value " + valueOperator + " ?");
+
+		if(limit){
+
+			query.setSql(query.getSql() + " " + singleRowLimiter.getLimitSQL());
+
+		}else{
+
+			query.setSql(query.getSql() + " ORDER BY " + this.firstnameParamFactory.getColumnName() + ", " + this.lastnameParamFactory.getColumnName());
+		}
 
 		query.addParameter(attributeName);
 		query.addParameter(attributeValue);
@@ -338,11 +390,11 @@ public class AnnotatedUserDAO<UserType extends User> extends AnnotatedDAO<UserTy
 		return query;
 	}
 
-	protected LowLevelQuery<UserType> getUserByAttributeQuery(String attributeName, boolean groups, boolean attributes) {
+	protected LowLevelQuery<UserType> getUsersByAttributeQuery(String attributeName, boolean groups, boolean attributes) {
 
 		LowLevelQuery<UserType> query = new LowLevelQuery<UserType>();
 
-		query.setSql("SELECT " + this.getTableName() + ".* FROM " + this.getTableName() + " INNER JOIN " + userAttributesTableName + " ON (" + this.getTableName() + ".userID=" + userAttributesTableName + ".userID) WHERE " + userAttributesTableName + ".name = ? AND " + userAttributesTableName + ".value IS NOT NULL");
+		query.setSql("SELECT " + this.getTableName() + ".* FROM " + this.getTableName() + " INNER JOIN " + userAttributesTableName + " ON (" + this.getTableName() + ".userID=" + userAttributesTableName + ".userID) WHERE " + userAttributesTableName + ".name = ? AND " + userAttributesTableName + ".value IS NOT NULL ORDER BY " + this.firstnameParamFactory.getColumnName() + ", " + this.lastnameParamFactory.getColumnName());
 
 		query.addParameter(attributeName);
 
@@ -363,5 +415,18 @@ public class AnnotatedUserDAO<UserType extends User> extends AnnotatedDAO<UserTy
 		query.setString(1, attributeName);
 
 		return query.executeQuery();
+	}
+
+	public List<UserType> getUsersWithoutAttribute(String attributeName, boolean groups, boolean attributes) throws SQLException {
+
+		LowLevelQuery<UserType> query = new LowLevelQuery<UserType>();
+
+		query.setSql("SELECT * FROM " + this.getTableName() + " WHERE userID NOT IN (SELECT userID FROM " + userAttributesTableName + " WHERE name = ?) ORDER BY " + this.firstnameParamFactory.getColumnName() + ", " + this.lastnameParamFactory.getColumnName());
+
+		query.addParameter(attributeName);
+
+		setQueryRelations(query, groups, attributes);
+
+		return getAll(query);
 	}
 }

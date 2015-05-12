@@ -13,9 +13,15 @@ import java.sql.SQLException;
 import javax.sql.DataSource;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.log4j.Logger;
 import org.xml.sax.SAXException;
 
+import se.unlogic.hierarchy.core.beans.SimpleBackgroundModuleDescriptor;
+import se.unlogic.hierarchy.core.beans.SimpleFilterModuleDescriptor;
+import se.unlogic.hierarchy.core.beans.SimpleForegroundModuleDescriptor;
+import se.unlogic.hierarchy.core.beans.SimpleSectionDescriptor;
 import se.unlogic.hierarchy.core.daos.factories.CoreDaoFactory;
+import se.unlogic.hierarchy.core.daos.interfaces.AttributeDAO;
 import se.unlogic.hierarchy.core.daos.interfaces.FilterModuleDAO;
 import se.unlogic.hierarchy.core.daos.interfaces.FilterModuleSettingDAO;
 import se.unlogic.standardutils.db.tableversionhandler.TableUpgradeException;
@@ -23,7 +29,9 @@ import se.unlogic.standardutils.db.tableversionhandler.TableVersionHandler;
 import se.unlogic.standardutils.db.tableversionhandler.UpgradeResult;
 import se.unlogic.standardutils.db.tableversionhandler.XMLDBScriptProvider;
 
-public class MySQLCoreDAOFactory extends CoreDaoFactory {
+public class MySQLCoreDAOFactory implements CoreDaoFactory {
+
+	protected static Logger log = Logger.getLogger(CoreDaoFactory.class);
 
 	private MySQLDataSourceDAO dataSourceDAO;
 	private MySQLMenuIndexDAO menuIndexDAO;
@@ -33,6 +41,10 @@ public class MySQLCoreDAOFactory extends CoreDaoFactory {
 	private MySQLFilterModuleSettingDAO filterModuleSettingDAO;
 	private MySQLForegroundModuleSettingDAO foregroundModuleSettingDAO;
 	private MySQLBackgroundModuleSettingDAO backgroundModuleSettingDAO;
+	private MySQLModuleAttributeDAO<SimpleForegroundModuleDescriptor> foregroundModuleAttributeDAO;
+	private MySQLModuleAttributeDAO<SimpleBackgroundModuleDescriptor> backgroundModuleAttributeDAO;
+	private MySQLModuleAttributeDAO<SimpleFilterModuleDescriptor> filterModuleAttributeDAO;
+	private MySQLSectionAttributeDAO<SimpleSectionDescriptor> sectionAttributeDAO;
 	private MySQLSectionDAO sectionDAO;
 	private MySQLVirtualMenuItemDAO virtualMenuItemDAO;
 
@@ -50,15 +62,20 @@ public class MySQLCoreDAOFactory extends CoreDaoFactory {
 		this.dataSourceDAO = new MySQLDataSourceDAO(dataSource);
 		this.menuIndexDAO = new MySQLMenuIndexDAO(dataSource);
 		this.virtualMenuItemDAO = new MySQLVirtualMenuItemDAO(dataSource);
-		this.sectionDAO = new MySQLSectionDAO(dataSource);
 
 		this.backgroundModuleSettingDAO = new MySQLBackgroundModuleSettingDAO(dataSource);
 		this.filterModuleSettingDAO = new MySQLFilterModuleSettingDAO(dataSource);
 		this.foregroundModuleSettingDAO = new MySQLForegroundModuleSettingDAO(dataSource);
 
-		this.backgroundModuleDAO = new MySQLBackgroundModuleDAO(dataSource, backgroundModuleSettingDAO);
-		this.filterModuleDAO = new MySQLFilterModuleDAO(dataSource, filterModuleSettingDAO);
-		this.foregroundModuleDAO = new MySQLForegroundModuleDAO(dataSource, foregroundModuleSettingDAO);
+		this.backgroundModuleAttributeDAO = new MySQLModuleAttributeDAO<SimpleBackgroundModuleDescriptor>(dataSource, "openhierarchy_background_module_attributes");
+		this.filterModuleAttributeDAO = new MySQLModuleAttributeDAO<SimpleFilterModuleDescriptor>(dataSource, "openhierarchy_filter_module_attributes");
+		this.foregroundModuleAttributeDAO = new MySQLModuleAttributeDAO<SimpleForegroundModuleDescriptor>(dataSource, "openhierarchy_foreground_module_attributes");
+		this.sectionAttributeDAO = new MySQLSectionAttributeDAO<SimpleSectionDescriptor>(dataSource, "openhierarchy_section_attributes");
+
+		this.backgroundModuleDAO = new MySQLBackgroundModuleDAO(dataSource, backgroundModuleSettingDAO, backgroundModuleAttributeDAO);
+		this.filterModuleDAO = new MySQLFilterModuleDAO(dataSource, filterModuleSettingDAO, filterModuleAttributeDAO);
+		this.foregroundModuleDAO = new MySQLForegroundModuleDAO(dataSource, foregroundModuleSettingDAO, foregroundModuleAttributeDAO);
+		this.sectionDAO = new MySQLSectionDAO(dataSource, sectionAttributeDAO);
 	}
 
 	@Override
@@ -119,5 +136,29 @@ public class MySQLCoreDAOFactory extends CoreDaoFactory {
 	public FilterModuleDAO getFilterModuleDAO() {
 
 		return this.filterModuleDAO;
+	}
+
+	@Override
+	public AttributeDAO<SimpleForegroundModuleDescriptor> getForegroundModuleAttributeDAO() {
+
+		return foregroundModuleAttributeDAO;
+	}
+
+	@Override
+	public AttributeDAO<SimpleBackgroundModuleDescriptor> getBackgroundModuleAttributeDAO() {
+
+		return backgroundModuleAttributeDAO;
+	}
+
+	@Override
+	public AttributeDAO<SimpleFilterModuleDescriptor> getFilterModuleAttributeDAO() {
+
+		return filterModuleAttributeDAO;
+	}
+
+	@Override
+	public AttributeDAO<SimpleSectionDescriptor> getSectionAttributeDAO() {
+
+		return sectionAttributeDAO;
 	}
 }

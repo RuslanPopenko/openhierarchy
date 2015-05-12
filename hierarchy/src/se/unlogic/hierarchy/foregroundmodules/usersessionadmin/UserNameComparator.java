@@ -13,6 +13,7 @@ import se.unlogic.hierarchy.core.beans.User;
 
 public class UserNameComparator implements Comparator<User>{
 
+	@Override
 	public int compare(User user1, User user2) {
 		
 		//Check firstname

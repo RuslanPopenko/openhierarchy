@@ -23,7 +23,7 @@ import se.unlogic.standardutils.i18n.Language;
 public interface SystemInterface {
 
 	public abstract UserHandler getUserHandler();
-	
+
 	public abstract GroupHandler getGroupHandler();
 
 	public abstract RootSectionInterface getRootSection();
@@ -93,4 +93,8 @@ public interface SystemInterface {
 	public InstanceHandler getInstanceHandler();
 
 	public EventHandler getEventHandler();
+
+	public SectionInterface getSectionInterface(Integer sectionID);
+
+	public SessionListenerHandler getSessionListenerHandler();
 }

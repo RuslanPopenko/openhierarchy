@@ -41,7 +41,7 @@ import se.unlogic.hierarchy.core.interfaces.SectionInterface;
 import se.unlogic.standardutils.string.StringUtils;
 import se.unlogic.webutils.http.URIParser;
 
-public abstract class AnnotatedForegroundModule extends AnnotatedSectionModule<ForegroundModuleDescriptor> implements ForegroundModule{
+public abstract class AnnotatedForegroundModule extends AnnotatedSectionModule<ForegroundModuleDescriptor> implements ForegroundModule {
 
 	protected static final Class<?>[] PARAMETER_TYPES = { HttpServletRequest.class, HttpServletResponse.class, User.class, URIParser.class };
 	protected static final Class<?> RETURN_TYPE = ForegroundModuleResponse.class;
@@ -49,7 +49,7 @@ public abstract class AnnotatedForegroundModule extends AnnotatedSectionModule<F
 	protected final HashMap<String, MethodMapping> methodMap = new HashMap<String, MethodMapping>();
 
 	@ModuleSetting
-	@EnumDropDownSettingDescriptor(name="Menuitem type",description="The type of menuitem this module should display itself as in the menu",required=true)
+	@EnumDropDownSettingDescriptor(name = "Menuitem type", description = "The type of menuitem this module should display itself as in the menu", required = true)
 	protected MenuItemType menuItemType = MenuItemType.MENUITEM;
 
 	@Override
@@ -84,7 +84,7 @@ public abstract class AnnotatedForegroundModule extends AnnotatedSectionModule<F
 						log.debug("Caching method " + method.getName() + " with alias " + annotation.alias());
 						this.methodMap.put(annotation.alias(), methodMapping);
 
-					} else if(annotation.toLowerCase()){
+					} else if (annotation.toLowerCase()) {
 
 						String alias = method.getName().toLowerCase();
 
@@ -92,7 +92,7 @@ public abstract class AnnotatedForegroundModule extends AnnotatedSectionModule<F
 
 						this.methodMap.put(alias, methodMapping);
 
-					}else{
+					} else {
 						log.debug("Caching method " + method.getName());
 
 						this.methodMap.put(method.getName(), methodMapping);
@@ -104,26 +104,27 @@ public abstract class AnnotatedForegroundModule extends AnnotatedSectionModule<F
 		super.init(moduleDescriptor, sectionInterface, dataSource);
 	}
 
+	@Override
 	public ForegroundModuleResponse processRequest(HttpServletRequest req, HttpServletResponse res, User user, URIParser uriParser) throws Throwable {
 
-		if(dependencyLock != null){
+		if (dependencyLock != null) {
 
-			readLock.lock();
+			dependencyReadLock.lock();
 
-			try{
-				if(hasRequiredDependencies){
+			try {
+				if (hasRequiredDependencies) {
 
 					checkRequiredDependencies();
 				}
 
 				return processForegroundRequest(req, res, user, uriParser);
 
-			}finally{
+			} finally {
 
-				readLock.unlock();
+				dependencyReadLock.unlock();
 			}
 
-		}else{
+		} else {
 
 			return processForegroundRequest(req, res, user, uriParser);
 		}
@@ -132,20 +133,22 @@ public abstract class AnnotatedForegroundModule extends AnnotatedSectionModule<F
 
 	public void checkRequiredDependencies() throws ModuleConfigurationException {
 
-		for(ReflectionInstanceListener<?> instanceListener : this.instanceListeners){
+		for (ReflectionInstanceListener<?> instanceListener : this.instanceListeners) {
 
-			if(instanceListener.isRequired() && !instanceListener.hasInstance()){
+			if (instanceListener.isRequired() && !instanceListener.hasInstance()) {
 
 				throw new ModuleConfigurationException("Missing required dependency " + instanceListener.getRawKey().getSimpleName());
 			}
 		}
 	}
 
-	protected ForegroundModuleResponse processForegroundRequest(HttpServletRequest req, HttpServletResponse res, User user, URIParser uriParser) throws Throwable{
+	protected ForegroundModuleResponse processForegroundRequest(HttpServletRequest req, HttpServletResponse res, User user, URIParser uriParser) throws Throwable {
 
-		if (uriParser.size() > 1) {
+		String method = getMethod(req, uriParser);
 
-			MethodMapping methodMapping = this.methodMap.get(uriParser.get(1));
+		if (method != null) {
+
+			MethodMapping methodMapping = this.methodMap.get(method);
 
 			if (methodMapping == null) {
 
@@ -153,7 +156,7 @@ public abstract class AnnotatedForegroundModule extends AnnotatedSectionModule<F
 
 			} else {
 
-				if(user == null && methodMapping.getAnnotation().requireLogin()){
+				if (user == null && methodMapping.getAnnotation().requireLogin()) {
 
 					throw new AccessDeniedException("Login required");
 				}
@@ -161,14 +164,14 @@ public abstract class AnnotatedForegroundModule extends AnnotatedSectionModule<F
 				try {
 					ForegroundModuleResponse moduleResponse = this.invoke(methodMapping.getMethod(), req, res, user, uriParser);
 
-					if(moduleResponse != null){
+					if (moduleResponse != null) {
 
-						if(this.scripts != null && methodMapping.getAnnotation().autoAppendScripts()){
+						if (this.scripts != null && methodMapping.getAnnotation().autoAppendScripts()) {
 
 							moduleResponse.addScripts(scripts);
 						}
 
-						if(this.links != null && methodMapping.getAnnotation().autoAppendLinks()){
+						if (this.links != null && methodMapping.getAnnotation().autoAppendLinks()) {
 
 							moduleResponse.addLinks(links);
 						}
@@ -189,13 +192,23 @@ public abstract class AnnotatedForegroundModule extends AnnotatedSectionModule<F
 		} else {
 			ForegroundModuleResponse moduleResponse = this.defaultMethod(req, res, user, uriParser);
 
-			if(moduleResponse != null){
+			if (moduleResponse != null) {
 
 				setLinksAndScripts(moduleResponse);
 			}
 
 			return moduleResponse;
 		}
+	}
+
+	protected String getMethod(HttpServletRequest req, URIParser uriParser) {
+
+		if (uriParser.size() > 1) {
+
+			return uriParser.get(1);
+		}
+
+		return null;
 	}
 
 	protected Class<?> getReturnType() {
@@ -217,7 +230,7 @@ public abstract class AnnotatedForegroundModule extends AnnotatedSectionModule<F
 		}
 	}
 
-	public ForegroundModuleResponse defaultMethod(HttpServletRequest req, HttpServletResponse res, User user, URIParser uriParser) throws Throwable{
+	public ForegroundModuleResponse defaultMethod(HttpServletRequest req, HttpServletResponse res, User user, URIParser uriParser) throws Throwable {
 
 		return null;
 	}
@@ -243,10 +256,12 @@ public abstract class AnnotatedForegroundModule extends AnnotatedSectionModule<F
 	}
 
 	protected String getModuleURI(HttpServletRequest req) {
+
 		return req.getContextPath() + this.getFullAlias();
 	}
 
 	public String getFullAlias() {
+
 		return this.sectionInterface.getSectionDescriptor().getFullAlias() + "/" + this.moduleDescriptor.getAlias();
 	}
 
@@ -256,6 +271,7 @@ public abstract class AnnotatedForegroundModule extends AnnotatedSectionModule<F
 		return "f";
 	}
 
+	@Override
 	public List<? extends MenuItemDescriptor> getVisibleMenuItems() {
 
 		if (this.moduleDescriptor.isVisibleInMenu()) {
@@ -265,6 +281,7 @@ public abstract class AnnotatedForegroundModule extends AnnotatedSectionModule<F
 		}
 	}
 
+	@Override
 	public List<? extends MenuItemDescriptor> getAllMenuItems() {
 
 		SimpleMenuItemDescriptor menuItemDescriptor = new SimpleMenuItemDescriptor();
@@ -280,11 +297,15 @@ public abstract class AnnotatedForegroundModule extends AnnotatedSectionModule<F
 		return Collections.singletonList((MenuItemDescriptor) menuItemDescriptor);
 	}
 
+	@Override
 	public List<? extends BundleDescriptor> getAllBundles() {
+
 		return this.getVisibleBundles();
 	}
 
+	@Override
 	public List<? extends BundleDescriptor> getVisibleBundles() {
+
 		return null;
 	}
 

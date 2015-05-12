@@ -64,4 +64,11 @@ public class SimpleGroupProviderModule extends BaseGroupProviderModule<SimpleGro
 
 		return SimpleGroup.ATTRIBUTES_RELATION;
 	}
+
+	@Override
+	protected String getGroupAttributesTableName() {
+
+		return "simple_group_attributes";
+	}
+	
 }

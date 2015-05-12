@@ -15,16 +15,21 @@ import se.unlogic.standardutils.dao.CRUDDAO;
 
 public interface DataSourceDAO extends CRUDDAO<SimpleDataSourceDescriptor, Integer>{
 
+	@Override
 	public abstract ArrayList<SimpleDataSourceDescriptor> getAll() throws SQLException;
 
 	public abstract ArrayList<SimpleDataSourceDescriptor> getAll(boolean enabled) throws SQLException;
 
+	@Override
 	public abstract SimpleDataSourceDescriptor get(Integer dataSourceID) throws SQLException;
 
+	@Override
 	public abstract void update(SimpleDataSourceDescriptor dsb) throws SQLException;
 
+	@Override
 	public abstract void delete(SimpleDataSourceDescriptor dsb) throws SQLException;
 
+	@Override
 	public abstract void add(SimpleDataSourceDescriptor dsb) throws SQLException;
 
 }

@@ -36,6 +36,7 @@ public class MySQLDataSourceDAO extends AnnotatedDAO<SimpleDataSourceDescriptor>
 		return new ArrayListQuery<SimpleDataSourceDescriptor>(this.dataSource.getConnection(), true, "SELECT * FROM openhierarchy_data_sources ORDER BY name, username", POPULATOR).executeQuery();
 	}
 
+	@Override
 	public ArrayList<SimpleDataSourceDescriptor> getAll(boolean enabled) throws SQLException {
 
 		ArrayListQuery<SimpleDataSourceDescriptor> query = new ArrayListQuery<SimpleDataSourceDescriptor>(this.dataSource.getConnection(), true, "SELECT * FROM openhierarchy_data_sources WHERE enabled = ? ORDER BY name, username", POPULATOR);
@@ -45,6 +46,7 @@ public class MySQLDataSourceDAO extends AnnotatedDAO<SimpleDataSourceDescriptor>
 		return query.executeQuery();
 	}
 
+	@Override
 	public SimpleDataSourceDescriptor get(Integer dataSourceID) throws SQLException {
 
 		ObjectQuery<SimpleDataSourceDescriptor> query = new ObjectQuery<SimpleDataSourceDescriptor>(this.dataSource.getConnection(), true, "SELECT * FROM openhierarchy_data_sources WHERE dataSourceID = ? ORDER BY name, username", POPULATOR);
@@ -54,16 +56,19 @@ public class MySQLDataSourceDAO extends AnnotatedDAO<SimpleDataSourceDescriptor>
 		return query.executeQuery();
 	}
 
+	@Override
 	public void add(SimpleDataSourceDescriptor bean, TransactionHandler transactionHandler) throws SQLException {
 
 		super.add(bean, transactionHandler, null);
 	}
 
+	@Override
 	public void update(SimpleDataSourceDescriptor bean, TransactionHandler transactionHandler) throws SQLException {
 
 		super.update(bean, transactionHandler, null);
 	}
 
+	@Override
 	public SimpleDataSourceDescriptor get(Integer dataSourceID, TransactionHandler transactionHandler) throws SQLException {
 
 		ObjectQuery<SimpleDataSourceDescriptor> query = transactionHandler.getObjectQuery("SELECT * FROM openhierarchy_data_sources WHERE dataSourceID = ? ORDER BY name, username", POPULATOR);
@@ -73,6 +78,7 @@ public class MySQLDataSourceDAO extends AnnotatedDAO<SimpleDataSourceDescriptor>
 		return query.executeQuery();
 	}
 
+	@Override
 	public List<SimpleDataSourceDescriptor> getAll(TransactionHandler transactionHandler) throws SQLException {
 
 		return super.getAll((HighLevelQuery<SimpleDataSourceDescriptor>)null, transactionHandler);

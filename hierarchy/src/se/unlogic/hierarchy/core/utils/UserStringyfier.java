@@ -14,6 +14,7 @@ public class UserStringyfier implements Stringyfier<User> {
 		this.displayFullName = displayFullName;
 	}
 
+	@Override
 	public String format(User user) {
 
 		if(user == null){

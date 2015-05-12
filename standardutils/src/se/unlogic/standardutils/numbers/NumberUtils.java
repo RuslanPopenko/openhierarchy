@@ -103,6 +103,18 @@ public class NumberUtils {
 		return null;
 	}
 
+	public static Short toShort(String value) {
+
+		if (value != null) {
+			try {
+				return Short.parseShort(value);
+
+			} catch (NumberFormatException e) {}
+		}
+
+		return null;
+	}	
+	
 	public static List<Integer> toInt(Collection<? extends Object> list, Field field) throws IllegalArgumentException, IllegalAccessException {
 
 		Type type = field.getType();
@@ -216,6 +228,36 @@ public class NumberUtils {
 		return null;
 	}
 
+	public static List<Float> toFloat(List<String> values) {
+
+		if (values == null) {
+
+			return null;
+
+		} else {
+
+			ArrayList<Float> validFloats = new ArrayList<Float>();
+
+			for (String value : values) {
+
+				if (value != null) {
+
+					Float floatValue = NumberUtils.toFloat(value);
+
+					if (floatValue != null) {
+						validFloats.add(floatValue);
+					}
+				}
+			}
+
+			if (validFloats.isEmpty()) {
+				return null;
+			} else {
+				return validFloats;
+			}
+		}
+	}
+	
 	public static Double toDouble(String value) {
 
 		if (value != null) {
@@ -349,4 +391,15 @@ public class NumberUtils {
 		return integer;
 	}
 
+	public static int getLowestValue(int value1, int value2) {
+
+		if(value1 < value2){
+			
+			return value1;
+			
+		}else{
+			
+			return value2;
+		}
+	}
 }

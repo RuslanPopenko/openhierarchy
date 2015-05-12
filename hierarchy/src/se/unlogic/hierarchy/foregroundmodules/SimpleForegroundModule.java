@@ -79,6 +79,7 @@ public abstract class SimpleForegroundModule extends BaseSectionModule<Foregroun
 	@Override
 	public void unload() throws Exception {}
 
+	@Override
 	public List<? extends MenuItemDescriptor> getVisibleMenuItems() {
 
 		if (this.moduleDescriptor.isVisibleInMenu()) {
@@ -88,6 +89,7 @@ public abstract class SimpleForegroundModule extends BaseSectionModule<Foregroun
 		}
 	}
 
+	@Override
 	public List<? extends MenuItemDescriptor> getAllMenuItems() {
 
 		SimpleMenuItemDescriptor menuItemDescriptor = new SimpleMenuItemDescriptor();
@@ -103,10 +105,12 @@ public abstract class SimpleForegroundModule extends BaseSectionModule<Foregroun
 		return Collections.singletonList((MenuItemDescriptor) menuItemDescriptor);
 	}	
 	
+	@Override
 	public List<? extends BundleDescriptor> getAllBundles() {
 		return this.getVisibleBundles();
 	}
 
+	@Override
 	public List<? extends BundleDescriptor> getVisibleBundles() {
 		return null;
 	}

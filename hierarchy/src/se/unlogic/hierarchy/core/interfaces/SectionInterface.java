@@ -13,6 +13,7 @@ import se.unlogic.hierarchy.core.cache.ForegroundModuleCache;
 import se.unlogic.hierarchy.core.cache.ForegroundModuleXSLTCache;
 import se.unlogic.hierarchy.core.cache.MenuItemCache;
 import se.unlogic.hierarchy.core.cache.SectionCache;
+import se.unlogic.hierarchy.core.enums.SectionStatus;
 
 public interface SectionInterface {
 
@@ -33,6 +34,16 @@ public interface SectionInterface {
 	public int getReadLockCount();
 
 	public SectionInterface getParentSectionInterface();
-	
+
 	public Breadcrumb getBreadcrumb();
+
+	public SectionStatus getSectionStatus();
+
+	public abstract boolean removeModuleAccessDeniedHandler(ModuleAccessDeniedHandler handler);
+
+	public abstract boolean addModuleAccessDeniedHandler(ModuleAccessDeniedHandler handler);
+
+	public abstract boolean removeSectionAccessDeniedHandler(SectionAccessDeniedHandler handler);
+
+	public abstract boolean addSectionAccessDeniedHandler(SectionAccessDeniedHandler handler);
 }

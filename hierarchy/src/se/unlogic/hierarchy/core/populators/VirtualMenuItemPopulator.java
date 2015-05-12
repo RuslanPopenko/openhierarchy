@@ -23,15 +23,17 @@ import se.unlogic.standardutils.validation.ValidationError;
 import se.unlogic.standardutils.validation.ValidationErrorType;
 import se.unlogic.standardutils.validation.ValidationException;
 import se.unlogic.webutils.http.BeanRequestPopulator;
+import se.unlogic.webutils.validation.ValidationUtils;
 
 public class VirtualMenuItemPopulator implements BeanRequestPopulator<VirtualMenuItem>,BeanResultSetPopulator<VirtualMenuItem> {
 
+	@Override
 	public VirtualMenuItem populate(HttpServletRequest req) throws ValidationException {
 
 		return populate(new VirtualMenuItem(),req);
-
 	}
 
+	@Override
 	public VirtualMenuItem populate(VirtualMenuItem virtualMenuItem, HttpServletRequest req) throws ValidationException {
 
 		ArrayList<ValidationError> validationErrors = new ArrayList<ValidationError>();
@@ -39,43 +41,28 @@ public class VirtualMenuItemPopulator implements BeanRequestPopulator<VirtualMen
 		String itemtype = req.getParameter("itemtype");
 
 		if(StringUtils.isEmpty(itemtype)){
+			
 			validationErrors.add(new ValidationError("itemtype",ValidationErrorType.RequiredField));
+			
 		}else{
 
 			MenuItemType menuItemType = EnumUtils.toEnum(MenuItemType.class, itemtype);
 
 			if(menuItemType == null){
+				
 				validationErrors.add(new ValidationError("itemtype",ValidationErrorType.InvalidFormat));
+				
 			}else{
+				
 				virtualMenuItem.setItemType(menuItemType);
 			}
 		}
 
 		if(virtualMenuItem.getItemType() != null && !virtualMenuItem.getItemType().equals(MenuItemType.BLANK)){
 
-			String name = req.getParameter("name");
-
-			if(StringUtils.isEmpty(name)){
-				validationErrors.add(new ValidationError("name",ValidationErrorType.RequiredField));
-			}else{
-				virtualMenuItem.setName(name);
-			}
-
-			String description = req.getParameter("description");
-
-			if(StringUtils.isEmpty(description)){
-				validationErrors.add(new ValidationError("description",ValidationErrorType.RequiredField));
-			}else{
-				virtualMenuItem.setDescription(description);
-			}
-
-			String url = req.getParameter("url");
-
-			if(!StringUtils.isEmpty(url)){
-				virtualMenuItem.setUrl(url);
-			}else{
-				virtualMenuItem.setUrl(null);
-			}
+			virtualMenuItem.setName(ValidationUtils.validateParameter("name", req, true, 1, 45, validationErrors));
+			virtualMenuItem.setDescription(ValidationUtils.validateParameter("description", req, true, 1, 65536, validationErrors));
+			virtualMenuItem.setUrl(ValidationUtils.validateParameter("url", req, false, 1, 65536, validationErrors));
 
 		}else{
 
@@ -90,31 +77,18 @@ public class VirtualMenuItemPopulator implements BeanRequestPopulator<VirtualMen
 
 		if(validationErrors.isEmpty()){
 
-			String[] allowedUserIDs = req.getParameterValues("user");
-			ArrayList<Integer> userIDs = null;
-
-			if(allowedUserIDs != null){
-				userIDs = NumberUtils.toInt(allowedUserIDs);
-			}
-
-			virtualMenuItem.setAllowedUserIDs(userIDs);
-
-
-			String[] allowedGroupIDs = req.getParameterValues("group");
-			ArrayList<Integer> groupIDs = null;
-
-			if(allowedGroupIDs != null){
-				groupIDs = NumberUtils.toInt(allowedGroupIDs);
-			}
-
-			virtualMenuItem.setAllowedGroupIDs(groupIDs);
+			virtualMenuItem.setAllowedUserIDs(NumberUtils.toInt(req.getParameterValues("user")));
+			virtualMenuItem.setAllowedGroupIDs(NumberUtils.toInt(req.getParameterValues("group")));
 
 			return virtualMenuItem;
+			
 		}else{
+			
 			throw new ValidationException(validationErrors);
 		}
 	}
 
+	@Override
 	public VirtualMenuItem populate(ResultSet rs) throws SQLException {
 
 		VirtualMenuItem virtualMenuItem = new VirtualMenuItem();

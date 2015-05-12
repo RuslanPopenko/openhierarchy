@@ -32,6 +32,7 @@ public class MySQLVirtualMenuItemDAO extends BaseDAO implements VirtualMenuItemD
 		super(ds);
 	}
 
+	@Override
 	public VirtualMenuItem getMenuItem(Integer menuItemID) throws SQLException {
 
 		Connection connection = null;
@@ -61,6 +62,7 @@ public class MySQLVirtualMenuItemDAO extends BaseDAO implements VirtualMenuItemD
 		}
 	}
 
+	@Override
 	public void delete(VirtualMenuItem virtualMenuItem) throws SQLException {
 
 		UpdateQuery query = new UpdateQuery(this.dataSource.getConnection(), true, "DELETE FROM openhierarchy_virtual_menu_items WHERE menuItemID = ?");
@@ -70,6 +72,7 @@ public class MySQLVirtualMenuItemDAO extends BaseDAO implements VirtualMenuItemD
 		query.executeUpdate();
 	}
 
+	@Override
 	public void update(VirtualMenuItem virtualMenuItem) throws SQLException {
 
 		TransactionHandler transactionHandler = null;
@@ -111,6 +114,7 @@ public class MySQLVirtualMenuItemDAO extends BaseDAO implements VirtualMenuItemD
 		}
 	}
 
+	@Override
 	public ArrayList<VirtualMenuItem> getMenuItemsInSection(Integer sectionID) throws SQLException {
 
 		Connection connection = null;
@@ -143,6 +147,7 @@ public class MySQLVirtualMenuItemDAO extends BaseDAO implements VirtualMenuItemD
 
 	}
 
+	@Override
 	public void add(VirtualMenuItem virtualMenuItem) throws SQLException {
 
 		TransactionHandler transactionHandler = null;

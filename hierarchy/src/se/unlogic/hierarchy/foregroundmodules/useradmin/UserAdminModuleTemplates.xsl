@@ -158,6 +158,7 @@
 		
 		<xsl:apply-templates select="user" mode="adminLinks">
 			<xsl:with-param name="allowAdminAdministration" select="allowAdminAdministration"/>
+			<xsl:with-param name="allowUserSwitching" select="allowUserSwitching"/>
 		</xsl:apply-templates>
 		
 		<h1><xsl:value-of select="user/firstname"/> <xsl:text>&#x20;</xsl:text> <xsl:value-of select="user/lastname"/></h1>
@@ -303,6 +304,7 @@
 
 			<xsl:apply-templates select="." mode="adminLinks">
 				<xsl:with-param name="allowAdminAdministration" select="../../allowAdminAdministration"/>
+				<xsl:with-param name="allowUserSwitching" select="../../allowUserSwitching"/>
 			</xsl:apply-templates>
 		</div>		
 	</xsl:template>
@@ -310,8 +312,16 @@
 	<xsl:template match="user" mode="adminLinks">
 
 			<xsl:param name="allowAdminAdministration"/>
+			<xsl:param name="allowUserSwitching"/>
 
 			<div class="floatright marginright">
+				
+				<xsl:if test="$allowUserSwitching = 'true'">
+					<a href="{/Document/requestinfo/currentURI}/{/Document/module/alias}/switch/{userID}" title="{$i18n.switchToUser}: {firstname} {lastname}">
+						<img class="alignbottom" src="{/Document/requestinfo/contextpath}/static/f/{/Document/module/sectionID}/{/Document/module/moduleID}/pics/switch.png"/>
+					</a>				
+				</xsl:if>
+			
 				<xsl:choose>
 					<xsl:when test="admin='true' and $allowAdminAdministration = 'false'">
 						<img class="alignbottom" src="{/Document/requestinfo/contextpath}/static/f/{/Document/module/sectionID}/{/Document/module/moduleID}/pics/user_edit_locked.png" title="{$i18n.userUpdatedLocked}"/>

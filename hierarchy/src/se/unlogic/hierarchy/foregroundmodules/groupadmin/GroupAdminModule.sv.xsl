@@ -3,6 +3,7 @@
 	<xsl:output encoding="ISO-8859-1" method="html" version="4.0"/>
 
 	<xsl:include href="GroupAdminModuleTemplates.xsl"/>
+	<xsl:include href="classpath://se/unlogic/hierarchy/core/utils/usergrouplist/UserGroupList.sv.xsl"/>
 
 	<xsl:variable name="noGroupsFound" select="'Inga grupper hittades'"/>
 	<xsl:variable name="addGroup" select="'Lägg till grupp'"/>
