@@ -26,9 +26,9 @@ public class UpdateQuery extends PreparedStatementQuery {
 		super(connection, closeConnectionOnExit, query);
 	}
 
-	public UpdateQuery(DataSource dataSource, boolean closeConnectionOnExit, String query) throws SQLException {
+	public UpdateQuery(DataSource dataSource, String query) throws SQLException {
 
-		super(dataSource, closeConnectionOnExit, query);
+		super(dataSource, query);
 	}
 
 	public void executeUpdate() throws SQLException {

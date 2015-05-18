@@ -213,7 +213,7 @@ public class DefaultManyToOneRelation<LocalType,RemoteType, RemoteKeyType> imple
 
 			if(remoteBean != null){
 
-				this.annotatedDAO.add(remoteBean, connection, relationQuery);
+				this.annotatedDAO.addOrUpdate(remoteBean, connection, relationQuery);
 			}
 
 		} catch (IllegalArgumentException e) {

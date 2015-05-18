@@ -21,8 +21,8 @@ public class BooleanQuery extends PreparedStatementQuery {
 		super(connection, closeConnectionOnExit, query);
 	}
 
-	public BooleanQuery(DataSource dataSource, boolean closeConnectionOnExit, String query) throws SQLException {
-		super(dataSource, closeConnectionOnExit, query);
+	public BooleanQuery(DataSource dataSource, String query) throws SQLException {
+		super(dataSource, query);
 	}
 
 	public boolean executeQuery() throws SQLException {

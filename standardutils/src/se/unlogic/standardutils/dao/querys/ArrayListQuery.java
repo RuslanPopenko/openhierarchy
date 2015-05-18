@@ -24,8 +24,8 @@ public class ArrayListQuery<ReturnType> extends PopulatedQuery<ReturnType> {
 		super(connection, closeConnectionOnExit, query, bp);
 	}
 
-	public ArrayListQuery(DataSource dataSource, boolean closeConnectionOnExit, String query, BeanResultSetPopulator<ReturnType> bp) throws SQLException {
-		super(dataSource, closeConnectionOnExit, query, bp);
+	public ArrayListQuery(DataSource dataSource, String query, BeanResultSetPopulator<ReturnType> bp) throws SQLException {
+		super(dataSource, query, bp);
 	}
 
 	public ArrayList<ReturnType> executeQuery() throws SQLException {

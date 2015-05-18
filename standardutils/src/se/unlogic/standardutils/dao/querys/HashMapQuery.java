@@ -24,8 +24,8 @@ public class HashMapQuery<KeyType, ValueType> extends PopulatedQuery<Entry<KeyTy
 		super(connection, closeConnectionOnExit, query, bp);
 	}
 
-	public HashMapQuery(DataSource dataSource, boolean closeConnectionOnExit, String query, BeanResultSetPopulator<? extends Entry<KeyType, ValueType>> bp) throws SQLException {
-		super(dataSource, closeConnectionOnExit, query, bp);
+	public HashMapQuery(DataSource dataSource, String query, BeanResultSetPopulator<? extends Entry<KeyType, ValueType>> bp) throws SQLException {
+		super(dataSource, query, bp);
 	}
 
 	public HashMap<KeyType, ValueType> executeQuery() throws SQLException {

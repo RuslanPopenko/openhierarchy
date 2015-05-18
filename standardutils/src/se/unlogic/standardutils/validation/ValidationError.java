@@ -83,4 +83,56 @@ public class ValidationError extends GeneratedElementable{
 
 		return displayName;
 	}
+
+	@Override
+	public int hashCode() {
+
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((displayName == null) ? 0 : displayName.hashCode());
+		result = prime * result + ((fieldName == null) ? 0 : fieldName.hashCode());
+		result = prime * result + ((messageKey == null) ? 0 : messageKey.hashCode());
+		result = prime * result + ((validationErrorType == null) ? 0 : validationErrorType.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		ValidationError other = (ValidationError) obj;
+		if (displayName == null) {
+			if (other.displayName != null) {
+				return false;
+			}
+		} else if (!displayName.equals(other.displayName)) {
+			return false;
+		}
+		if (fieldName == null) {
+			if (other.fieldName != null) {
+				return false;
+			}
+		} else if (!fieldName.equals(other.fieldName)) {
+			return false;
+		}
+		if (messageKey == null) {
+			if (other.messageKey != null) {
+				return false;
+			}
+		} else if (!messageKey.equals(other.messageKey)) {
+			return false;
+		}
+		if (validationErrorType != other.validationErrorType) {
+			return false;
+		}
+		return true;
+	}
 }

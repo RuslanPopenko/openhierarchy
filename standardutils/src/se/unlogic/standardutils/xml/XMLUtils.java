@@ -73,9 +73,9 @@ public class XMLUtils {
 		return NAMESPACE_AWARE_DOCUMENT_BUILDER.getDOMImplementation().createDocument(namespaceURI, qualifiedName, null);
 	}
 
-	public static String toString(Document doc, String encoding, boolean indent) throws TransformerFactoryConfigurationError, TransformerException {
+	public static String toString(Node node, String encoding, boolean indent) throws TransformerFactoryConfigurationError, TransformerException {
 
-		Source source = new DOMSource(doc);
+		Source source = new DOMSource(node);
 		StringWriter sw = new StringWriter();
 		Result result = new StreamResult(sw);
 
@@ -91,9 +91,9 @@ public class XMLUtils {
 		return sw.getBuffer().toString();
 	}
 
-	public static void toString(Document doc, String encoding, Writer w, boolean indent) throws TransformerFactoryConfigurationError, TransformerException {
+	public static void toString(Node node, String encoding, Writer w, boolean indent) throws TransformerFactoryConfigurationError, TransformerException {
 
-		Source source = new DOMSource(doc);
+		Source source = new DOMSource(node);
 		Result result = new StreamResult(w);
 
 		Transformer xformer = TransformerFactory.newInstance().newTransformer();

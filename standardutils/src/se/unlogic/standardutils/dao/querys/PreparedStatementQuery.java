@@ -53,8 +53,8 @@ public abstract class PreparedStatementQuery {
 		return connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
 	}
 
-	public PreparedStatementQuery(DataSource dataSource, boolean closeConnectionOnExit, String query) throws SQLException {
-		this(dataSource.getConnection(), closeConnectionOnExit, query);
+	public PreparedStatementQuery(DataSource dataSource, String query) throws SQLException {
+		this(dataSource.getConnection(), true, query);
 	}
 
 	public void setArray(int arg0, java.sql.Array arg1) throws SQLException {

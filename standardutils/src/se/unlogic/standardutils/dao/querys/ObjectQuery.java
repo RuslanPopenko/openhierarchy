@@ -22,8 +22,8 @@ public class ObjectQuery<ReturnType> extends PopulatedQuery<ReturnType> {
 		super(connection, closeConnectionOnExit, query, bp);
 	}
 
-	public ObjectQuery(DataSource dataSource, boolean closeConnectionOnExit, String query, BeanResultSetPopulator<ReturnType> bp) throws SQLException {
-		super(dataSource, closeConnectionOnExit, query, bp);
+	public ObjectQuery(DataSource dataSource, String query, BeanResultSetPopulator<ReturnType> bp) throws SQLException {
+		super(dataSource, query, bp);
 	}
 
 	public ReturnType executeQuery() throws SQLException {

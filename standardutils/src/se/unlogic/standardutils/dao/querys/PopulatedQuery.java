@@ -23,8 +23,8 @@ public abstract class PopulatedQuery<ReturnType> extends PreparedStatementQuery 
 		this.beanPopulator = bp;
 	}
 
-	public PopulatedQuery(DataSource dataSource, boolean closeConnectionOnExit, String query, BeanResultSetPopulator<? extends ReturnType> bp) throws SQLException {
-		super(dataSource, closeConnectionOnExit, query);
+	public PopulatedQuery(DataSource dataSource, String query, BeanResultSetPopulator<? extends ReturnType> bp) throws SQLException {
+		super(dataSource, query);
 		this.beanPopulator = bp;
 	}
 
