@@ -15,20 +15,20 @@ import se.unlogic.standardutils.populators.BeanStringPopulator;
 public class GroupTypePopulator implements BeanStringPopulator<Group> {
 
 	private final GroupHandler groupHandler;
-	private final boolean getAttrbutes;
+	private final boolean getAttributes;
 	
 	public GroupTypePopulator(GroupHandler groupHandler) {
 
 		super();
 		this.groupHandler = groupHandler;
-		this.getAttrbutes = false;
+		this.getAttributes = false;
 	}	
 	
-	public GroupTypePopulator(GroupHandler groupHandler, boolean getAttrbutes) {
+	public GroupTypePopulator(GroupHandler groupHandler, boolean getAttributes) {
 
 		super();
 		this.groupHandler = groupHandler;
-		this.getAttrbutes = getAttrbutes;
+		this.getAttributes = getAttributes;
 	}
 
 	@Override
@@ -46,7 +46,7 @@ public class GroupTypePopulator implements BeanStringPopulator<Group> {
 	@Override
 	public Group getValue(String value) {
 
-		return this.groupHandler.getGroup(Integer.parseInt(value), getAttrbutes);
+		return this.groupHandler.getGroup(Integer.parseInt(value), getAttributes);
 	}
 
 	@Override

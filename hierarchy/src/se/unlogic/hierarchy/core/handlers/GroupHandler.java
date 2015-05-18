@@ -329,7 +329,7 @@ public class GroupHandler {
 			for (GroupProvider groupProvider : this.groupProviders) {
 
 				try {
-					List<? extends Group> providerGroups = groupProvider.getGroups(groupIDs, attributes);
+					List<? extends Group> providerGroups = groupProvider.getGroups(groupsLeft, attributes);
 
 					if (providerGroups != null) {
 

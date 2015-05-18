@@ -159,7 +159,7 @@ public class MySQLMailDAO extends BaseDAO implements MailDAO {
 	@Override
 	public void delete(QueuedEmail email) throws SQLException {
 
-		UpdateQuery query = new UpdateQuery(dataSource, true, "DELETE FROM emails WHERE emailID = ?");
+		UpdateQuery query = new UpdateQuery(dataSource, "DELETE FROM emails WHERE emailID = ?");
 
 		query.setString(1, email.getEmailID().toString());
 
@@ -257,13 +257,13 @@ public class MySQLMailDAO extends BaseDAO implements MailDAO {
 	@Override
 	public long getMailCount() throws SQLException {
 
-		return new ObjectQuery<Integer>(dataSource, true, "SELECT COUNT(emailID) FROM emails", IntegerPopulator.getPopulator()).executeQuery();
+		return new ObjectQuery<Integer>(dataSource, "SELECT COUNT(emailID) FROM emails", IntegerPopulator.getPopulator()).executeQuery();
 	}
 
 	@Override
 	public void updateAndRelease(QueuedEmail email) throws SQLException {
 
-		UpdateQuery query = new UpdateQuery(dataSource, true, "UPDATE emails SET owner = NULL, resendCount = ?, lastSent = ? WHERE emailID = ?");
+		UpdateQuery query = new UpdateQuery(dataSource, "UPDATE emails SET owner = NULL, resendCount = ?, lastSent = ? WHERE emailID = ?");
 
 		query.setInt(1, email.getResendCount());
 		query.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
@@ -275,7 +275,7 @@ public class MySQLMailDAO extends BaseDAO implements MailDAO {
 	@Override
 	public void releaseAll(int databaseID) throws SQLException {
 
-		UpdateQuery query = new UpdateQuery(dataSource, true, "UPDATE emails SET owner = NULL WHERE owner = ?");
+		UpdateQuery query = new UpdateQuery(dataSource, "UPDATE emails SET owner = NULL WHERE owner = ?");
 
 		query.setInt(1, databaseID);
 

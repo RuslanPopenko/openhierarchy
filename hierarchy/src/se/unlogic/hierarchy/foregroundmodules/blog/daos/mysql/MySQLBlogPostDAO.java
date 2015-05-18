@@ -98,7 +98,7 @@ public class MySQLBlogPostDAO extends BaseDAO implements BlogPostDAO {
 	@Override
 	public int getPostCount(String blogID) throws SQLException {
 
-		ObjectQuery<Integer> query = new ObjectQuery<Integer>(dataSource, true, "SELECT COUNT(postID) FROM blog_posts WHERE blogID = ?", IntegerPopulator.getPopulator());
+		ObjectQuery<Integer> query = new ObjectQuery<Integer>(dataSource, "SELECT COUNT(postID) FROM blog_posts WHERE blogID = ?", IntegerPopulator.getPopulator());
 
 		query.setString(1, blogID);
 
@@ -160,7 +160,7 @@ public class MySQLBlogPostDAO extends BaseDAO implements BlogPostDAO {
 	@Override
 	public List<ArchiveEntry> getLatestArchiveEntries(int archiveBundleLimit, String blogID) throws SQLException {
 
-		ArrayListQuery<ArchiveEntry> query = new ArrayListQuery<ArchiveEntry>(dataSource, true, "SELECT YEAR(added) as yearNr, MONTH(added) as monthNr, count(postID) as postCount FROM blog_posts WHERE blogID = ? GROUP BY yearNr, monthNr ORDER BY yearNr DESC, monthNr DESC LIMIT " + archiveBundleLimit, ARCHIVE_ENTRY_POPULATOR);
+		ArrayListQuery<ArchiveEntry> query = new ArrayListQuery<ArchiveEntry>(dataSource, "SELECT YEAR(added) as yearNr, MONTH(added) as monthNr, count(postID) as postCount FROM blog_posts WHERE blogID = ? GROUP BY yearNr, monthNr ORDER BY yearNr DESC, monthNr DESC LIMIT " + archiveBundleLimit, ARCHIVE_ENTRY_POPULATOR);
 
 		query.setString(1, blogID);
 
@@ -170,7 +170,7 @@ public class MySQLBlogPostDAO extends BaseDAO implements BlogPostDAO {
 	@Override
 	public List<TagEntry> getTagEntries(int tagBundleLimit, String blogID) throws SQLException {
 
-		ArrayListQuery<TagEntry> query = new ArrayListQuery<TagEntry>(dataSource, true, "SELECT blog_tags.tag, COUNT(blog_posts.postID) AS postCount FROM blog_tags INNER JOIN blog_posts ON (blog_tags.postID=blog_posts.postID) WHERE blogID = ?  GROUP BY blog_tags.tag ORDER BY postCount DESC, tag LIMIT " + tagBundleLimit, TAG_ENTRY_POPULATOR);
+		ArrayListQuery<TagEntry> query = new ArrayListQuery<TagEntry>(dataSource, "SELECT blog_tags.tag, COUNT(blog_posts.postID) AS postCount FROM blog_tags INNER JOIN blog_posts ON (blog_tags.postID=blog_posts.postID) WHERE blogID = ?  GROUP BY blog_tags.tag ORDER BY postCount DESC, tag LIMIT " + tagBundleLimit, TAG_ENTRY_POPULATOR);
 
 		query.setString(1, blogID);
 
@@ -292,7 +292,7 @@ public class MySQLBlogPostDAO extends BaseDAO implements BlogPostDAO {
 	@Override
 	public void delete(BlogPost blogPost, String blogID) throws SQLException {
 
-		UpdateQuery query = new UpdateQuery(dataSource, true, "DELETE FROM blog_posts WHERE postID = ? and blogID = ?");
+		UpdateQuery query = new UpdateQuery(dataSource, "DELETE FROM blog_posts WHERE postID = ? and blogID = ?");
 
 		query.setInt(1, blogPost.getPostID());
 		query.setString(2, blogID);
@@ -326,7 +326,7 @@ public class MySQLBlogPostDAO extends BaseDAO implements BlogPostDAO {
 	@Override
 	public List<TagEntry> getTagEntries(String blogID) throws SQLException {
 
-		ArrayListQuery<TagEntry> query = new ArrayListQuery<TagEntry>(dataSource, true, "SELECT DISTINCT(tag), COUNT(blog_tags.postID) as postCount FROM blog_tags INNER JOIN blog_posts ON (blog_tags.postID=blog_posts.postID) WHERE blogID = ? GROUP BY tag ORDER BY tag", TAG_ENTRY_POPULATOR);
+		ArrayListQuery<TagEntry> query = new ArrayListQuery<TagEntry>(dataSource, "SELECT DISTINCT(tag), COUNT(blog_tags.postID) as postCount FROM blog_tags INNER JOIN blog_posts ON (blog_tags.postID=blog_posts.postID) WHERE blogID = ? GROUP BY tag ORDER BY tag", TAG_ENTRY_POPULATOR);
 
 		query.setString(1, blogID);
 
@@ -336,7 +336,7 @@ public class MySQLBlogPostDAO extends BaseDAO implements BlogPostDAO {
 	@Override
 	public List<String> getTags(String blogID) throws SQLException {
 
-		ArrayListQuery<String> query = new ArrayListQuery<String>(dataSource, true, "SELECT DISTINCT(tag) FROM blog_tags INNER JOIN blog_posts ON (blog_tags.postID=blog_posts.postID) WHERE blogID = ? GROUP BY tag ORDER BY tag", StringPopulator.getPopulator());
+		ArrayListQuery<String> query = new ArrayListQuery<String>(dataSource, "SELECT DISTINCT(tag) FROM blog_tags INNER JOIN blog_posts ON (blog_tags.postID=blog_posts.postID) WHERE blogID = ? GROUP BY tag ORDER BY tag", StringPopulator.getPopulator());
 
 		query.setString(1, blogID);
 
@@ -346,7 +346,7 @@ public class MySQLBlogPostDAO extends BaseDAO implements BlogPostDAO {
 	@Override
 	public List<ArchiveEntry> getArchiveEntries(String blogID) throws SQLException {
 
-		ArrayListQuery<ArchiveEntry> query = new ArrayListQuery<ArchiveEntry>(dataSource, true, "SELECT YEAR(added) as yearNr, MONTH(added) as monthNr, count(postID) as postCount FROM blog_posts WHERE blogID = ? GROUP BY yearNr, monthNr ORDER BY yearNr DESC, monthNr DESC", ARCHIVE_ENTRY_POPULATOR);
+		ArrayListQuery<ArchiveEntry> query = new ArrayListQuery<ArchiveEntry>(dataSource, "SELECT YEAR(added) as yearNr, MONTH(added) as monthNr, count(postID) as postCount FROM blog_posts WHERE blogID = ? GROUP BY yearNr, monthNr ORDER BY yearNr DESC, monthNr DESC", ARCHIVE_ENTRY_POPULATOR);
 
 		query.setString(1, blogID);
 
@@ -425,7 +425,7 @@ public class MySQLBlogPostDAO extends BaseDAO implements BlogPostDAO {
 	@Override
 	public void incrementReadCount(int postID) throws SQLException {
 
-		UpdateQuery query = new UpdateQuery(dataSource, true, "UPDATE blog_posts SET readCount=readCount + 1 WHERE postID = ?");
+		UpdateQuery query = new UpdateQuery(dataSource, "UPDATE blog_posts SET readCount=readCount + 1 WHERE postID = ?");
 
 		query.setInt(1, postID);
 

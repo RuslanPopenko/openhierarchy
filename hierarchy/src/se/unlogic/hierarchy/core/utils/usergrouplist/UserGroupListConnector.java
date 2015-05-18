@@ -31,6 +31,7 @@ public class UserGroupListConnector {
 	private final String encoding;
 	private final UserHandler userHandler;
 	private final GroupHandler groupHandler;
+	private int searchResultLimit = 100;
 
 	public UserGroupListConnector(SystemInterface systemInterface) {
 
@@ -75,7 +76,7 @@ public class UserGroupListConnector {
 			query = URLDecoder.decode(query, "UTF-8");
 		}
 
-		List<User> users = userHandler.searchUsers(query, false, false, null);
+		List<User> users = userHandler.searchUsers(query, false, false, searchResultLimit);
 
 		log.info("User " + user + " searching for users using query " + query + ", found " + CollectionUtils.getSize(users) + " hits");
 
@@ -117,7 +118,7 @@ public class UserGroupListConnector {
 			query = URLDecoder.decode(query, "UTF-8");
 		}
 
-		List<Group> groups = groupHandler.searchGroups(query, false, null);
+		List<Group> groups = groupHandler.searchGroups(query, false, searchResultLimit);
 
 		log.info("User " + user + " searching for groups using query " + query + ", found " + CollectionUtils.getSize(groups) + " hits");
 
@@ -146,6 +147,16 @@ public class UserGroupListConnector {
 	protected String getUserNameString(User user) {
 
 		return user.getFirstname() + " " + user.getLastname();
+	}
+
+	public int getSearchResultLimit() {
+
+		return searchResultLimit;
+	}
+
+	public void setSearchResultLimit(int searchResultLimit) {
+
+		this.searchResultLimit = searchResultLimit;
 	}
 
 }

@@ -929,5 +929,27 @@
 			]]>
 		</Query>
 	</Script> 
+	<Script version="34">
+		<Query>
+			<![CDATA[
+				ALTER TABLE `openhierarchy_foreground_module_attributes` MODIFY COLUMN `value` VARCHAR(4096) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL;
+			]]>
+		</Query>
+		<Query>
+			<![CDATA[
+				ALTER TABLE `openhierarchy_background_module_attributes` MODIFY COLUMN `value` VARCHAR(4096) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL;
+			]]>
+		</Query>
+		<Query>
+			<![CDATA[
+				ALTER TABLE `openhierarchy_filter_module_attributes` MODIFY COLUMN `value` VARCHAR(4096) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL;
+			]]>
+		</Query>
+		<Query>
+			<![CDATA[
+				ALTER TABLE `openhierarchy_section_attributes` MODIFY COLUMN `value` VARCHAR(4096) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL;
+			]]>
+		</Query>
+	</Script> 
 	
 </DBScripts>

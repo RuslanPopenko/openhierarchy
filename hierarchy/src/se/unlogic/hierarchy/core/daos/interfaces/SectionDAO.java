@@ -34,6 +34,10 @@ public interface SectionDAO {
 
 	public abstract SimpleSectionDescriptor getSection(Integer sectionID, String alias) throws SQLException;
 
-	public abstract List<SimpleSectionDescriptor> getSectionsByAttribute(String name, String value) throws SQLException;
+	public abstract List<SimpleSectionDescriptor> getSectionsByIDs(List<Integer> sectionIDs, boolean fullAlias) throws SQLException;
+
+	public abstract List<SimpleSectionDescriptor> getSectionsByAttribute(String name, boolean fullAlias) throws SQLException;
+
+	public abstract List<SimpleSectionDescriptor> getSectionsByAttribute(String name, String value, boolean fullAlias) throws SQLException;
 
 }

@@ -20,6 +20,7 @@ import se.unlogic.hierarchy.core.daos.BaseDAO;
 import se.unlogic.hierarchy.core.daos.interfaces.SectionDAO;
 import se.unlogic.hierarchy.core.interfaces.SectionDescriptor;
 import se.unlogic.hierarchy.core.populators.SectionDescriptorPopulator;
+import se.unlogic.standardutils.dao.QueryOperators;
 import se.unlogic.standardutils.dao.TransactionHandler;
 import se.unlogic.standardutils.dao.querys.ArrayListQuery;
 import se.unlogic.standardutils.dao.querys.IntegerKeyCollector;
@@ -76,7 +77,7 @@ public class MySQLSectionDAO extends BaseDAO implements SectionDAO {
 
 			if (simpleSectionDescriptor != null) {
 
-				getRelations(Collections.singletonList(simpleSectionDescriptor), connection);
+				getRelations(Collections.singletonList(simpleSectionDescriptor), connection, false);
 
 				if (getSubSections) {
 					simpleSectionDescriptor.setSubSectionsList(this.getSubSections(connection, simpleSectionDescriptor, true));
@@ -106,7 +107,7 @@ public class MySQLSectionDAO extends BaseDAO implements SectionDAO {
 
 		if (sectionList != null) {
 
-			getRelations(sectionList, connection);
+			getRelations(sectionList, connection, false);
 
 			for (SimpleSectionDescriptor subSection : sectionList) {
 
@@ -151,7 +152,7 @@ public class MySQLSectionDAO extends BaseDAO implements SectionDAO {
 
 		if (sectionList != null) {
 
-			getRelations(sectionList, connection);
+			getRelations(sectionList, connection, false);
 
 			for (SimpleSectionDescriptor subSection : sectionList) {
 
@@ -202,11 +203,7 @@ public class MySQLSectionDAO extends BaseDAO implements SectionDAO {
 
 			if (simpleSectionDescriptor != null) {
 
-				getRelations(Collections.singletonList(simpleSectionDescriptor), connection);
-
-				if (fullAlias && simpleSectionDescriptor.getParentSectionID() != null) {
-					this.getReverseFullAlias(simpleSectionDescriptor);
-				}
+				getRelations(Collections.singletonList(simpleSectionDescriptor), connection, fullAlias);
 			}
 
 			return simpleSectionDescriptor;
@@ -417,10 +414,7 @@ public class MySQLSectionDAO extends BaseDAO implements SectionDAO {
 		return query.executeQuery();
 	}
 
-	@Override
-	public List<SimpleSectionDescriptor> getSectionsByAttribute(String name, String value) throws SQLException {
-
-		List<Integer> sectionIDs = this.sectionAttributeDAO.getSectionIDsByAttribute(name, value);
+	public List<SimpleSectionDescriptor> getSectionsByIDs(List<Integer> sectionIDs, boolean fullAlias) throws SQLException {
 
 		if (sectionIDs == null) {
 
@@ -434,13 +428,13 @@ public class MySQLSectionDAO extends BaseDAO implements SectionDAO {
 
 			ArrayListQuery<SimpleSectionDescriptor> query;
 
-			query = new ArrayListQuery<SimpleSectionDescriptor>(connection, false, "SELECT * FROM openhierarchy_sections WHERE sectionID = IN(" + StringUtils.toCommaSeparatedString(sectionIDs) + ") ORDER BY name", Populator);
+			query = new ArrayListQuery<SimpleSectionDescriptor>(connection, false, "SELECT * FROM openhierarchy_sections WHERE sectionID IN(" + StringUtils.toCommaSeparatedString(sectionIDs) + ") ORDER BY name", Populator);
 
 			ArrayList<SimpleSectionDescriptor> sectionDescriptors = query.executeQuery();
 
 			if (sectionDescriptors != null) {
 
-				getRelations(sectionDescriptors, connection);
+				getRelations(sectionDescriptors, connection, fullAlias);
 			}
 
 			return sectionDescriptors;
@@ -451,7 +445,7 @@ public class MySQLSectionDAO extends BaseDAO implements SectionDAO {
 		}
 	}
 
-	protected void getRelations(List<SimpleSectionDescriptor> sections, Connection connection) throws SQLException {
+	protected void getRelations(List<SimpleSectionDescriptor> sections, Connection connection, boolean fullAlias) throws SQLException {
 
 		for (SimpleSectionDescriptor sectionDescriptor : sections) {
 
@@ -459,6 +453,26 @@ public class MySQLSectionDAO extends BaseDAO implements SectionDAO {
 			this.getSectionGroups(sectionDescriptor, connection);
 
 			this.sectionAttributeDAO.getAttributeHandler(sectionDescriptor, connection);
+
+			if (fullAlias && sectionDescriptor.getParentSectionID() != null) {
+				this.getReverseFullAlias(sectionDescriptor);
+			}
 		}
+	}
+
+	@Override
+	public List<SimpleSectionDescriptor> getSectionsByAttribute(String name, String value, boolean fullAlias) throws SQLException {
+
+		List<Integer> sectionIDs = this.sectionAttributeDAO.getIDsByAttribute(name, value, QueryOperators.EQUALS);
+
+		return getSectionsByIDs(sectionIDs, fullAlias);
+	}
+
+	@Override
+	public List<SimpleSectionDescriptor> getSectionsByAttribute(String name, boolean fullAlias) throws SQLException {
+
+		List<Integer> sectionIDs = this.sectionAttributeDAO.getIDsByAttribute(name);
+
+		return getSectionsByIDs(sectionIDs, fullAlias);
 	}
 }

@@ -365,7 +365,7 @@ public abstract class BaseModuleDescriptor implements ModuleDescriptor, XMLParse
 
 		if(attributeParser != null){
 
-			this.attributeHandler = new SimpleMutableAttributeHandler(attributeParser, 255, 255);
+			this.attributeHandler = new SimpleMutableAttributeHandler(attributeParser, 255, 4096);
 		}
 
 		if(!errors.isEmpty()){
@@ -377,6 +377,11 @@ public abstract class BaseModuleDescriptor implements ModuleDescriptor, XMLParse
 
 	@Override
 	public SimpleMutableAttributeHandler getAttributeHandler() {
+
+		if (attributeHandler == null) {
+
+			attributeHandler = new SimpleMutableAttributeHandler(255, 4096);
+		}
 
 		return attributeHandler;
 	}

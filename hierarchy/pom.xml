@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>se.unlogic</groupId>
   <artifactId>hierarchy</artifactId>
-  <version>1.2.4</version>
+  <version>1.2.5</version>
   <packaging>jar</packaging>
   <dependencies>
     <dependency>
@@ -19,7 +19,7 @@
     <dependency>
       <groupId>se.unlogic</groupId>
       <artifactId>standardutils</artifactId>
-      <version>1.2.4</version>
+      <version>1.2.5</version>
     </dependency>
     <dependency>
       <groupId>se.unlogic</groupId>
@@ -50,6 +50,12 @@
       <groupId>mysql</groupId>
       <artifactId>mysql-connector-java</artifactId>
       <version>5.1.35</version>
+    </dependency>
+    <dependency>
+        <groupId>javax.servlet</groupId>
+        <artifactId>servlet-api</artifactId>
+        <version>2.5</version>
+        <scope>provided</scope>
     </dependency>
   </dependencies>
   <build>

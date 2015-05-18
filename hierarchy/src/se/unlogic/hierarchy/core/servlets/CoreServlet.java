@@ -95,7 +95,7 @@ import se.unlogic.webutils.http.URIParser;
 public class CoreServlet extends BaseServlet implements FullSystemInterface {
 
 	private static final long serialVersionUID = 2610603465755792663L;
-	public static final String VERSION_PREFIX = "OpenHierarchy 1.2.4";
+	public static final String VERSION_PREFIX = "OpenHierarchy 1.2.5";
 	public static final String VERSION;
 
 	static {

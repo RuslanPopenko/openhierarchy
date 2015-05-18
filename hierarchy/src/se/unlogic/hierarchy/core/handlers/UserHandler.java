@@ -262,7 +262,7 @@ public class UserHandler {
 			for (UserProvider userProvider : this.userProviders) {
 
 				try {
-					List<? extends User> providerUsers = userProvider.getUsers(userIDs, groups, attributes);
+					List<? extends User> providerUsers = userProvider.getUsers(usersLeft, groups, attributes);
 
 					if (providerUsers != null) {
 

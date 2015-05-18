@@ -22,7 +22,7 @@ $(document).ready(function() {
 			},
 			focus: function(event, ui) {
 		        event.preventDefault();
-		    }			
+		    }
 		 });
 		 
 		 
@@ -82,6 +82,8 @@ function searchUsersAndGroups(request, response, $searchURL, $searchInput, templ
 						Username : item.Username
 					}
 				}));
+			} else {
+				response(null);
 			}
 			
 			$searchInput.removeClass("ui-autocomplete-loading");

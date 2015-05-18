@@ -59,9 +59,10 @@ public class StaticContentModule implements ForegroundModule {
 	private static final PooledSimpleDateFormat RFC1123_DATE_FORMATTER = new PooledSimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US, TimeZone.getTimeZone("GMT"));
 
 	protected Logger log = Logger.getLogger(this.getClass());
-	
+
 	private SystemInterface systemInterface;
 	private SectionInterface sectionInterface;
+	private ForegroundModuleDescriptor moduleDescriptor;
 
 	@ModuleSetting
 	@CheckboxSettingDescriptor(name = "Enable global links", description = "Controls whether or not global links are enabled")
@@ -71,6 +72,10 @@ public class StaticContentModule implements ForegroundModule {
 	@TextFieldSettingDescriptor(name = "Global content links file", description = "The path to the file containing the definitions of global links (the file must be in classpath)")
 	protected String globalContentLinksFile = "defaultGlobalContentLinks.properties";
 
+	@ModuleSetting
+	@CheckboxSettingDescriptor(name = "Register in instance handler", description = "Controls if this module should register itself in the global instance handler.")
+	boolean registerInInstanceHandler = true;
+
 	protected Properties globalContentLinks;
 
 	@Override
@@ -78,23 +83,49 @@ public class StaticContentModule implements ForegroundModule {
 
 		this.sectionInterface = sectionInterface;
 		this.systemInterface = sectionInterface.getSystemInterface();
+		this.moduleDescriptor = moduleDescriptor;
 
 		ModuleUtils.setModuleSettings(this, StaticContentModule.class, moduleDescriptor.getMutableSettingHandler(), sectionInterface.getSystemInterface());
 
 		loadGlobalContentLinks();
+
+		checkInstanceHandlerRegistration(registerInInstanceHandler);
 	}
 
 	@Override
 	public void update(ForegroundModuleDescriptor moduleDescriptor, DataSource dataSource) throws Exception {
 
+		this.moduleDescriptor = moduleDescriptor;
+
 		ModuleUtils.setModuleSettings(this, StaticContentModule.class, moduleDescriptor.getMutableSettingHandler(), sectionInterface.getSystemInterface());
 
 		loadGlobalContentLinks();
+
+		checkInstanceHandlerRegistration(registerInInstanceHandler);
 	}
 
 	@Override
 	public void unload() throws Exception {
 
+		checkInstanceHandlerRegistration(false);
+	}
+
+	protected void checkInstanceHandlerRegistration(boolean register){
+
+		if(register){
+
+			if (!systemInterface.getInstanceHandler().addInstance(StaticContentModule.class, this)) {
+
+				log.warn("Another instance has already been registered in instance handler for class " + StaticContentModule.class.getName());
+			}
+
+		}else{
+
+			if (systemInterface.getInstanceHandler().getInstance(StaticContentModule.class) == this) {
+
+				systemInterface.getInstanceHandler().removeInstance(StaticContentModule.class);
+			}
+		}
 	}
 
 	private void loadGlobalContentLinks() {
@@ -264,11 +295,11 @@ public class StaticContentModule implements ForegroundModule {
 
 			if(moduleEntry == null){
 
-				String aliasOrHashCode = uriParser.get(3);
-
 				if(foreground){
 
-					moduleEntry = sectionInterface.getForegroundModuleCache().getEntry(aliasOrHashCode);
+					String alias = uriParser.get(3);
+
+					moduleEntry = sectionInterface.getForegroundModuleCache().getEntry(alias);
 
 				}else if(moduleID != null){
 
@@ -509,5 +540,21 @@ public class StaticContentModule implements ForegroundModule {
 	public List<BundleDescriptor> getAllBundles() {
 
 		return null;
+	}
+
+	public String getModuleContentURL(ForegroundModuleDescriptor moduleDescriptor, HttpServletRequest req) {
+
+		String moduleIdentifier;
+
+		if(moduleDescriptor.getModuleID() != null){
+
+			moduleIdentifier = moduleDescriptor.getModuleID().toString();
+
+		}else{
+
+			moduleIdentifier = moduleDescriptor.getAlias();
+		}
+
+		return req.getContextPath() + this.sectionInterface.getSectionDescriptor().getFullAlias() + "/" + this.moduleDescriptor.getAlias() + "/f/" + moduleDescriptor.getSectionID() + "/" + moduleIdentifier;
 	}
 }

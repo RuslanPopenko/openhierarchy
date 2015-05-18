@@ -1,11 +1,13 @@
 <DBScripts>
 	
 	<Script version="1">
+		<!--	
 		<Query>
 			<![CDATA[
 				DELETE FROM foregroundmodules WHERE classname = "se.unlogic.hierarchy.foregroundmodules.invitation.InvitationModule";
 			]]>
 		</Query>
+		-->
 		<Query>
 			<![CDATA[
 				ALTER TABLE `invitationtypes` RENAME TO `user_invitation_types`;

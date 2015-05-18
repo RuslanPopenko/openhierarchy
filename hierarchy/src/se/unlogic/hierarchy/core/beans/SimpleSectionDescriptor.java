@@ -424,6 +424,11 @@ public class SimpleSectionDescriptor implements SectionDescriptor, Serializable 
 	@Override
 	public SimpleMutableAttributeHandler getAttributeHandler() {
 
+		if (attributeHandler == null) {
+
+			attributeHandler = new SimpleMutableAttributeHandler(255, 4096);
+		}
+
 		return attributeHandler;
 	}
 

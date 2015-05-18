@@ -533,7 +533,7 @@ public class PageAdminModule extends AnnotatedForegroundModule implements Sectio
 
 		if (pageViewModule != null) {
 
-			if (disablePreview && AccessUtils.checkAccess(user, page) && AccessUtils.checkRecursiveModuleAccess(user, pageViewModule.getForegroundModuleDescriptor(), systemInterface)) {
+			if (disablePreview && page.isEnabled() && AccessUtils.checkAccess(user, page) && AccessUtils.checkRecursiveModuleAccess(user, pageViewModule.getForegroundModuleDescriptor(), systemInterface)) {
 
 				res.sendRedirect(req.getContextPath() + pageViewModule.getSectionInterface().getSectionDescriptor().getFullAlias() + "/" + pageViewModule.getForegroundModuleDescriptor().getAlias() + "/" + page.getAlias());
 

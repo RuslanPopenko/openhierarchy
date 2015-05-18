@@ -36,7 +36,7 @@ public class MySQLCommentDAO extends BaseDAO implements CommentDAO {
 	@Override
 	public void add(Comment comment) throws SQLException {
 
-		UpdateQuery query = new UpdateQuery(dataSource, true, "INSERT INTO blog_comments VALUES (null,?,?,?,?,?,?,?,?,?)");
+		UpdateQuery query = new UpdateQuery(dataSource, "INSERT INTO blog_comments VALUES (null,?,?,?,?,?,?,?,?,?)");
 
 		query.setTimestamp(1, comment.getAdded());
 		query.setTimestamp(2, comment.getUpdated());
@@ -69,7 +69,7 @@ public class MySQLCommentDAO extends BaseDAO implements CommentDAO {
 	@Override
 	public Comment get(Integer commentID) throws SQLException {
 
-		ObjectQuery<Comment> query = new ObjectQuery<Comment>(dataSource, true, "SELECT * FROM blog_comments WHERE commentID = ?", commentPopulator);
+		ObjectQuery<Comment> query = new ObjectQuery<Comment>(dataSource, "SELECT * FROM blog_comments WHERE commentID = ?", commentPopulator);
 
 		query.setInt(1, commentID);
 
@@ -79,7 +79,7 @@ public class MySQLCommentDAO extends BaseDAO implements CommentDAO {
 	@Override
 	public void update(Comment comment) throws SQLException {
 
-		UpdateQuery query = new UpdateQuery(dataSource, true, "UPDATE blog_comments SET added = ?, updated = ?, message = ?, posterID = ?, editorID = ?, posterName = ?, posterEmail = ?, posterWebsite = ?, postID = ? WHERE commentID = ?");
+		UpdateQuery query = new UpdateQuery(dataSource, "UPDATE blog_comments SET added = ?, updated = ?, message = ?, posterID = ?, editorID = ?, posterName = ?, posterEmail = ?, posterWebsite = ?, postID = ? WHERE commentID = ?");
 
 		query.setTimestamp(1, comment.getAdded());
 		query.setTimestamp(2, comment.getUpdated());
@@ -111,7 +111,7 @@ public class MySQLCommentDAO extends BaseDAO implements CommentDAO {
 	@Override
 	public void delete(Comment comment) throws SQLException {
 
-		UpdateQuery query = new UpdateQuery(dataSource, true, "DELETE FROM blog_comments WHERE commentID = ?");
+		UpdateQuery query = new UpdateQuery(dataSource, "DELETE FROM blog_comments WHERE commentID = ?");
 
 		query.setInt(1, comment.getCommentID());
 

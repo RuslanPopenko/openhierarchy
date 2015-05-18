@@ -14,6 +14,8 @@
 		<xsl:param name="value" select="''"/>
 		<xsl:param name="element" select="null"/>
 		<xsl:param name="size" select="''"/>
+		<xsl:param name="min" select="''"/>
+		<xsl:param name="max" select="''"/>
 		<xsl:param name="width" select="'99%'"/>
 		<xsl:param name="requestparameters" select="requestparameters"/>
 		
@@ -37,7 +39,7 @@
 				</xsl:attribute>
 			</xsl:if>
 			
-			<xsl:if test="$disabled">
+			<xsl:if test="$disabled != ''">
 				<xsl:attribute name="disabled">
 					<xsl:value-of select="'true'"/> 
 				</xsl:attribute>
@@ -64,6 +66,18 @@
 			<xsl:if test="$size = '' and $width != ''">
 				<xsl:attribute name="style">
 					<xsl:text>width: </xsl:text><xsl:value-of select="$width"/><xsl:text>;</xsl:text>
+				</xsl:attribute>
+			</xsl:if>
+			
+			<xsl:if test="$type = 'number' and $min != ''">
+				<xsl:attribute name="min">
+					<xsl:value-of select="$min"/>
+				</xsl:attribute>
+			</xsl:if>
+			
+			<xsl:if test="$type = 'number' and $max != ''">
+				<xsl:attribute name="max">
+					<xsl:value-of select="$max"/>
 				</xsl:attribute>
 			</xsl:if>
 		

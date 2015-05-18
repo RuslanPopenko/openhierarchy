@@ -156,12 +156,12 @@ public class AnnotatedGroupDAO<GroupType extends Group> extends AnnotatedDAO<Gro
 
 	public Integer getGroupCount() throws SQLException {
 
-		return new ObjectQuery<Integer>(dataSource, true, "SELECT COUNT(groupID) FROM " + this.getTableName(), IntegerPopulator.getPopulator()).executeQuery();
+		return new ObjectQuery<Integer>(dataSource, "SELECT COUNT(groupID) FROM " + this.getTableName(), IntegerPopulator.getPopulator()).executeQuery();
 	}
 
 	public Integer getDisabledGroupCount() throws SQLException {
 
-		return new ObjectQuery<Integer>(dataSource, true, "SELECT COUNT(groupID) FROM " + this.getTableName() + " WHERE enabled = false", IntegerPopulator.getPopulator()).executeQuery();
+		return new ObjectQuery<Integer>(dataSource, "SELECT COUNT(groupID) FROM " + this.getTableName() + " WHERE enabled = false", IntegerPopulator.getPopulator()).executeQuery();
 	}
 
 	public List<GroupType> getGroups(Order order, char startsWith, boolean attributes) throws SQLException {
@@ -179,7 +179,7 @@ public class AnnotatedGroupDAO<GroupType extends Group> extends AnnotatedDAO<Gro
 
 	public List<Character> getGroupFirstLetterIndex() throws SQLException {
 
-		return new ArrayListQuery<Character>(dataSource, true, "SELECT DISTINCT UPPER(LEFT(name, 1)) as letter FROM " + this.getTableName() + " ORDER BY letter ", CharacterPopulator.getPopulator()).executeQuery();
+		return new ArrayListQuery<Character>(dataSource, "SELECT DISTINCT UPPER(LEFT(name, 1)) as letter FROM " + this.getTableName() + " ORDER BY letter ", CharacterPopulator.getPopulator()).executeQuery();
 	}
 
 	private void setQueryRelations(RelationQuery query, boolean attributes) {

@@ -19,6 +19,7 @@ import se.unlogic.hierarchy.core.beans.BaseModuleDescriptor;
 import se.unlogic.hierarchy.core.daos.BaseDAO;
 import se.unlogic.hierarchy.core.daos.interfaces.AttributeDAO;
 import se.unlogic.hierarchy.core.handlers.SimpleMutableAttributeHandler;
+import se.unlogic.standardutils.dao.QueryOperators;
 import se.unlogic.standardutils.dao.TransactionHandler;
 import se.unlogic.standardutils.dao.querys.ArrayListQuery;
 import se.unlogic.standardutils.dao.querys.HashMapQuery;
@@ -86,20 +87,35 @@ public class MySQLModuleAttributeDAO<Descriptor extends BaseModuleDescriptor> ex
 		HashMap<String, String> attributeMap = query.executeQuery();
 
 		if (attributeMap == null) {
-			moduleDescriptor.setAttributeHandler(new SimpleMutableAttributeHandler(255, 255));
 			return;
 		}
 
-		moduleDescriptor.setAttributeHandler(new SimpleMutableAttributeHandler(attributeMap, 255, 255));
+		moduleDescriptor.setAttributeHandler(new SimpleMutableAttributeHandler(attributeMap, 255, 4096));
 	}
 	
-	public List<Integer> getModulesIDsByAttribute(String name, String value) throws SQLException{
-		
-		ArrayListQuery<Integer> query = new ArrayListQuery<Integer>(dataSource, true, "SELECT moduleID FROM " + tableName + " WHERE name = ? and `value` = ?", IntegerPopulator.getPopulator());
-		
+	public List<Integer> getModulesIDsByAttribute(String name, String value) throws SQLException {
+
+		return getIDsByAttribute(name, value, QueryOperators.EQUALS);
+	}
+
+	@Override
+	public List<Integer> getIDsByAttribute(String name, String value, QueryOperators operator) throws SQLException {
+
+		ArrayListQuery<Integer> query = new ArrayListQuery<Integer>(dataSource, "SELECT moduleID FROM " + tableName + " WHERE name = ? AND `value` " + operator.getOperator() + " ?", IntegerPopulator.getPopulator());
+
 		query.setString(1, name);
 		query.setString(2, value);
-		
+
+		return query.executeQuery();
+	}
+
+	@Override
+	public List<Integer> getIDsByAttribute(String name) throws SQLException {
+
+		ArrayListQuery<Integer> query = new ArrayListQuery<Integer>(dataSource, "SELECT moduleID FROM " + tableName + " WHERE name = ?", IntegerPopulator.getPopulator());
+
+		query.setString(1, name);
+
 		return query.executeQuery();
 	}
 }
