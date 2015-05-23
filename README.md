@@ -1,5 +1,7 @@
 # OpenHierarchy
 
+[![Build Status](https://travis-ci.org/bjornharrtell/openhierarchy.svg)](https://travis-ci.org/bjornharrtell/openhierarchy)
+
 Open Source Java web framework and dependencies
 
 Modifications:
